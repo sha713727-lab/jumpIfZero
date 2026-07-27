@@ -12,7 +12,7 @@ export const serviceChapters = [
     title: "Websites engineered to convert visitors into customers.",
     quote: "A website should sell while you sleep.",
     category: "Website Development",
-    href: "/contact",
+    href: "/#contact",
     tone: "light",
     images: {
       left: "/images/services/website.jpg",
@@ -24,7 +24,7 @@ export const serviceChapters = [
     title: "Custom software that fits your workflow — not the other way around.",
     quote: "Build once. Scale with confidence.",
     category: "Software Development",
-    href: "/contact",
+    href: "/#contact",
     tone: "dark",
     images: {
       left: "/images/services/software.jpg",
@@ -36,7 +36,7 @@ export const serviceChapters = [
     title: "Mobile apps built for speed, clarity, and growth.",
     quote: "Useful in the hand. Strong in the market.",
     category: "App Development",
-    href: "/contact",
+    href: "/#contact",
     tone: "light",
     images: {
       left: "/images/services/app.jpg",
@@ -48,7 +48,7 @@ export const serviceChapters = [
     title: "SEO that targets intent, not vanity keywords.",
     quote: "Rank where your customers already search.",
     category: "SEO",
-    href: "/contact",
+    href: "/#contact",
     tone: "dark",
     images: {
       left: "/images/services/seo.jpg",
@@ -60,7 +60,7 @@ export const serviceChapters = [
     title: "Social content that earns attention and drives action.",
     quote: "Consistency builds the brand people remember.",
     category: "Digital Marketing",
-    href: "/contact",
+    href: "/#contact",
     tone: "light",
     images: {
       left: "/images/services/smm.jpg",
@@ -72,7 +72,7 @@ export const serviceChapters = [
     title: "Visual identity that feels premium and consistent.",
     quote: "Design that speaks before you do.",
     category: "Graphic Designing",
-    href: "/contact",
+    href: "/#contact",
     tone: "dark",
     images: {
       left: "/images/services/design.jpg",
@@ -84,7 +84,7 @@ export const serviceChapters = [
     title: "Security systems that reduce risk without slowing work.",
     quote: "Protect the business behind the brand.",
     category: "Network Security",
-    href: "/contact",
+    href: "/#contact",
     tone: "light",
     images: {
       left: "/images/services/security.jpg",
@@ -96,7 +96,7 @@ export const serviceChapters = [
     title: "Diagnose. Fix. Stabilize — before issues cost you more.",
     quote: "Fast fixes. Stable systems. Less downtime.",
     category: "Fix Bug & Error",
-    href: "/contact",
+    href: "/#contact",
     tone: "dark",
     images: {
       left: "/images/services/bugfix.jpg",

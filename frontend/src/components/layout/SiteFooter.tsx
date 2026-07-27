@@ -105,7 +105,7 @@ export function SiteFooter() {
 
           <div className="md:justify-self-end md:text-right">
             <Link
-              href="/contact"
+              href="/#contact"
               className="group inline-flex items-center gap-2 text-[0.92rem] font-medium tracking-[-0.01em] text-cream transition-colors hover:text-secondary focus-visible:ring-2 focus-visible:ring-cream/50 focus-visible:outline-none"
             >
               Contact

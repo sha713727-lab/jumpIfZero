@@ -5,11 +5,11 @@ export const site = {
 } as const;
 
 export const navLinks = [
-  { name: "About Us", href: "/about" },
+  { name: "About Us", href: "/#about" },
   { name: "Our Services", href: "/#services" },
-  { name: "Contact", href: "/contact" },
-  { name: "Portfolio", href: "/portfolio" },
-  { name: "Blog", href: "/blog" },
+  { name: "Contact", href: "/#contact" },
+  { name: "Portfolio", href: "/#services" },
+  { name: "Blog", href: "/" },
 ] as const;
 
 export const heroCopy = {

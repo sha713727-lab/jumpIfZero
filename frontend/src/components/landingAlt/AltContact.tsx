@@ -92,6 +92,7 @@ export function AltContact() {
   return (
     <section
       ref={sectionRef}
+      id="contact"
       aria-label="Contact JZ Enterprises"
       data-header-tone="light"
       data-header-bg="#f7f5f0"
@@ -134,7 +135,7 @@ export function AltContact() {
           </p>
 
           <MagneticLink
-            href="/contact"
+            href="/#contact"
             className="mt-11 inline-flex items-center gap-3 rounded-full bg-secondary px-9 py-4 text-[0.7rem] font-extrabold tracking-[0.22em] text-black uppercase focus-visible:ring-2 focus-visible:ring-cream focus-visible:outline-none"
           >
             Contact
