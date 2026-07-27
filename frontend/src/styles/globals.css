@@ -1,0 +1,697 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #74815f;
+  --color-secondary: #f9a137;
+  --color-white: #ffffff;
+  --color-cream: #f7f5f0;
+  --color-black: #000000;
+  --font-sans: var(--font-nourd), system-ui, sans-serif;
+  --font-script: "Hiragenda", cursive;
+  --font-welcome: "Organical", cursive;
+  --font-tagline: "Amsterdam Handwriting", cursive;
+}
+
+@font-face {
+  font-family: "Hiragenda";
+  src: url("/fonts/Hiragenda.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Organical";
+  src: url("/fonts/Organical.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Amsterdam Handwriting";
+  src: url("/fonts/AmsterdamHandwriting.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer base {
+  body {
+    @apply bg-cream font-sans text-black antialiased;
+  }
+}
+
+@utility hero-curve-mask {
+  clip-path: url(#hero-curve-clip);
+}
+
+@utility hero-photo-blend {
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.2) 18%,
+    rgba(0, 0, 0, 0.75) 38%,
+    #000 58%
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.2) 18%,
+    rgba(0, 0, 0, 0.75) 38%,
+    #000 58%
+  );
+}
+
+@utility site-container {
+  @apply mx-auto w-full max-w-7xl px-5 md:px-8;
+}
+
+@utility font-script {
+  font-family: var(--font-script);
+}
+
+@utility font-welcome {
+  font-family: var(--font-welcome);
+}
+
+@utility font-tagline {
+  font-family: var(--font-tagline);
+}
+
+@utility text-logo-gradient {
+  background-image: linear-gradient(
+    105deg,
+    #ffe3a8 0%,
+    #f9a137 38%,
+    #f0b24a 62%,
+    #e8891a 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility hero-ambient {
+  background: #74815f;
+}
+
+@utility hero-mesh {
+  background:
+    radial-gradient(
+      ellipse 58% 48% at 78% 42%,
+      rgba(249, 161, 55, 0.18) 0%,
+      transparent 68%
+    ),
+    radial-gradient(
+      ellipse 62% 52% at 18% 28%,
+      rgba(247, 245, 240, 0.14) 0%,
+      transparent 70%
+    ),
+    linear-gradient(
+      145deg,
+      #8b9775 0%,
+      #74815f 42%,
+      #667154 78%,
+      #5d684c 100%
+    );
+}
+
+@utility hero-orb-a {
+  background: radial-gradient(
+    circle,
+    rgba(247, 245, 240, 0.14) 0%,
+    rgba(247, 245, 240, 0.04) 42%,
+    transparent 72%
+  );
+  filter: blur(64px);
+  animation: hero-orb-drift-a 20s ease-in-out infinite alternate;
+}
+
+@utility hero-orb-b {
+  background: radial-gradient(
+    circle,
+    rgba(249, 161, 55, 0.12) 0%,
+    rgba(249, 161, 55, 0.03) 40%,
+    transparent 74%
+  );
+  filter: blur(72px);
+  animation: hero-orb-drift-b 26s ease-in-out infinite alternate;
+}
+
+@utility hero-orb-c {
+  background: radial-gradient(
+    circle,
+    rgba(247, 245, 240, 0.1) 0%,
+    transparent 70%
+  );
+  filter: blur(80px);
+  animation: hero-orb-drift-c 24s ease-in-out infinite alternate;
+}
+
+@utility hero-dots {
+  background-image:
+    radial-gradient(
+      circle,
+      rgba(247, 245, 240, 0.42) 0 1.15px,
+      transparent 1.35px
+    ),
+    radial-gradient(
+      circle,
+      rgba(249, 161, 55, 0.18) 0 0.9px,
+      transparent 1.15px
+    );
+  background-size:
+    26px 26px,
+    52px 52px;
+  background-position:
+    0 0,
+    13px 13px;
+  animation: hero-dots-drift 28s linear infinite;
+}
+
+@utility hero-dots-pulse {
+  animation: hero-dots-pulse 5.5s ease-in-out infinite;
+}
+
+@utility hero-sheen {
+  background: linear-gradient(
+    118deg,
+    transparent 36%,
+    rgba(247, 245, 240, 0.07) 50%,
+    transparent 64%
+  );
+  background-size: 240% 240%;
+  animation: hero-sheen-sweep 16s ease-in-out infinite;
+}
+
+@keyframes hero-orb-drift-a {
+  from {
+    transform: translate(-6%, -3%) scale(1);
+  }
+  to {
+    transform: translate(8%, 6%) scale(1.08);
+  }
+}
+
+@keyframes hero-orb-drift-b {
+  from {
+    transform: translate(4%, 3%) scale(1.04);
+  }
+  to {
+    transform: translate(-9%, -5%) scale(0.94);
+  }
+}
+
+@keyframes hero-orb-drift-c {
+  from {
+    transform: translate(2%, 5%) scale(0.96);
+  }
+  to {
+    transform: translate(-5%, -4%) scale(1.06);
+  }
+}
+
+@keyframes hero-dots-drift {
+  from {
+    background-position:
+      0 0,
+      13px 13px;
+  }
+  to {
+    background-position:
+      26px 26px,
+      39px 39px;
+  }
+}
+
+@keyframes hero-dots-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@keyframes hero-sheen-sweep {
+  0%,
+  100% {
+    background-position: 12% 40%;
+    opacity: 0.4;
+  }
+  50% {
+    background-position: 88% 58%;
+    opacity: 0.75;
+  }
+}
+
+@utility hero-room {
+  background:
+    radial-gradient(
+      ellipse 55% 48% at 50% 38%,
+      rgba(116, 129, 95, 0.95) 0%,
+      rgba(90, 102, 74, 0.55) 28%,
+      rgba(26, 34, 22, 0.35) 52%,
+      transparent 72%
+    ),
+    linear-gradient(
+      90deg,
+      #030403 0%,
+      #070a06 14%,
+      #121810 34%,
+      #3d4633 50%,
+      #121810 66%,
+      #070a06 86%,
+      #030403 100%
+    ),
+    linear-gradient(
+      180deg,
+      #0a0e09 0%,
+      #1a2216 26%,
+      #74815f 48%,
+      #1c2418 72%,
+      #050705 100%
+    );
+  background-blend-mode: soft-light, soft-light, normal;
+}
+
+@utility hero-wall-left {
+  background: linear-gradient(
+    105deg,
+    rgba(5, 7, 5, 0.92) 0%,
+    rgba(13, 18, 12, 0.55) 38%,
+    transparent 72%
+  );
+  transform: perspective(1200px) rotateY(18deg);
+  transform-origin: left center;
+}
+
+@utility hero-wall-right {
+  background: linear-gradient(
+    -105deg,
+    rgba(5, 7, 5, 0.92) 0%,
+    rgba(13, 18, 12, 0.55) 38%,
+    transparent 72%
+  );
+  transform: perspective(1200px) rotateY(-18deg);
+  transform-origin: right center;
+}
+
+@utility hero-corner {
+  background:
+    linear-gradient(
+      90deg,
+      transparent 49.2%,
+      rgba(247, 245, 240, 0.14) 50%,
+      transparent 50.8%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(247, 245, 240, 0.22) 0%,
+      rgba(249, 161, 55, 0.06) 12%,
+      transparent 42%
+    );
+}
+
+@utility hero-beam {
+  background: linear-gradient(
+    180deg,
+    rgba(247, 245, 240, 0.42) 0%,
+    rgba(247, 245, 240, 0.16) 12%,
+    rgba(249, 161, 55, 0.1) 28%,
+    rgba(116, 129, 95, 0.08) 48%,
+    transparent 78%
+  );
+  clip-path: polygon(44% 0%, 56% 0%, 82% 100%, 18% 100%);
+  filter: blur(22px);
+}
+
+@utility hero-floor {
+  background:
+    linear-gradient(
+      180deg,
+      transparent 48%,
+      rgba(116, 129, 95, 0.12) 66%,
+      rgba(7, 10, 6, 0.45) 84%,
+      rgba(0, 0, 0, 0.72) 100%
+    ),
+    radial-gradient(
+      ellipse 58% 22% at 50% 78%,
+      rgba(247, 245, 240, 0.14) 0%,
+      rgba(116, 129, 95, 0.28) 28%,
+      rgba(249, 161, 55, 0.06) 48%,
+      transparent 72%
+    );
+}
+
+@utility hero-spotlight {
+  background:
+    radial-gradient(
+      ellipse 38% 32% at 50% -6%,
+      rgba(247, 245, 240, 0.88) 0%,
+      rgba(247, 245, 240, 0.28) 12%,
+      rgba(249, 161, 55, 0.16) 22%,
+      rgba(116, 129, 95, 0.22) 38%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 48% 36% at 50% 58%,
+      rgba(116, 129, 95, 0.38) 0%,
+      rgba(249, 161, 55, 0.06) 35%,
+      transparent 68%
+    );
+}
+
+@utility hero-bloom {
+  background: radial-gradient(
+    circle at 50% 42%,
+    rgba(249, 161, 55, 0.12) 0%,
+    rgba(116, 129, 95, 0.1) 28%,
+    transparent 60%
+  );
+  filter: blur(40px);
+}
+
+@utility hero-dust {
+  background-image:
+    radial-gradient(circle, rgba(247, 245, 240, 0.9) 0 1.1px, transparent 1.7px),
+    radial-gradient(circle, rgba(249, 161, 55, 0.55) 0 1px, transparent 1.6px),
+    radial-gradient(circle, rgba(247, 245, 240, 0.4) 0 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(247, 245, 240, 0.25) 0 0.8px, transparent 1.3px);
+  background-size: 120px 120px, 190px 190px, 260px 260px, 340px 340px;
+  background-position: 18% 16%, 72% 28%, 46% 48%, 60% 62%;
+  mask-image: radial-gradient(ellipse 58% 62% at 50% 30%, black 8%, transparent 72%);
+  animation: hero-dust-drift 14s ease-in-out infinite alternate;
+}
+
+@utility hero-grain {
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  mix-blend-mode: overlay;
+}
+
+@utility hero-vignette {
+  background: radial-gradient(
+    ellipse 68% 64% at 50% 42%,
+    transparent 8%,
+    rgba(0, 0, 0, 0.18) 42%,
+    rgba(0, 0, 0, 0.68) 74%,
+    rgba(0, 0, 0, 0.92) 100%
+  );
+}
+
+@keyframes hero-dust-drift {
+  from {
+    background-position: 18% 16%, 72% 28%, 46% 48%, 60% 62%;
+    opacity: 0.55;
+  }
+  to {
+    background-position: 22% 20%, 68% 24%, 50% 44%, 56% 58%;
+    opacity: 0.85;
+  }
+}
+
+@utility code-float {
+  animation: code-float 4.8s ease-in-out infinite;
+  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+@keyframes logo-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -8px;
+  }
+}
+
+@keyframes code-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -10px;
+  }
+}
+
+@utility logo-float {
+  animation: logo-float 5.6s ease-in-out infinite;
+}
+
+@utility logo-shadow {
+  filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.55))
+    drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4))
+    drop-shadow(0 0 22px rgba(249, 161, 55, 0.28));
+}
+
+@keyframes headline-in-top {
+  from {
+    opacity: 0;
+    transform: translateY(-28px);
+    letter-spacing: 0.28em;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    letter-spacing: 0.08em;
+  }
+}
+
+@keyframes headline-in-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+    letter-spacing: 0.28em;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    letter-spacing: 0.08em;
+  }
+}
+
+@keyframes paren-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes paren-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes side-in-left {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+
+@keyframes side-in-right {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+
+@keyframes fineprint-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  to {
+    opacity: 0.35;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes spotlight-pulse {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@utility headline-in-top {
+  animation: headline-in-top 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility headline-in-bottom {
+  animation: headline-in-bottom 1.1s 0.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility paren-in-left {
+  animation: paren-in-left 1s 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility paren-in-right {
+  animation: paren-in-right 1s 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility side-in-left {
+  animation: side-in-left 1.2s 0.45s ease both;
+}
+
+@utility side-in-right {
+  animation: side-in-right 1.2s 0.45s ease both;
+}
+
+@utility fineprint-in {
+  animation: fineprint-in 1s 0.7s ease both;
+}
+
+@utility hero-spotlight-pulse {
+  animation: spotlight-pulse 5s ease-in-out infinite;
+}
+
+@utility brand-burst {
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      rgba(116, 129, 95, 0.22) 0deg 4deg,
+      rgba(255, 255, 255, 0) 4deg 14deg
+    ),
+    radial-gradient(
+      circle at center,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(116, 129, 95, 0.18) 22%,
+      transparent 55%
+    );
+  filter: blur(12px) saturate(1.05);
+  mask-image: radial-gradient(circle, black 6%, transparent 62%);
+}
+
+@utility brand-streak {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(116, 129, 95, 0.35) 45%,
+    rgba(255, 255, 255, 0.85) 50%,
+    rgba(116, 129, 95, 0.35) 55%,
+    transparent 100%
+  );
+  filter: blur(1.5px);
+}
+
+@utility services-portal {
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(74, 90, 58, 0.15) 0%,
+      rgba(47, 58, 40, 0.92) 42%,
+      rgba(35, 44, 30, 0.98) 68%,
+      transparent 72%
+    );
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.35);
+}
+
+@utility services-particles {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.7) 0 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.45) 0 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.35) 0 1px, transparent 1.5px);
+  background-size: 180px 180px, 260px 260px, 320px 320px;
+  background-position: 12% 18%, 64% 30%, 40% 72%;
+  mask-image: radial-gradient(circle at center, black 20%, transparent 68%);
+}
+
+@utility services-light-sweep {
+  background: radial-gradient(
+    ellipse 90% 78% at 0% -4%,
+    rgba(249, 161, 55, 0.42) 0%,
+    rgba(249, 161, 55, 0.22) 32%,
+    rgba(249, 161, 55, 0.08) 55%,
+    transparent 72%
+  );
+}
+
+@utility services-light-dots {
+  background-image:
+    radial-gradient(circle, rgba(249, 161, 55, 0.45) 0 1.15px, transparent 1.7px),
+    radial-gradient(circle, rgba(249, 161, 55, 0.28) 0 1px, transparent 1.6px);
+  background-size: 26px 26px, 52px 52px;
+  background-position: 0 0, 13px 13px;
+  mask-image: radial-gradient(circle at 42% 40%, black 30%, transparent 78%);
+}
+
+@utility services-light-sparkles {
+  background-image:
+    radial-gradient(circle, rgba(249, 161, 55, 0.9) 0 1.4px, transparent 2.2px),
+    radial-gradient(circle, rgba(249, 161, 55, 0.65) 0 1.1px, transparent 2px),
+    radial-gradient(circle, rgba(249, 161, 55, 0.75) 0 1.6px, transparent 2.4px);
+  background-size: 190px 190px, 250px 250px, 310px 310px;
+  background-position: 16% 18%, 74% 26%, 52% 70%;
+  mask-image: radial-gradient(circle at 48% 46%, black 34%, transparent 78%);
+}
+
+@utility services-frame-dots {
+  background-image: radial-gradient(
+    circle,
+    rgba(116, 129, 95, 0.35) 0 1.1px,
+    transparent 1.35px
+  );
+  background-size: 14px 14px;
+}
+
+@utility services-frame-dots-dark {
+  background-image: radial-gradient(
+    circle,
+    rgba(247, 245, 240, 0.28) 0 1.1px,
+    transparent 1.35px
+  );
+  background-size: 14px 14px;
+}
+
+@utility services-skew-frame {
+  transform: skewY(-9deg);
+}
+
+@utility services-skew-media {
+  transform: skewY(9deg) scale(1.14);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-float,
+  .code-float,
+  .headline-in-top,
+  .headline-in-bottom,
+  .paren-in-left,
+  .paren-in-right,
+  .side-in-left,
+  .side-in-right,
+  .fineprint-in,
+  .hero-spotlight-pulse,
+  .hero-dust,
+  .hero-orb-a,
+  .hero-orb-b,
+  .hero-orb-c,
+  .hero-dots,
+  .hero-dots-pulse,
+  .hero-sheen {
+    animation: none;
+  }
+}
