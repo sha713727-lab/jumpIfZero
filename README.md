@@ -52,7 +52,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Variable | Required | Description |
 | --- | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | Yes | Absolute site URL (no trailing slash). Local: `http://localhost:3000`. Production: your Vercel domain or custom domain. |
+| `NEXT_PUBLIC_SITE_URL` | Recommended | Absolute site URL (no trailing slash). Local: `http://localhost:3000`. Production: your custom domain. On Vercel builds, if unset, the app falls back to `https://$VERCEL_URL`. |
 
 Copy from `.env.example`:
 
