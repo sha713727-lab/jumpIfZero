@@ -55,7 +55,7 @@ export const aboutCopy: AboutCopy = {
   ],
   cta: {
     label: "About Us",
-    href: "/#about",
+    href: "/about",
   },
 };
 

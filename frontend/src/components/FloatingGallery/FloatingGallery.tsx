@@ -12,13 +12,19 @@ import { applyHeaderTone } from "@/lib/headerTone";
 import { GalleryItem } from "./GalleryItem";
 import { aboutCopy, buildGalleryItems } from "./galleryData";
 import styles from "./gallery.module.css";
+import type { FloatingGalleryProps } from "./types";
 import { useGalleryAnimation } from "./useGalleryAnimation";
 import { resolveLayoutConfig, resolveViewport } from "./utils";
 
 const RESIZE_DEBOUNCE_MS = 160;
 const MOUNT_ROOT_MARGIN = "80px 0px";
+const GALLERY_HEADER_BG = "#f3f5ef";
 
-export function FloatingGallery() {
+export function FloatingGallery({
+  sectionId = "about",
+  ariaLabel = "About JZ Enterprises",
+  copy = aboutCopy,
+}: FloatingGalleryProps) {
   const itemRefs = useRef<Array<HTMLElement | null>>([]);
   const sectionRef = useRef<HTMLElement | null>(null);
   const [stageEl, setStageEl] = useState<HTMLElement | null>(null);
@@ -123,7 +129,7 @@ export function FloatingGallery() {
     const syncHeader = () => {
       const rect = stageEl.getBoundingClientRect();
       if (rect.top <= 72 && rect.bottom > 72) {
-        applyHeaderTone(true, "#f7f5f0");
+        applyHeaderTone(true, GALLERY_HEADER_BG);
       }
     };
 
@@ -141,9 +147,11 @@ export function FloatingGallery() {
   return (
     <section
       ref={sectionRef}
-      id="about"
+      id={sectionId}
       className={styles.section}
-      aria-label="About JZ Enterprises"
+      aria-label={ariaLabel}
+      data-header-tone="light"
+      data-header-bg={GALLERY_HEADER_BG}
       data-active={inView ? "1" : "0"}
     >
       <div ref={setStageEl} className={stageClass}>
@@ -172,18 +180,18 @@ export function FloatingGallery() {
           <div ref={setCopyEl} className={styles.copyInner}>
             <div className={styles.headingStack}>
               <span className={styles.watermark} aria-hidden="true">
-                {aboutCopy.watermark}
+                {copy.watermark}
               </span>
-              <h2 className={styles.title}>{aboutCopy.title}</h2>
+              <h2 className={styles.title}>{copy.title}</h2>
             </div>
-            {aboutCopy.paragraphs.map((paragraph) => (
+            {copy.paragraphs.map((paragraph) => (
               <p key={paragraph} className={styles.paragraph}>
                 {paragraph}
               </p>
             ))}
 
-            <Link href={aboutCopy.cta.href} className={styles.cta}>
-              {aboutCopy.cta.label}
+            <Link href={copy.cta.href} className={styles.cta}>
+              {copy.cta.label}
               <span className={styles.ctaIcon} aria-hidden="true">
                 →
               </span>

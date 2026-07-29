@@ -5,6 +5,13 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
   },
+  experimental: {
+    optimizePackageImports: ["gsap", "framer-motion"],
+  },
+  images: {
+    formats: ["image/avif", "image/webp"],
+    qualities: [70, 75],
+  },
   headers: async () => {
     const isDev = process.env.NODE_ENV === "development";
     const scriptSrc = isDev
@@ -30,7 +37,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: `default-src 'self'; ${scriptSrc}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; ${connectSrc}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'`,
+            value: `default-src 'self'; ${scriptSrc}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.ggpht.com; font-src 'self' data:; ${connectSrc}; frame-src 'self' https://www.google.com https://maps.google.com https://www.google.com/maps; frame-ancestors 'none'; base-uri 'self'; form-action 'self'`,
           },
         ],
       },

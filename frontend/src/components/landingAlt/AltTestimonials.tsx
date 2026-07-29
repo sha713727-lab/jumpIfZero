@@ -19,10 +19,10 @@ const FRAME_THEMES = {
     ring: "border-cream/30",
     quote: "text-cream/85",
     name: "text-cream",
-    meta: "text-secondary",
+    meta: "text-logo-gradient",
   },
   secondary: {
-    frame: "border-black/10 bg-secondary",
+    frame: "border-black/10 bg-logo-gradient",
     ring: "border-black/15",
     quote: "text-black/75",
     name: "text-black",
@@ -33,7 +33,7 @@ const FRAME_THEMES = {
     ring: "border-cream/20",
     quote: "text-cream/80",
     name: "text-cream",
-    meta: "text-secondary",
+    meta: "text-logo-gradient",
   },
 } as const;
 
@@ -136,7 +136,7 @@ export function AltTestimonials() {
           <div className="relative mx-auto flex items-center justify-center py-6">
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[clamp(2.4rem,8vw,5.5rem)] font-extrabold tracking-[0.08em] whitespace-nowrap text-secondary/25 uppercase select-none"
+              className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[clamp(2.4rem,8vw,5.5rem)] font-extrabold tracking-[0.08em] whitespace-nowrap text-logo-gradient opacity-25 uppercase select-none"
             >
               {testimonialsIntro.watermark}
             </span>

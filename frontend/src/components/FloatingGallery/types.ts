@@ -64,3 +64,9 @@ export type AboutCopy = {
     readonly href: string;
   };
 };
+
+export type FloatingGalleryProps = {
+  readonly sectionId?: string;
+  readonly ariaLabel?: string;
+  readonly copy?: AboutCopy;
+};

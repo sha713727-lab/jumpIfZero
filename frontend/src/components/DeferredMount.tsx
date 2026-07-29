@@ -8,6 +8,14 @@ type DeferredMountProps = {
   readonly rootMargin?: string;
 };
 
+function refreshScrollTriggers() {
+  void import("gsap/ScrollTrigger")
+    .then(({ ScrollTrigger }) => {
+      ScrollTrigger.refresh();
+    })
+    .catch(() => undefined);
+}
+
 export function DeferredMount({
   children,
   fallback,
@@ -37,6 +45,18 @@ export function DeferredMount({
 
     return () => observer.disconnect();
   }, [rootMargin, visible]);
+
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      refreshScrollTriggers();
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [visible]);
 
   return <div ref={rootRef}>{visible ? children : fallback}</div>;
 }

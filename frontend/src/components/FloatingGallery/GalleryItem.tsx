@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { memo } from "react";
 import type { GalleryItemData } from "./types";
 import styles from "./gallery.module.css";
@@ -17,12 +18,14 @@ function GalleryItemComponent({ item, itemRef }: GalleryItemProps) {
       data-gallery-item={item.id}
       aria-hidden="true"
     >
-      <img
+      <Image
         className={styles.image}
         src={item.src}
         alt=""
         width={item.width}
         height={item.height}
+        sizes="(max-width: 768px) 42vw, (max-width: 1200px) 28vw, 22vw"
+        quality={70}
         loading="lazy"
         decoding="async"
         fetchPriority="low"

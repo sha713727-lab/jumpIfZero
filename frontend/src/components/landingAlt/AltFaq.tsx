@@ -106,7 +106,7 @@ export function AltFaq() {
         <div className="relative mx-auto flex max-w-3xl items-center justify-center py-6 text-center">
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-[clamp(2.4rem,8vw,5.5rem)] font-extrabold tracking-[0.08em] text-secondary/20 uppercase select-none"
+            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-[clamp(2.4rem,8vw,5.5rem)] font-extrabold tracking-[0.08em] text-logo-gradient opacity-20 uppercase select-none"
           >
             {faqIntro.watermark}
           </span>
@@ -157,7 +157,7 @@ export function AltFaq() {
                     <span
                       aria-hidden="true"
                       className={`shrink-0 text-[1.35rem] leading-none font-light text-black transition-transform duration-300 ${
-                        open ? "rotate-45 text-secondary" : ""
+                        open ? "rotate-45 text-logo-gradient" : ""
                       }`}
                     >
                       +

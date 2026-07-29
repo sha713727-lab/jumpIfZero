@@ -22,12 +22,12 @@ const CARD_THEMES = {
     surface: "border-white/10 bg-brand",
     title: "text-cream",
     body: "text-cream/75",
-    accent: "text-secondary",
-    bar: "bg-secondary",
+    accent: "text-logo-gradient",
+    bar: "bg-logo-gradient",
     bloom: "bg-white/10",
   },
   secondary: {
-    surface: "border-black/10 bg-secondary",
+    surface: "border-black/10 bg-logo-gradient",
     title: "text-black",
     body: "text-black/70",
     accent: "text-[#2f3a28]",
@@ -286,7 +286,7 @@ export function AltWhy() {
         <div className="relative mx-auto flex items-center justify-center py-6">
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-[clamp(2.4rem,8vw,5.5rem)] font-extrabold tracking-[0.08em] text-secondary/20 uppercase select-none"
+            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-[clamp(2.4rem,8vw,5.5rem)] font-extrabold tracking-[0.08em] text-logo-gradient opacity-20 uppercase select-none"
           >
             {whyChoose.watermark}
           </span>
@@ -412,9 +412,9 @@ export function AltWhy() {
             const surface =
               tone === "brand"
                 ? "border-white/10 bg-brand text-cream"
-                : "border-black/10 bg-secondary text-black";
+                : "border-black/10 bg-logo-gradient text-black";
             const valueColor =
-              tone === "brand" ? "text-secondary" : "text-[#2f3a28]";
+              tone === "brand" ? "text-logo-gradient" : "text-[#2f3a28]";
             const labelColor =
               tone === "brand" ? "text-cream/70" : "text-black/60";
             const bloom =

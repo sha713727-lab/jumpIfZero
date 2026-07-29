@@ -1,19 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { heroCopy, site } from "@/constants/site";
 import { applyHeaderTone } from "@/lib/headerTone";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const FRAME_DIR = "/images/JZ_Frames_30FPS";
 const FRAME_COUNT = 239;
 const FRAME_PAD = 4;
 const SCROLL_DISTANCE = 4800;
-const LOAD_CONCURRENCY_DESKTOP = 6;
-const LOAD_CONCURRENCY_MOBILE = 3;
+const STRIDE_DESKTOP = 4;
+const STRIDE_MOBILE = 8;
+const STRIDE_SAVEDATA = 12;
+const FILL_CONCURRENCY = 1;
+const STRIDE_CONCURRENCY = 2;
 const MAX_DPR_DESKTOP = 2;
 const MAX_DPR_MOBILE = 1;
 const CONTAIN_BELOW_ASPECT = 1;
@@ -38,7 +37,7 @@ const LOGO_GRADIENT =
   "linear-gradient(172deg, #ffe27a 0%, #ffc250 32%, #ffa040 64%, #ef8a1f 100%)";
 
 function frameSrc(index: number): string {
-  return `${FRAME_DIR}/frame_${String(index).padStart(FRAME_PAD, "0")}.jpg`;
+  return `${FRAME_DIR}/frame_${String(index).padStart(FRAME_PAD, "0")}.webp`;
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -77,62 +76,170 @@ function nearestFrame(
   return null;
 }
 
+function connectionStride(): number {
+  const connection = (
+    navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }
+  ).connection;
+
+  if (connection?.saveData) {
+    return STRIDE_SAVEDATA;
+  }
+
+  if (
+    connection?.effectiveType === "slow-2g" ||
+    connection?.effectiveType === "2g"
+  ) {
+    return STRIDE_SAVEDATA;
+  }
+
+  if (connection?.effectiveType === "3g") {
+    return STRIDE_MOBILE;
+  }
+
+  return window.matchMedia("(max-width: 767px)").matches
+    ? STRIDE_MOBILE
+    : STRIDE_DESKTOP;
+}
+
+async function loadIndices(
+  frames: Array<HTMLImageElement | null>,
+  indices: readonly number[],
+  concurrency: number,
+  onProgress: (loaded: number, total: number) => void,
+  isCancelled: () => boolean,
+  loadedStart: number,
+  total: number,
+): Promise<number> {
+  let loaded = loadedStart;
+  let cursor = 0;
+
+  const worker = async () => {
+    while (cursor < indices.length && !isCancelled()) {
+      const index = indices[cursor];
+      cursor += 1;
+
+      if (index === undefined || frames[index]) {
+        continue;
+      }
+
+      try {
+        frames[index] = await loadImage(frameSrc(index));
+        loaded += 1;
+        onProgress(loaded, total);
+      } catch {
+        continue;
+      }
+    }
+  };
+
+  await Promise.all(
+    Array.from({ length: Math.max(1, concurrency) }, () => worker()),
+  );
+
+  return loaded;
+}
+
+function scheduleIdle(task: () => void): () => void {
+  const ric = (
+    window as Window & {
+      requestIdleCallback?: (
+        cb: IdleRequestCallback,
+        opts?: IdleRequestOptions,
+      ) => number;
+      cancelIdleCallback?: (id: number) => void;
+    }
+  ).requestIdleCallback;
+
+  if (typeof ric === "function") {
+    const id = ric(() => task(), { timeout: 1800 });
+    return () => window.cancelIdleCallback?.(id);
+  }
+
+  const id = window.setTimeout(task, 400);
+  return () => window.clearTimeout(id);
+}
+
 async function preloadFrames(
   onFirst: (frame: HTMLImageElement) => void,
   onProgress: (loaded: number, total: number) => void,
   isCancelled: () => boolean,
-): Promise<Array<HTMLImageElement | null>> {
-  const frames: Array<HTMLImageElement | null> = Array.from(
-    { length: FRAME_COUNT },
-    () => null,
-  );
-
+  frames: Array<HTMLImageElement | null>,
+): Promise<void> {
   const first = await loadImage(frameSrc(0));
 
   if (isCancelled()) {
-    return frames;
+    return;
   }
 
   frames[0] = first;
   onFirst(first);
   onProgress(1, FRAME_COUNT);
 
-  let loaded = 1;
-  let cursor = 1;
-  const mobile = window.matchMedia("(max-width: 767px)").matches;
-  const concurrency = mobile
-    ? LOAD_CONCURRENCY_MOBILE
-    : LOAD_CONCURRENCY_DESKTOP;
-  let lastReported = 1;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const worker = async () => {
-    while (cursor < FRAME_COUNT && !isCancelled()) {
-      const index = cursor;
-      cursor += 1;
-
-      try {
-        frames[index] = await loadImage(frameSrc(index));
-      } catch {
-        continue;
-      }
-
-      loaded += 1;
-
-      if (
-        loaded === FRAME_COUNT ||
-        loaded - lastReported >= 10 ||
-        loaded / FRAME_COUNT - lastReported / FRAME_COUNT >= 0.05
-      ) {
-        lastReported = loaded;
-        onProgress(loaded, FRAME_COUNT);
-      }
+  if (reduced) {
+    try {
+      frames[FRAME_COUNT - 1] = await loadImage(frameSrc(FRAME_COUNT - 1));
+    } catch {
+      return;
     }
-  };
+    onProgress(2, FRAME_COUNT);
+    return;
+  }
 
-  await Promise.all(Array.from({ length: concurrency }, () => worker()));
-  onProgress(loaded, FRAME_COUNT);
+  const stride = connectionStride();
+  const strideIndices: number[] = [];
 
-  return frames;
+  for (let index = stride; index < FRAME_COUNT; index += stride) {
+    strideIndices.push(index);
+  }
+
+  if (strideIndices[strideIndices.length - 1] !== FRAME_COUNT - 1) {
+    strideIndices.push(FRAME_COUNT - 1);
+  }
+
+  let loaded = await loadIndices(
+    frames,
+    strideIndices,
+    STRIDE_CONCURRENCY,
+    onProgress,
+    isCancelled,
+    1,
+    FRAME_COUNT,
+  );
+
+  if (isCancelled()) {
+    return;
+  }
+
+  const remainder: number[] = [];
+
+  for (let index = 1; index < FRAME_COUNT; index += 1) {
+    if (!frames[index]) {
+      remainder.push(index);
+    }
+  }
+
+  await new Promise<void>((resolve) => {
+    const cancelIdle = scheduleIdle(() => {
+      void loadIndices(
+        frames,
+        remainder,
+        FILL_CONCURRENCY,
+        onProgress,
+        isCancelled,
+        loaded,
+        FRAME_COUNT,
+      ).then(() => resolve());
+    });
+
+    if (isCancelled()) {
+      cancelIdle();
+      resolve();
+    }
+  });
 }
 
 function drawFrame(
@@ -207,6 +314,11 @@ export function ScrollFrameSequence() {
 
   useEffect(() => {
     let cancelled = false;
+    const frames: Array<HTMLImageElement | null> = Array.from(
+      { length: FRAME_COUNT },
+      () => null,
+    );
+    framesRef.current = frames;
 
     preloadFrames(
       (first) => {
@@ -214,8 +326,7 @@ export function ScrollFrameSequence() {
           return;
         }
 
-        framesRef.current = Array.from({ length: FRAME_COUNT }, () => null);
-        framesRef.current[0] = first;
+        frames[0] = first;
         setReady(true);
       },
       (loaded, total) => {
@@ -224,20 +335,12 @@ export function ScrollFrameSequence() {
         }
       },
       () => cancelled,
-    )
-      .then((frames) => {
-        if (cancelled) {
-          return;
-        }
-
-        framesRef.current = frames;
-        setLoadProgress(1);
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setFailed(true);
-        }
-      });
+      frames,
+    ).catch(() => {
+      if (!cancelled) {
+        setFailed(true);
+      }
+    });
 
     return () => {
       cancelled = true;
@@ -256,6 +359,8 @@ export function ScrollFrameSequence() {
       return;
     }
 
+    let cancelled = false;
+    let ctx: { revert: () => void } | null = null;
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     const proxy = { frame: 0 };
     const size = { width: 1, height: 1 };
@@ -293,6 +398,7 @@ export function ScrollFrameSequence() {
     resize();
     window.addEventListener("resize", resize);
     syncHeader();
+    paint(0);
 
     const lines = [
       welcomeRef.current,
@@ -301,156 +407,170 @@ export function ScrollFrameSequence() {
       signatureRef.current,
     ];
 
-    const ctx = gsap.context(() => {
-      if (media.matches) {
-        paint(FRAME_COUNT - 1);
-        for (const line of lines) {
-          if (line) {
-            gsap.set(line, { opacity: 1, y: 0 });
-          }
-        }
-        if (glowRef.current) {
-          gsap.set(glowRef.current, { opacity: 1, scale: 1 });
-        }
-        if (washRef.current) {
-          gsap.set(washRef.current, { opacity: 1 });
-        }
+    void (async () => {
+      const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
+        import("gsap"),
+        import("gsap/ScrollTrigger"),
+      ]);
+
+      if (cancelled) {
         return;
       }
 
-      const timeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: `+=${SCROLL_DISTANCE}`,
-          pin: true,
-          scrub: 0.45,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-          onEnter: (self) => syncHeader(self.progress >= WASH_START),
-          onEnterBack: (self) => syncHeader(self.progress >= WASH_START),
-          onUpdate: (self) => {
-            if (self.isActive) {
-              syncHeader(self.progress >= WASH_START);
+      gsap.registerPlugin(ScrollTrigger);
+
+      ctx = gsap.context(() => {
+        if (media.matches) {
+          paint(FRAME_COUNT - 1);
+          for (const line of lines) {
+            if (line) {
+              gsap.set(line, { opacity: 1, y: 0 });
             }
+          }
+          if (glowRef.current) {
+            gsap.set(glowRef.current, { opacity: 1, scale: 1 });
+          }
+          if (washRef.current) {
+            gsap.set(washRef.current, { opacity: 1 });
+          }
+          return;
+        }
+
+        const timeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: "top top",
+            end: `+=${SCROLL_DISTANCE}`,
+            pin: true,
+            scrub: 0.45,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+            onEnter: (self) => syncHeader(self.progress >= WASH_START),
+            onEnterBack: (self) => syncHeader(self.progress >= WASH_START),
+            onUpdate: (self) => {
+              if (self.isActive) {
+                syncHeader(self.progress >= WASH_START);
+              }
+            },
           },
-        },
-      });
+        });
 
-      timeline.to(
-        proxy,
-        {
-          frame: FRAME_COUNT - 1,
-          ease: "none",
-          duration: FRAME_END,
-          onUpdate: () => paint(proxy.frame),
-        },
-        0,
-      );
+        timeline.to(
+          proxy,
+          {
+            frame: FRAME_COUNT - 1,
+            ease: "none",
+            duration: FRAME_END,
+            onUpdate: () => paint(proxy.frame),
+          },
+          0,
+        );
 
-      lines.forEach((line, index) => {
-        if (!line) {
-          return;
-        }
-        const cue = LINE_CUES[index];
+        lines.forEach((line, index) => {
+          if (!line) {
+            return;
+          }
+          const cue = LINE_CUES[index];
 
-        if (!cue) {
-          return;
-        }
+          if (!cue) {
+            return;
+          }
 
-        if (cue.enter === null) {
-          gsap.fromTo(
-            line,
-            { opacity: 0, y: 24 },
-            { opacity: 1, y: 0, duration: 0.9, ease: "power2.out" },
-          );
-        } else {
-          gsap.set(line, { opacity: 0, y: 30 });
+          if (cue.enter === null) {
+            gsap.fromTo(
+              line,
+              { opacity: 0, y: 24 },
+              { opacity: 1, y: 0, duration: 0.9, ease: "power2.out" },
+            );
+          } else {
+            gsap.set(line, { opacity: 0, y: 30 });
+            timeline.to(
+              line,
+              {
+                opacity: 1,
+                y: 0,
+                ease: "power2.out",
+                duration: LINE_IN,
+              },
+              cue.enter,
+            );
+          }
+
           timeline.to(
             line,
             {
-              opacity: 1,
-              y: 0,
-              ease: "power2.out",
-              duration: LINE_IN,
+              opacity: 0,
+              y: -26,
+              ease: "power1.in",
+              duration: LINE_OUT,
             },
-            cue.enter,
+            cue.exit,
+          );
+        });
+
+        if (glowRef.current) {
+          gsap.set(glowRef.current, {
+            opacity: 0,
+            scale: 0.02,
+            transformOrigin: "50% 50%",
+          });
+          timeline
+            .to(
+              glowRef.current,
+              {
+                opacity: 1,
+                scale: 0.12,
+                ease: "power2.out",
+                duration: GLOW_SPARK_SHARE,
+              },
+              GLOW_START,
+            )
+            .to(
+              glowRef.current,
+              {
+                scale: 1,
+                ease: "power2.in",
+                duration: 1 - GLOW_START - GLOW_SPARK_SHARE,
+              },
+              GLOW_START + GLOW_SPARK_SHARE,
+            );
+        }
+
+        if (veilRef.current) {
+          timeline.to(
+            veilRef.current,
+            {
+              backgroundColor: "rgba(47, 58, 40, 0.2)",
+              ease: "power1.out",
+              duration: 1 - GLOW_START,
+            },
+            GLOW_START,
           );
         }
 
-        timeline.to(
-          line,
-          {
-            opacity: 0,
-            y: -26,
-            ease: "power1.in",
-            duration: LINE_OUT,
-          },
-          cue.exit,
-        );
-      });
-
-      if (glowRef.current) {
-        gsap.set(glowRef.current, {
-          opacity: 0,
-          scale: 0.02,
-          transformOrigin: "50% 50%",
-        });
-        timeline
-          .to(
-            glowRef.current,
+        if (washRef.current) {
+          gsap.set(washRef.current, { opacity: 0 });
+          timeline.to(
+            washRef.current,
             {
               opacity: 1,
-              scale: 0.12,
-              ease: "power2.out",
-              duration: GLOW_SPARK_SHARE,
+              ease: "none",
+              duration: 1 - WASH_START,
             },
-            GLOW_START,
-          )
-          .to(
-            glowRef.current,
-            {
-              scale: 1,
-              ease: "power2.in",
-              duration: 1 - GLOW_START - GLOW_SPARK_SHARE,
-            },
-            GLOW_START + GLOW_SPARK_SHARE,
+            WASH_START,
           );
-      }
+        }
 
-      if (veilRef.current) {
-        timeline.to(
-          veilRef.current,
-          {
-            backgroundColor: "rgba(47, 58, 40, 0.2)",
-            ease: "power1.out",
-            duration: 1 - GLOW_START,
-          },
-          GLOW_START,
-        );
-      }
+        paint(0);
+      }, section);
 
-      if (washRef.current) {
-        gsap.set(washRef.current, { opacity: 0 });
-        timeline.to(
-          washRef.current,
-          {
-            opacity: 1,
-            ease: "none",
-            duration: 1 - WASH_START,
-          },
-          WASH_START,
-        );
-      }
-
-      paint(0);
-    }, section);
-
-    ScrollTrigger.refresh();
+      ScrollTrigger.refresh();
+    })();
 
     return () => {
+      cancelled = true;
       window.removeEventListener("resize", resize);
-      ctx.revert();
+      ctx?.revert();
     };
   }, [ready]);
 
@@ -534,7 +654,7 @@ export function ScrollFrameSequence() {
         <div className="pointer-events-none absolute inset-x-0 bottom-8 z-20 flex flex-col items-center gap-2 px-6">
           <div className="h-1 w-40 overflow-hidden rounded-full bg-white/15">
             <div
-              className="h-full bg-[#f9a137] transition-[width] duration-200 ease-out"
+              className="h-full bg-logo-gradient transition-[width] duration-200 ease-out"
               style={{ width: `${Math.round(loadProgress * 100)}%` }}
             />
           </div>

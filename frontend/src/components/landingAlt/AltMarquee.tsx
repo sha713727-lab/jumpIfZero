@@ -39,7 +39,7 @@ function MarqueeRow({ reverse, outlined, paused }: MarqueeRowProps) {
                 </span>
                 <span
                   aria-hidden="true"
-                  className="size-1.5 rotate-45 bg-secondary"
+                  className="size-1.5 rotate-45 bg-logo-gradient"
                 />
               </span>
             ))}

@@ -135,8 +135,8 @@ export function AltContact() {
           </p>
 
           <MagneticLink
-            href="/#contact"
-            className="mt-11 inline-flex items-center gap-3 rounded-full bg-secondary px-9 py-4 text-[0.7rem] font-extrabold tracking-[0.22em] text-black uppercase focus-visible:ring-2 focus-visible:ring-cream focus-visible:outline-none"
+            href="/contact"
+            className="mt-11 inline-flex items-center gap-3 rounded-full bg-logo-gradient px-9 py-4 text-[0.7rem] font-extrabold tracking-[0.22em] text-black uppercase hover:bg-brand hover:text-cream focus-visible:ring-2 focus-visible:ring-cream focus-visible:outline-none"
           >
             Contact
             <span aria-hidden="true">→</span>

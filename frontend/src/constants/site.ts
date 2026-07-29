@@ -5,11 +5,11 @@ export const site = {
 } as const;
 
 export const navLinks = [
-  { name: "About Us", href: "/#about" },
-  { name: "Our Services", href: "/#services" },
-  { name: "Contact", href: "/#contact" },
-  { name: "Portfolio", href: "/#services" },
-  { name: "Blog", href: "/" },
+  { name: "Services", href: "/services" },
+  { name: "Portfolio", href: "/portfolio" },
+  { name: "Blog", href: "/blog" },
+  { name: "Contact", href: "/contact" },
+  { name: "About", href: "/about" },
 ] as const;
 
 export const heroCopy = {
@@ -21,5 +21,5 @@ export const heroCopy = {
   support:
     "We design end-to-end digital systems around your goals — not generic templates.",
   imageSrc: "/images/hero-office.png",
-  loginHref: "/login",
+  loginHref: "/dashboard",
 } as const;

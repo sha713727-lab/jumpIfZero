@@ -10,24 +10,21 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "optimize:images": "node scripts/optimize-images.cjs",
-    "optimize:images:dry": "node scripts/optimize-images.cjs --dry-run"
+    "optimize:images:dry": "node scripts/optimize-images.cjs --dry-run",
+    "optimize:frames": "node scripts/convert-jz-frames-webp.cjs"
   },
   "dependencies": {
-    "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^9.6.1",
     "framer-motion": "^12.42.2",
     "gsap": "^3.15.0",
     "next": "16.2.11",
     "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "three": "^0.185.1"
+    "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/three": "^0.185.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.11",
     "tailwindcss": "^4",

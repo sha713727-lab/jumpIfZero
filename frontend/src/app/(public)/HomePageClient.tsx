@@ -235,9 +235,6 @@ export function HomePageClient() {
       >
         <AltContact />
       </DeferredMount>
-      <div id="content" className="sr-only">
-        Content
-      </div>
     </main>
   );
 }

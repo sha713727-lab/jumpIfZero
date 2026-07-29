@@ -27,7 +27,7 @@ const CARD_THEMES = {
     bloom: "bg-white/10",
   },
   secondary: {
-    surface: "border-black/10 bg-secondary",
+    surface: "border-black/10 bg-logo-gradient",
     bloom: "bg-white/25",
   },
   dark: {
@@ -121,7 +121,7 @@ function TeamCardBody({
         <h3 className="text-[1.25rem] leading-tight font-extrabold tracking-[-0.02em] text-cream">
           {name}
         </h3>
-        <p className="mt-2 text-[0.66rem] font-bold tracking-[0.24em] text-secondary uppercase">
+        <p className="mt-2 text-[0.66rem] font-bold tracking-[0.24em] text-logo-gradient uppercase">
           {role}
         </p>
 
@@ -131,7 +131,7 @@ function TeamCardBody({
               key={social.network}
               href={social.href}
               aria-label={`${name} on ${social.label}`}
-              className="flex size-9 items-center justify-center rounded-full border border-cream/25 text-cream transition-all duration-300 hover:border-secondary hover:bg-secondary hover:text-black focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="flex size-9 items-center justify-center rounded-full border border-cream/25 text-cream transition-all duration-300 hover:border-secondary hover:bg-logo-gradient hover:text-black focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
               onPointerDown={(event) => event.stopPropagation()}
             >
               <SocialIcon network={social.network} />
@@ -412,7 +412,7 @@ export function AltTeam() {
           <div className="relative mx-auto flex items-center justify-center py-6">
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[clamp(2.4rem,8vw,5.5rem)] font-extrabold tracking-[0.08em] whitespace-nowrap text-secondary/20 uppercase select-none"
+              className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[clamp(2.4rem,8vw,5.5rem)] font-extrabold tracking-[0.08em] whitespace-nowrap text-logo-gradient opacity-20 uppercase select-none"
             >
               {teamIntro.watermark}
             </span>

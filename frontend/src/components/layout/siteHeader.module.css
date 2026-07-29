@@ -1,0 +1,76 @@
+.header {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 80;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  backdrop-filter: blur(12px);
+  transition:
+    background-color 300ms,
+    border-color 300ms,
+    color 300ms;
+}
+
+:global(html[data-hero-clear="1"]) .header {
+  border-color: transparent;
+  backdrop-filter: none;
+}
+
+:global(html[data-hero-light="1"]) .header {
+  border-color: rgba(116, 129, 95, 0.15);
+  color: #74815f;
+}
+
+.ink {
+  color: inherit;
+}
+
+.readable {
+  filter: none;
+}
+
+:global(html[data-hero-clear="1"]:not([data-hero-light="1"])) .readable {
+  filter: drop-shadow(0 1px 10px rgba(0, 0, 0, 0.55));
+}
+
+.navLink {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  transition: color 150ms;
+}
+
+.navLink:hover {
+  background-image: linear-gradient(
+    105deg,
+    #ffe3a8 0%,
+    #f9a137 38%,
+    #f0b24a 62%,
+    #e8891a 100%
+  );
+  background-clip: text;
+  color: transparent;
+}
+
+.ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7);
+}
+
+:global(html[data-hero-light="1"]) .ring:focus-visible {
+  box-shadow: 0 0 0 2px rgba(116, 129, 95, 0.5);
+}
+
+.drawer {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: #1a2117;
+  color: #ffffff;
+}
+
+:global(html[data-hero-light="1"]) .drawer {
+  border-color: rgba(116, 129, 95, 0.15);
+  background: #f7f5f0;
+  color: #74815f;
+}

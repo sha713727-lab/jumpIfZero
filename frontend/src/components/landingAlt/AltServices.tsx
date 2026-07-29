@@ -4,9 +4,10 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ServiceDetailModal } from "@/components/services/ServiceDetailModal";
+import { getServiceDetail } from "@/constants/serviceDetails";
 import { serviceChapters, servicesIntro } from "@/constants/servicesStory";
 import { applyHeaderTone } from "@/lib/headerTone";
-import { MagneticLink } from "./MagneticLink";
 import styles from "./landingAlt.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -59,6 +60,7 @@ export function AltServices() {
   const triggerRef = useRef<ScrollTrigger | null>(null);
   const activeRef = useRef(0);
   const [active, setActive] = useState(0);
+  const [detailCategory, setDetailCategory] = useState<string | null>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -187,12 +189,17 @@ export function AltServices() {
   };
 
   const chapter = serviceChapters[active] ?? serviceChapters[0];
+  const openDetail =
+    detailCategory === null
+      ? null
+      : (getServiceDetail(detailCategory) ?? null);
 
   if (!chapter) {
     return null;
   }
 
   return (
+    <>
     <section
       ref={sectionRef}
       id="services"
@@ -222,7 +229,7 @@ export function AltServices() {
           <div className="relative mx-auto flex items-center justify-center py-6">
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-[clamp(2.4rem,8vw,5.5rem)] font-extrabold tracking-[0.08em] text-secondary/25 uppercase select-none"
+              className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-[clamp(2.4rem,8vw,5.5rem)] font-extrabold tracking-[0.08em] text-logo-gradient opacity-25 uppercase select-none"
             >
               {servicesIntro.watermark}
             </span>
@@ -257,13 +264,14 @@ export function AltServices() {
               “{chapter.quote}”
             </p>
 
-            <MagneticLink
-              href={chapter.href}
+            <button
+              type="button"
+              onClick={() => setDetailCategory(chapter.category)}
               className="mt-9 inline-flex items-center gap-3 rounded-full bg-cream px-7 py-3.5 text-[0.68rem] font-extrabold tracking-[0.2em] text-black italic uppercase focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             >
-              {chapter.category}
+              Explore {chapter.category}
               <span aria-hidden="true">→</span>
-            </MagneticLink>
+            </button>
           </div>
 
           <div className="mt-10 flex items-center gap-2">
@@ -276,7 +284,7 @@ export function AltServices() {
                 onClick={() => goToChapter(index)}
                 className={`h-1 rounded-full transition-all duration-300 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
                   index === active
-                    ? "w-10 bg-secondary"
+                    ? "w-10 bg-logo-gradient"
                     : "w-4 bg-cream/20 hover:bg-cream/40"
                 }`}
               />
@@ -310,7 +318,7 @@ export function AltServices() {
                 <p className="text-[0.66rem] font-extrabold tracking-[0.22em] text-cream uppercase">
                   {service.category}
                 </p>
-                <p className="text-[0.66rem] font-extrabold tracking-[0.18em] text-secondary">
+                <p className="text-[0.66rem] font-extrabold tracking-[0.18em] text-logo-gradient">
                   {formatIndex(index)}
                 </p>
               </div>
@@ -320,5 +328,11 @@ export function AltServices() {
         </div>
       </div>
     </section>
+
+    <ServiceDetailModal
+      detail={openDetail ?? null}
+      onClose={() => setDetailCategory(null)}
+    />
+    </>
   );
 }

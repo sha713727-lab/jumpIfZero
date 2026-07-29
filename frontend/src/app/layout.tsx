@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { SiteFooter } from "@/components/layout/SiteFooter";
-import { SiteHeader } from "@/components/layout/SiteHeader";
 import { site } from "@/constants/site";
 import { env } from "@/lib/env";
 import { nourd } from "@/lib/fonts";
@@ -22,11 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={nourd.variable}>
-      <body className={`${nourd.className} antialiased`}>
-        <SiteHeader />
-        {children}
-        <SiteFooter />
-      </body>
+      <body className={`${nourd.className} antialiased`}>{children}</body>
     </html>
   );
 }
