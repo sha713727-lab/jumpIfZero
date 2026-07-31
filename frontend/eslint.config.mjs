@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
   ]),
   {
+    rules: {
+      "no-console": "error",
+    },
+  },
+  {
     files: ["scripts/**/*.cjs"],
     rules: {
       "@typescript-eslint/no-require-imports": "off",
