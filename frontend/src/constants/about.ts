@@ -1,12 +1,12 @@
-export const aboutCopy = {
+﻿export const aboutCopy = {
   watermark: "About",
   title: "JZ Enterprises",
-  lede: "End-to-end digital systems around your goals — not generic templates.",
-  micro: "Jump If Zero · strategy, design, development, growth",
+  lede: "End-to-end digital systems around your goals ΓÇö not generic templates.",
+  micro: "Jump If Zero ┬╖ strategy, design, development, growth",
   storyTitle: "Who we are",
   story: [
     "Our goal is to create holistic IT solutions tailored to your needs while attracting the ideal target audience to improve the reach of your online business.",
-    "We design end-to-end digital systems around your goals — not generic templates. From strategy to launch, we build products that attract the right audience and turn attention into measurable growth.",
+    "We design end-to-end digital systems around your goals ΓÇö not generic templates. From strategy to launch, we build products that attract the right audience and turn attention into measurable growth.",
     "Technical excellence. Clear communication. Outcomes you can scale. That is how Jump If Zero works.",
   ],
   principlesTitle: "How we work",
@@ -15,7 +15,7 @@ export const aboutCopy = {
     {
       index: "01",
       title: "One system, not scattered vendors",
-      body: "Strategy, design, development, and growth run as one owned pipeline — so launches stay sharp and rebuilds stay coherent.",
+      body: "Strategy, design, development, and growth run as one owned pipeline ΓÇö so launches stay sharp and rebuilds stay coherent.",
       accent: "brand",
       image: "/images/services/software.jpg",
       imageAlt: "Software systems work",
@@ -23,7 +23,7 @@ export const aboutCopy = {
     {
       index: "02",
       title: "Built for conversion",
-      body: "Every surface is shaped to attract the right audience and turn attention into measurable growth — not vanity deliverables.",
+      body: "Every surface is shaped to attract the right audience and turn attention into measurable growth ΓÇö not vanity deliverables.",
       accent: "secondary",
       image: "/images/services/website.jpg",
       imageAlt: "Website conversion work",
@@ -39,8 +39,7 @@ export const aboutCopy = {
   ],
   locationTitle: "Where to find us",
   locationWatermark: "Location",
-  locationLede:
-    "JZ Enterprises proudly serves clients across all 50 states, with expert teams ready to support your business.",
+  locationLede: "182 LDA Avenue One Road, Lahore.",
   location: {
     label: "Studio",
     lines: [
