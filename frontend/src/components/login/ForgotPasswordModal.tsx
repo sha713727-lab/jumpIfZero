@@ -28,11 +28,13 @@ function CloseIcon({ className }: { readonly className?: string }) {
   );
 }
 
-export function ForgotPasswordModal({
-  open,
-  initialEmail = "",
+function ForgotPasswordModalContent({
+  initialEmail,
   onClose,
-}: ForgotPasswordModalProps) {
+}: {
+  readonly initialEmail: string;
+  readonly onClose: () => void;
+}) {
   const titleId = useId();
   const formId = useId();
   const closeRef = useRef<HTMLButtonElement | null>(null);
@@ -42,20 +44,6 @@ export function ForgotPasswordModal({
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
 
   useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    setEmail(initialEmail);
-    setError(null);
-    setStatus("idle");
-  }, [open, initialEmail]);
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
@@ -75,11 +63,7 @@ export function ForgotPasswordModal({
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [open, onClose]);
-
-  if (!open || typeof document === "undefined") {
-    return null;
-  }
+  }, [onClose]);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -208,5 +192,23 @@ export function ForgotPasswordModal({
       </div>
     </div>,
     document.body,
+  );
+}
+
+export function ForgotPasswordModal({
+  open,
+  initialEmail = "",
+  onClose,
+}: ForgotPasswordModalProps) {
+  if (!open || typeof document === "undefined") {
+    return null;
+  }
+
+  return (
+    <ForgotPasswordModalContent
+      key={initialEmail}
+      initialEmail={initialEmail}
+      onClose={onClose}
+    />
   );
 }
