@@ -1,7 +1,7 @@
 "use server";
 
-import { demoCustomer } from "@/constants/demoCustomer";
 import type { LoginFormValues } from "@/constants/login";
+import { lookupCredentials } from "@/lib/auth/lookupCredentials";
 import { createSession } from "@/lib/session";
 
 export type LoginSubmitResult =
@@ -11,22 +11,16 @@ export type LoginSubmitResult =
 export async function submitLogin(
   values: LoginFormValues,
 ): Promise<LoginSubmitResult> {
-  const expectedPassword = process.env.DEMO_CUSTOMER_PASSWORD;
+  const result = await lookupCredentials({
+    role: "customer",
+    email: values.email,
+    password: values.password,
+  });
 
-  if (expectedPassword === undefined || expectedPassword === "") {
-    return { ok: false, reason: "server" };
+  if (!result.ok) {
+    return result;
   }
 
-  const email = values.email.trim().toLowerCase();
-  const password = values.password;
-
-  if (
-    email !== demoCustomer.email.toLowerCase() ||
-    password !== expectedPassword
-  ) {
-    return { ok: false, reason: "credentials" };
-  }
-
-  await createSession("customer", demoCustomer.id);
+  await createSession(result.role, result.subjectId);
   return { ok: true };
 }

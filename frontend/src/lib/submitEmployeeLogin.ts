@@ -1,7 +1,7 @@
 "use server";
 
 import type { EmployeeLoginFormValues } from "@/constants/employeeAuth";
-import { initialAdminDemoState } from "@/constants/adminDemo";
+import { lookupCredentials } from "@/lib/auth/lookupCredentials";
 import { createSession } from "@/lib/session";
 
 export type EmployeeLoginSubmitResult =
@@ -11,23 +11,16 @@ export type EmployeeLoginSubmitResult =
 export async function submitEmployeeLogin(
   values: EmployeeLoginFormValues,
 ): Promise<EmployeeLoginSubmitResult> {
-  const expectedPassword = process.env.DEMO_EMPLOYEE_PASSWORD;
+  const result = await lookupCredentials({
+    role: "employee",
+    email: values.email,
+    password: values.password,
+  });
 
-  if (expectedPassword === undefined || expectedPassword === "") {
-    return { ok: false, reason: "server" };
+  if (!result.ok) {
+    return result;
   }
 
-  const email = values.email.trim().toLowerCase();
-  const password = values.password;
-
-  const employee = initialAdminDemoState.employees.find(
-    (item) => item.active && item.email.toLowerCase() === email,
-  );
-
-  if (!employee || password !== expectedPassword) {
-    return { ok: false, reason: "credentials" };
-  }
-
-  await createSession("employee", employee.id);
-  return { ok: true, employeeId: employee.id };
+  await createSession(result.role, result.subjectId);
+  return { ok: true, employeeId: result.subjectId };
 }

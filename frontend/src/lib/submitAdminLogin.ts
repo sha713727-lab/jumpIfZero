@@ -1,9 +1,7 @@
 "use server";
 
-import {
-  demoAdmin,
-  type AdminLoginFormValues,
-} from "@/constants/adminAuth";
+import type { AdminLoginFormValues } from "@/constants/adminAuth";
+import { lookupCredentials } from "@/lib/auth/lookupCredentials";
 import { createSession } from "@/lib/session";
 
 export type AdminLoginSubmitResult =
@@ -13,23 +11,16 @@ export type AdminLoginSubmitResult =
 export async function submitAdminLogin(
   values: AdminLoginFormValues,
 ): Promise<AdminLoginSubmitResult> {
-  const expectedEmail = process.env.DEMO_ADMIN_EMAIL?.trim();
-  const expectedPassword = process.env.DEMO_ADMIN_PASSWORD;
+  const result = await lookupCredentials({
+    role: "admin",
+    email: values.email,
+    password: values.password,
+  });
 
-  if (!expectedEmail || expectedPassword === undefined || expectedPassword === "") {
-    return { ok: false, reason: "server" };
+  if (!result.ok) {
+    return result;
   }
 
-  const email = values.email.trim().toLowerCase();
-  const password = values.password;
-
-  if (
-    email !== expectedEmail.toLowerCase() ||
-    password !== expectedPassword
-  ) {
-    return { ok: false, reason: "credentials" };
-  }
-
-  await createSession("admin", demoAdmin.id);
+  await createSession(result.role, result.subjectId);
   return { ok: true };
 }
