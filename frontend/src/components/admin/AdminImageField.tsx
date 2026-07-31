@@ -82,7 +82,7 @@ export function AdminImageField({
           <div className="relative h-40 w-full overflow-hidden rounded-xl border border-black/10 bg-white">
             <Image
               src={value}
-              alt=""
+              alt="Selected image preview"
               fill
               unoptimized
               className="object-cover"

@@ -187,6 +187,7 @@ export function LoginPageClient() {
               <Image
                 src="/images/jumpIfZeroLogo.png"
                 alt=""
+                aria-hidden="true"
                 width={108}
                 height={105}
                 className="h-24 w-auto"

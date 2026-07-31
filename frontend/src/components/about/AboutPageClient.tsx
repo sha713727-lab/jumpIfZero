@@ -149,6 +149,7 @@ export function AboutPageClient() {
             <Image
               src="/images/jumpIfZeroLogo.png"
               alt=""
+              aria-hidden="true"
               width={54}
               height={52}
               className="mx-auto h-12 w-auto"

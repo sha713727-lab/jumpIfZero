@@ -87,6 +87,7 @@ export function AboutBelowFold() {
                 <Image
                   src="/images/jumpIfZeroLogo.png"
                   alt=""
+                  aria-hidden="true"
                   width={240}
                   height={232}
                   className="relative z-[1] h-[clamp(7rem,20vw,13rem)] w-auto"

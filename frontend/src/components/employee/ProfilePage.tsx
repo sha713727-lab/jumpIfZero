@@ -51,7 +51,7 @@ export function ProfilePage() {
               <div className="relative size-16 overflow-hidden rounded-full border border-black/8">
                 <Image
                   src={employee.image}
-                  alt=""
+                  alt={employee.name}
                   fill
                   unoptimized
                   className="object-cover"

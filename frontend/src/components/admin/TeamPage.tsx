@@ -142,7 +142,7 @@ export function TeamPage() {
                         <div className="relative size-12 shrink-0 overflow-hidden rounded-lg border border-black/8">
                           <Image
                             src={item.image}
-                            alt=""
+                            alt={item.name}
                             fill
                             unoptimized
                             className="object-cover"

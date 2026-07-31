@@ -161,7 +161,7 @@ export function EmployeesPage() {
                         <div className="relative size-10 shrink-0 overflow-hidden rounded-full border border-black/8">
                           <Image
                             src={item.image}
-                            alt=""
+                            alt={item.name}
                             fill
                             unoptimized
                             className="object-cover"

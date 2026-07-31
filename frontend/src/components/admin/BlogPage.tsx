@@ -139,7 +139,7 @@ export function BlogPage() {
                         <div className="relative size-12 shrink-0 overflow-hidden rounded-lg border border-black/8">
                           <Image
                             src={item.image}
-                            alt=""
+                            alt={item.title}
                             fill
                             unoptimized
                             className="object-cover"

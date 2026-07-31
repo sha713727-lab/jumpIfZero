@@ -81,6 +81,7 @@ export function DashboardShell({
             <Image
               src="/images/jumpIfZeroLogo.png"
               alt=""
+              aria-hidden="true"
               width={32}
               height={31}
               className="h-8 w-auto"
@@ -164,6 +165,7 @@ export function DashboardShell({
             <Image
               src="/images/jumpIfZeroLogo.png"
               alt=""
+              aria-hidden="true"
               width={32}
               height={31}
               className="h-8 w-auto"

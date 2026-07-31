@@ -325,6 +325,7 @@ export function ImagesFlow({
                   <Image
                     src={src}
                     alt=""
+                    aria-hidden="true"
                     fill
                     className="object-cover grayscale contrast-[0.92] brightness-[1.18]"
                     sizes={isLast ? "(max-width: 768px) 100vw, 90vw" : "(max-width: 768px) 90vw, 500px"}

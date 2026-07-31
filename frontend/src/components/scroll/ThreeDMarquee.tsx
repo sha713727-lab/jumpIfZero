@@ -44,6 +44,7 @@ export function ThreeDMarquee({ images, className }: ThreeDMarqueeProps) {
                   <Image
                     src={src}
                     alt=""
+                    aria-hidden="true"
                     fill
                     draggable={false}
                     className="object-cover select-none"

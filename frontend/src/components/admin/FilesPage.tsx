@@ -34,7 +34,7 @@ export function FilesPage() {
                       <div className="relative size-10 shrink-0 overflow-hidden rounded-lg border border-black/8">
                         <Image
                           src={file.url}
-                          alt=""
+                          alt={file.name}
                           fill
                           unoptimized
                           className="object-cover"
