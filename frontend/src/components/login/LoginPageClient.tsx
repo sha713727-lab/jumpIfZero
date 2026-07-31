@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import type { FormEvent } from "react";
@@ -354,16 +353,6 @@ export function LoginPageClient() {
             >
               {status === "loading" ? loginCopy.submitting : loginCopy.submit}
             </button>
-
-            <p className="text-center text-[0.84rem] leading-[1.45] font-medium text-black/50">
-              {loginCopy.registerPrompt}{" "}
-              <Link
-                href={loginCopy.registerHref}
-                className="font-extrabold text-brand transition-colors hover:text-[#2f3a28] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
-              >
-                {loginCopy.registerLink}
-              </Link>
-            </p>
           </form>
         </div>
       </section>
