@@ -1,62 +1,27 @@
-function trimUrl(value: string): string {
-  return value.trim().replace(/\/$/, "");
-}
+import {
+  resolveSiteUrl,
+  serverEnvSchema,
+} from "@/schemas/env";
 
-function requireEnv(name: string): string {
-  const value = process.env[name]?.trim();
-
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
-  }
-
-  return value;
-}
-
-function requireSessionSecret(): string {
-  const value = requireEnv("SESSION_SECRET");
-
-  if (value.length < 32) {
-    throw new Error(
-      "SESSION_SECRET must be at least 32 characters",
-    );
-  }
-
-  return value;
-}
-
-function resolveSiteUrl(): string {
-  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-
-  if (configured) {
-    return trimUrl(configured);
-  }
-
-  const vercelUrl = process.env.VERCEL_URL?.trim();
-
-  if (vercelUrl) {
-    return trimUrl(
-      vercelUrl.startsWith("http://") || vercelUrl.startsWith("https://")
-        ? vercelUrl
-        : `https://${vercelUrl}`,
-    );
-  }
-
-  if (process.env.NODE_ENV !== "production") {
-    return "http://localhost:3000";
-  }
-
-  throw new Error(
-    "Missing required environment variable: NEXT_PUBLIC_SITE_URL",
-  );
-}
-
-requireEnv("DEMO_ADMIN_EMAIL");
-requireEnv("DEMO_ADMIN_PASSWORD");
-requireEnv("DEMO_EMPLOYEE_PASSWORD");
-requireEnv("DEMO_CUSTOMER_PASSWORD");
+const parsed = serverEnvSchema.parse({
+  DEMO_ADMIN_EMAIL: process.env.DEMO_ADMIN_EMAIL,
+  DEMO_ADMIN_PASSWORD: process.env.DEMO_ADMIN_PASSWORD,
+  DEMO_EMPLOYEE_PASSWORD: process.env.DEMO_EMPLOYEE_PASSWORD,
+  DEMO_CUSTOMER_PASSWORD: process.env.DEMO_CUSTOMER_PASSWORD,
+  SESSION_SECRET: process.env.SESSION_SECRET,
+  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+  VERCEL_URL: process.env.VERCEL_URL,
+  NODE_ENV: process.env.NODE_ENV,
+});
 
 export const env = {
-  siteUrl: resolveSiteUrl(),
-  nodeEnv: process.env.NODE_ENV ?? "development",
-  sessionSecret: requireSessionSecret(),
+  siteUrl: resolveSiteUrl({
+    ...(parsed.NEXT_PUBLIC_SITE_URL
+      ? { siteUrl: parsed.NEXT_PUBLIC_SITE_URL }
+      : {}),
+    ...(parsed.VERCEL_URL ? { vercelUrl: parsed.VERCEL_URL } : {}),
+    ...(parsed.NODE_ENV ? { nodeEnv: parsed.NODE_ENV } : {}),
+  }),
+  nodeEnv: parsed.NODE_ENV ?? "development",
+  sessionSecret: parsed.SESSION_SECRET,
 } as const;

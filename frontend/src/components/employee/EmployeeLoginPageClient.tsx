@@ -12,7 +12,6 @@ import {
 } from "@/constants/employeeAuth";
 import { site } from "@/constants/site";
 import { submitEmployeeLogin } from "@/lib/submitEmployeeLogin";
-import { validateEmployeeLoginForm } from "@/lib/validateEmployeeLogin";
 
 const EMPTY_VALUES: EmployeeLoginFormValues = {
   email: "",
@@ -114,21 +113,20 @@ export function EmployeeLoginPageClient() {
       return;
     }
 
-    const nextErrors = validateEmployeeLoginForm(values);
-    setErrors(nextErrors);
-
-    if (Object.keys(nextErrors).length > 0) {
-      setStatus("idle");
-      setSummary(employeeLoginCopy.validationSummary);
-      return;
-    }
-
     setSummary(null);
     setStatus("loading");
+    setErrors({});
 
     const result = await submitEmployeeLogin(values);
 
     if (!result.ok) {
+      if ("fieldErrors" in result) {
+        setErrors(result.fieldErrors);
+        setStatus("idle");
+        setSummary(employeeLoginCopy.validationSummary);
+        return;
+      }
+
       setStatus("error");
       setSummary(
         result.reason === "credentials"

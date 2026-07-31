@@ -34,12 +34,4 @@ export const forgotPasswordCopy = {
   requiredEmail: "Email is required.",
 } as const;
 
-export type LoginFormValues = {
-  email: string;
-  password: string;
-};
-
-export type LoginFieldErrors = {
-  email?: string;
-  password?: string;
-};
+export type { LoginFormValues, LoginFieldErrors } from "@/schemas/login";

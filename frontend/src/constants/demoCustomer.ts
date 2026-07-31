@@ -1,3 +1,5 @@
+import type { DemoCustomer } from "@/schemas/customer";
+
 export const demoCustomer = {
   id: "cust_demo_001",
   name: "Ayesha Rahman",
@@ -9,4 +11,4 @@ export const demoCustomer = {
   memberSince: "Nov 2025",
   plan: "Growth retainer",
   initials: "AR",
-} as const;
+} as const satisfies DemoCustomer;

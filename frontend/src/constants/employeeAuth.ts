@@ -17,12 +17,4 @@ export const employeeLoginCopy = {
   credentialsError: "Invalid email or password.",
 } as const;
 
-export type EmployeeLoginFormValues = {
-  email: string;
-  password: string;
-};
-
-export type EmployeeLoginFieldErrors = {
-  email?: string;
-  password?: string;
-};
+export type { LoginFormValues as EmployeeLoginFormValues, LoginFieldErrors as EmployeeLoginFieldErrors } from "@/schemas/login";

@@ -9,7 +9,6 @@ import { loginCopy, type LoginFieldErrors, type LoginFormValues } from "@/consta
 import { site } from "@/constants/site";
 import { applyHeaderTone } from "@/lib/headerTone";
 import { submitLogin } from "@/lib/submitLogin";
-import { validateLoginForm } from "@/lib/validateLogin";
 
 const HEADER_HEIGHT = 72;
 const PAGE_BG = "#f7f5f0";
@@ -145,21 +144,20 @@ export function LoginPageClient() {
       return;
     }
 
-    const nextErrors = validateLoginForm(values);
-    setErrors(nextErrors);
-
-    if (Object.keys(nextErrors).length > 0) {
-      setStatus("idle");
-      setSummary(loginCopy.validationSummary);
-      return;
-    }
-
     setSummary(null);
     setStatus("loading");
+    setErrors({});
 
     const result = await submitLogin(values);
 
     if (!result.ok) {
+      if ("fieldErrors" in result) {
+        setErrors(result.fieldErrors);
+        setStatus("idle");
+        setSummary(loginCopy.validationSummary);
+        return;
+      }
+
       setStatus("error");
       setSummary(
         result.reason === "credentials"

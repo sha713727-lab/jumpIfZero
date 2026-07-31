@@ -12,7 +12,6 @@ import {
 } from "@/constants/adminAuth";
 import { site } from "@/constants/site";
 import { submitAdminLogin } from "@/lib/submitAdminLogin";
-import { validateAdminLoginForm } from "@/lib/validateAdminLogin";
 
 const EMPTY_VALUES: AdminLoginFormValues = {
   email: "",
@@ -114,21 +113,20 @@ export function AdminLoginPageClient() {
       return;
     }
 
-    const nextErrors = validateAdminLoginForm(values);
-    setErrors(nextErrors);
-
-    if (Object.keys(nextErrors).length > 0) {
-      setStatus("idle");
-      setSummary(adminLoginCopy.validationSummary);
-      return;
-    }
-
     setSummary(null);
     setStatus("loading");
+    setErrors({});
 
     const result = await submitAdminLogin(values);
 
     if (!result.ok) {
+      if ("fieldErrors" in result) {
+        setErrors(result.fieldErrors);
+        setStatus("idle");
+        setSummary(adminLoginCopy.validationSummary);
+        return;
+      }
+
       setStatus("error");
       setSummary(
         result.reason === "credentials"

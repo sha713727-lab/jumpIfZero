@@ -9,8 +9,8 @@ as the migration seam, not as permanent product architecture.
 | Order | Batch | Notes |
 |---|---|---|
 | done | 1, Google fakes #49–51, #52, **3.5** (+ 8a–8d acceptance) | Cookie sessions + role/kind gates + swappable `lookupCredentials` |
-| done | **2**, **3**, **4**, **4.5** | Public-site + empty states + data seam |
-| next | **4.6** | zod schemas (**approved**) |
+| done | **2**, **3**, **4**, **4.5**, **4.6** | Public-site + empty states + data seam + zod schemas |
+| next | **5** | |
 | then | 5 → 6 | Unchanged |
 | then | **7** Bundle | **Analysis only** this phase |
 | then | 8+ / cleanup | Unchanged |
@@ -121,6 +121,24 @@ SESSION_SECRET=REPLACE_ME__not_a_real_secret__min_32_chars
 | **44** | Option (b): removed mock form/`submitContact`/`validateContact`; contact page is mailto + tel (`ContactDirect`). |
 
 - Unchanged from prior plan; zod **approved** for Batch 4.6.
+
+### BATCH 4.6 — Schemas (zod v4)
+
+**Installed:** `zod@^4.4.3`
+
+**Delivered**
+- `src/schemas/{admin,login,customer,env,index}.ts` — entity + login + env schemas; types via `z.infer` / `z.input`
+- `constants/adminDemo.ts` / login auth types / `demoCustomer` consume schema types (no hand-written entity interfaces)
+- Runtime validation on server: `submitLogin` / `submitAdminLogin` / `submitEmployeeLogin` + `lib/env.ts`
+- **Replaced** (deleted): `validateLogin.ts`, `validateAdminLogin.ts`, `validateEmployeeLogin.ts`
+- Client login forms use server-returned `fieldErrors` (zod never imported in client components)
+
+**Server-only proof** (after `npm run build`):
+
+```
+rg -l "zod" frontend/.next/static/chunks
+→ 0 hits (exit 1)
+```
 
 ### BATCH 4.5 — Data-access seam
 

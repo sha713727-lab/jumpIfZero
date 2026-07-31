@@ -1,232 +1,49 @@
-import type { ProjectStatus } from "@/constants/admin";
+import type {
+  AdminBlogPost,
+  AdminCallback,
+  AdminClient,
+  AdminContactMessage,
+  AdminDemoState,
+  AdminEmployee,
+  AdminFaq,
+  AdminFile,
+  AdminInvoice,
+  AdminLead,
+  AdminLeadFollowUp,
+  AdminMessage,
+  AdminPortfolioItem,
+  AdminProject,
+  AdminSale,
+  AdminSalesMessage,
+  AdminService,
+  AdminTeamMember,
+  EmployeeKind,
+  LeadStatus,
+  SaleStatus,
+} from "@/schemas/admin";
 
-export type AdminService = {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  path: string;
-  image: string;
-  active: boolean;
-  updatedAt: string;
-};
-
-export type AdminPortfolioItem = {
-  id: string;
-  title: string;
-  category: string;
-  summary: string;
-  image: string;
-  active: boolean;
-  updatedAt: string;
-};
-
-export type AdminBlogPost = {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  image: string;
-  active: boolean;
-  updatedAt: string;
-};
-
-export type AdminFaq = {
-  id: string;
-  question: string;
-  answer: string;
-  active: boolean;
-  updatedAt: string;
-};
-
-export type AdminTeamMember = {
-  id: string;
-  name: string;
-  role: string;
-  bio: string;
-  image: string;
-  active: boolean;
-  employeeId: string | null;
-  updatedAt: string;
-};
-
-export type EmployeeKind = "delivery" | "sales";
-
-export type AdminEmployee = {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  department: string;
-  kind: EmployeeKind;
-  image: string;
-  active: boolean;
-  teamMemberId: string | null;
-  updatedAt: string;
-};
-
-export type SaleStatus = "draft" | "quoted" | "won" | "lost";
-
-export type LeadStatus =
-  | "new"
-  | "contacted"
-  | "qualified"
-  | "converted"
-  | "closed";
-
-export type AdminSale = {
-  id: string;
-  repId: string;
-  status: SaleStatus;
-  usDot: string;
-  mc: string;
-  legalName: string;
-  dba: string;
-  businessAddress: string;
-  ownerOperatorDriver: string;
-  taxId: string;
-  salesAgent: string;
-  businessTelephone: string;
-  truckType: string;
-  type: string;
-  contactName: string;
-  contactPhone: string;
-  contactEmail: string;
-  truck: string;
-  trailer: string;
-  insuranceName: string;
-  insurancePhone: string;
-  insuranceStreet: string;
-  insuranceCityStateZip: string;
-  insuranceEmail: string;
-  factoringName: string;
-  factoringPhone: string;
-  factoringStreet: string;
-  factoringCityStateZip: string;
-  factoringEmail: string;
-  approvedBy: string;
-  updatedAt: string;
-};
-
-export type AdminLead = {
-  id: string;
-  repId: string;
-  company: string;
-  contactName: string;
-  phone: string;
-  email: string;
-  source: string;
-  status: LeadStatus;
-  notes: string;
-  updatedAt: string;
-};
-
-export type AdminLeadFollowUp = {
-  id: string;
-  leadId: string;
-  at: string;
-  note: string;
-  outcome: string;
-};
-
-export type AdminSalesMessage = {
-  id: string;
-  fromRepId: string;
-  toRepId: string;
-  body: string;
-  at: string;
-  read: boolean;
-};
-
-export type AdminClient = {
-  id: string;
-  name: string;
-  email: string;
-  company: string;
-  phone: string;
-  status: "active" | "paused";
-  initials: string;
-  memberSince: string;
-  assignedEmployeeIds: string[];
-  updatedAt: string;
-};
-
-export type AdminProject = {
-  id: string;
-  clientId: string;
-  title: string;
-  service: string;
-  status: ProjectStatus;
-  notes: string;
-  updatedAt: string;
-};
-
-export type AdminMessage = {
-  id: string;
-  clientId: string;
-  from: "admin" | "client" | "employee";
-  body: string;
-  at: string;
-  read: boolean;
-};
-
-export type AdminInvoice = {
-  id: string;
-  clientId: string;
-  number: string;
-  title: string;
-  amount: string;
-  status: "draft" | "sent" | "paid";
-  updatedAt: string;
-};
-
-export type AdminFile = {
-  id: string;
-  clientId: string;
-  name: string;
-  kind: string;
-  url: string | null;
-  updatedAt: string;
-};
-
-export type AdminCallback = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  note: string;
-  status: "new" | "resolved";
-  updatedAt: string;
-};
-
-export type AdminContactMessage = {
-  id: string;
-  name: string;
-  email: string;
-  subject: string;
-  body: string;
-  status: "new" | "read";
-  updatedAt: string;
-};
-
-export type AdminDemoState = {
-  services: AdminService[];
-  portfolio: AdminPortfolioItem[];
-  blog: AdminBlogPost[];
-  faqs: AdminFaq[];
-  team: AdminTeamMember[];
-  employees: AdminEmployee[];
-  clients: AdminClient[];
-  projects: AdminProject[];
-  messages: AdminMessage[];
-  invoices: AdminInvoice[];
-  files: AdminFile[];
-  callbacks: AdminCallback[];
-  contactMessages: AdminContactMessage[];
-  sales: AdminSale[];
-  leads: AdminLead[];
-  leadFollowUps: AdminLeadFollowUp[];
-  salesMessages: AdminSalesMessage[];
+export type {
+  AdminBlogPost,
+  AdminCallback,
+  AdminClient,
+  AdminContactMessage,
+  AdminDemoState,
+  AdminEmployee,
+  AdminFaq,
+  AdminFile,
+  AdminInvoice,
+  AdminLead,
+  AdminLeadFollowUp,
+  AdminMessage,
+  AdminPortfolioItem,
+  AdminProject,
+  AdminSale,
+  AdminSalesMessage,
+  AdminService,
+  AdminTeamMember,
+  EmployeeKind,
+  LeadStatus,
+  SaleStatus,
 };
 
 export const initialAdminDemoState: AdminDemoState = {

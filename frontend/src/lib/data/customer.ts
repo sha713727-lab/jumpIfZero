@@ -1,6 +1,7 @@
 import { demoCustomer } from "@/constants/demoCustomer";
+import type { DemoCustomer } from "@/schemas/customer";
 
-export type DemoCustomer = typeof demoCustomer;
+export type { DemoCustomer };
 
 export async function getDemoCustomer(): Promise<DemoCustomer> {
   return demoCustomer;
