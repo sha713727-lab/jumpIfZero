@@ -236,7 +236,7 @@ export const demoFiles = [
   },
   {
     id: "file_5",
-    name: "Staging_Credentials.txt",
+    name: "Staging_Access_Notes.txt",
     type: "TXT",
     size: "4 KB",
     uploaded: "Jul 18, 2026",
