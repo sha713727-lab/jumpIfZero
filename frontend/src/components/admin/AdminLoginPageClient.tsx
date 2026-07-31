@@ -117,26 +117,32 @@ export function AdminLoginPageClient() {
     setStatus("loading");
     setErrors({});
 
-    const result = await submitAdminLogin(values);
+    try {
+      const result = await submitAdminLogin(values);
 
-    if (!result.ok) {
-      if ("fieldErrors" in result) {
-        setErrors(result.fieldErrors);
-        setStatus("idle");
-        setSummary(adminLoginCopy.validationSummary);
+      if (!result.ok) {
+        if ("fieldErrors" in result) {
+          setErrors(result.fieldErrors);
+          setStatus("idle");
+          setSummary(adminLoginCopy.validationSummary);
+          return;
+        }
+
+        setStatus("error");
+        setSummary(
+          result.reason === "credentials"
+            ? adminLoginCopy.credentialsError
+            : adminLoginCopy.serverError,
+        );
         return;
       }
 
+      router.replace("/admin");
+      router.refresh();
+    } catch {
       setStatus("error");
-      setSummary(
-        result.reason === "credentials"
-          ? adminLoginCopy.credentialsError
-          : adminLoginCopy.serverError,
-      );
-      return;
+      setSummary(adminLoginCopy.serverError);
     }
-
-    router.replace("/admin");
   };
 
   const disabled = status === "loading";

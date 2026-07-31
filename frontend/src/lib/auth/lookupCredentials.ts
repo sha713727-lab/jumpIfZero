@@ -2,6 +2,7 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { demoAdmin } from "@/constants/adminAuth";
 import { initialAdminDemoState } from "@/lib/data/admin";
 import { demoCustomer } from "@/lib/data/customer";
+import { env } from "@/lib/env";
 import type { SessionRole } from "@/lib/session";
 
 export type CredentialLookupResult =
@@ -40,12 +41,8 @@ export async function lookupCredentials(
   const password = input.password;
 
   if (input.role === "admin") {
-    const expectedEmail = process.env.DEMO_ADMIN_EMAIL?.trim().toLowerCase();
-    const expectedPassword = process.env.DEMO_ADMIN_PASSWORD;
-
-    if (!expectedEmail || expectedPassword === undefined || expectedPassword === "") {
-      return { ok: false, reason: "server" };
-    }
+    const expectedEmail = env.demoAdminEmail.toLowerCase();
+    const expectedPassword = env.demoAdminPassword;
 
     const emailOk = secretsEqual(email, expectedEmail);
     const passwordOk = await verifyPassword(password, expectedPassword);
@@ -58,11 +55,7 @@ export async function lookupCredentials(
   }
 
   if (input.role === "customer") {
-    const expectedPassword = process.env.DEMO_CUSTOMER_PASSWORD;
-
-    if (expectedPassword === undefined || expectedPassword === "") {
-      return { ok: false, reason: "server" };
-    }
+    const expectedPassword = env.demoCustomerPassword;
 
     const emailOk = secretsEqual(email, demoCustomer.email.toLowerCase());
     const passwordOk = await verifyPassword(password, expectedPassword);
@@ -74,18 +67,12 @@ export async function lookupCredentials(
     return { ok: true, role: "customer", subjectId: demoCustomer.id };
   }
 
-  const expectedPassword = process.env.DEMO_EMPLOYEE_PASSWORD;
-
-  if (expectedPassword === undefined || expectedPassword === "") {
-    return { ok: false, reason: "server" };
-  }
+  const expectedPassword = env.demoEmployeePassword;
 
   const employee = initialAdminDemoState.employees.find(
     (item) => item.active && item.email.toLowerCase() === email,
   );
 
-  // DB implementation must run a dummy hash comparison on the not-found path
-  // to preserve uniform timing between unknown-email and wrong-password.
   const passwordOk = await verifyPassword(password, expectedPassword);
 
   if (!employee || !passwordOk) {

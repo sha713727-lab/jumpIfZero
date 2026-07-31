@@ -148,26 +148,32 @@ export function LoginPageClient() {
     setStatus("loading");
     setErrors({});
 
-    const result = await submitLogin(values);
+    try {
+      const result = await submitLogin(values);
 
-    if (!result.ok) {
-      if ("fieldErrors" in result) {
-        setErrors(result.fieldErrors);
-        setStatus("idle");
-        setSummary(loginCopy.validationSummary);
+      if (!result.ok) {
+        if ("fieldErrors" in result) {
+          setErrors(result.fieldErrors);
+          setStatus("idle");
+          setSummary(loginCopy.validationSummary);
+          return;
+        }
+
+        setStatus("error");
+        setSummary(
+          result.reason === "credentials"
+            ? loginCopy.credentialsError
+            : loginCopy.serverError,
+        );
         return;
       }
 
+      router.replace("/dashboard");
+      router.refresh();
+    } catch {
       setStatus("error");
-      setSummary(
-        result.reason === "credentials"
-          ? loginCopy.credentialsError
-          : loginCopy.serverError,
-      );
-      return;
+      setSummary(loginCopy.serverError);
     }
-
-    router.replace("/dashboard");
   };
 
   const disabled = status === "loading";

@@ -5,10 +5,10 @@ function trimUrl(value: string): string {
 }
 
 export const serverEnvSchema = z.object({
-  DEMO_ADMIN_EMAIL: z.string().trim().min(1),
-  DEMO_ADMIN_PASSWORD: z.string().trim().min(1),
-  DEMO_EMPLOYEE_PASSWORD: z.string().trim().min(1),
-  DEMO_CUSTOMER_PASSWORD: z.string().trim().min(1),
+  DEMO_ADMIN_EMAIL: z.string().trim().min(1).pipe(z.email()),
+  DEMO_ADMIN_PASSWORD: z.string().trim().min(8),
+  DEMO_EMPLOYEE_PASSWORD: z.string().trim().min(8),
+  DEMO_CUSTOMER_PASSWORD: z.string().trim().min(8),
   SESSION_SECRET: z.string().trim().min(32, {
     error: "SESSION_SECRET must be at least 32 characters",
   }),

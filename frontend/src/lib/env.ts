@@ -24,4 +24,8 @@ export const env = {
   }),
   nodeEnv: parsed.NODE_ENV ?? "development",
   sessionSecret: parsed.SESSION_SECRET,
+  demoAdminEmail: parsed.DEMO_ADMIN_EMAIL,
+  demoAdminPassword: parsed.DEMO_ADMIN_PASSWORD,
+  demoEmployeePassword: parsed.DEMO_EMPLOYEE_PASSWORD,
+  demoCustomerPassword: parsed.DEMO_CUSTOMER_PASSWORD,
 } as const;

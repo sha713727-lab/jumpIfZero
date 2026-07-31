@@ -111,6 +111,7 @@ function AdminShellInner({
               width={32}
               height={31}
               className="h-8 w-auto"
+              style={{ width: "auto" }}
               priority
             />
             <div className="min-w-0">
@@ -193,6 +194,7 @@ function AdminShellInner({
               width={32}
               height={31}
               className="h-8 w-auto"
+              style={{ width: "auto" }}
             />
             <div className="min-w-0">
               <p className="truncate text-[0.82rem] font-extrabold">

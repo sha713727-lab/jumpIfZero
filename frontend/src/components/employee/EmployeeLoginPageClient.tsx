@@ -117,26 +117,32 @@ export function EmployeeLoginPageClient() {
     setStatus("loading");
     setErrors({});
 
-    const result = await submitEmployeeLogin(values);
+    try {
+      const result = await submitEmployeeLogin(values);
 
-    if (!result.ok) {
-      if ("fieldErrors" in result) {
-        setErrors(result.fieldErrors);
-        setStatus("idle");
-        setSummary(employeeLoginCopy.validationSummary);
+      if (!result.ok) {
+        if ("fieldErrors" in result) {
+          setErrors(result.fieldErrors);
+          setStatus("idle");
+          setSummary(employeeLoginCopy.validationSummary);
+          return;
+        }
+
+        setStatus("error");
+        setSummary(
+          result.reason === "credentials"
+            ? employeeLoginCopy.credentialsError
+            : employeeLoginCopy.serverError,
+        );
         return;
       }
 
+      router.replace("/employee");
+      router.refresh();
+    } catch {
       setStatus("error");
-      setSummary(
-        result.reason === "credentials"
-          ? employeeLoginCopy.credentialsError
-          : employeeLoginCopy.serverError,
-      );
-      return;
+      setSummary(employeeLoginCopy.serverError);
     }
-
-    router.replace("/employee");
   };
 
   const disabled = status === "loading";

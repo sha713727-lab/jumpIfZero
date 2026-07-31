@@ -85,6 +85,7 @@ export function DashboardShell({
               width={32}
               height={31}
               className="h-8 w-auto"
+              style={{ width: "auto" }}
               priority
             />
             <div className="min-w-0">
@@ -169,6 +170,7 @@ export function DashboardShell({
               width={32}
               height={31}
               className="h-8 w-auto"
+              style={{ width: "auto" }}
             />
             <p className="text-[0.82rem] font-extrabold">{site.name}</p>
           </div>
