@@ -9,8 +9,8 @@ as the migration seam, not as permanent product architecture.
 | Order | Batch | Notes |
 |---|---|---|
 | done | 1, Google fakes #49–51, #52, **3.5** (+ 8a–8d acceptance) | Cookie sessions + role/kind gates + swappable `lookupCredentials` |
-| done | **2**, **3**, **4**, **4.5**, **4.6** | Public-site + empty states + data seam + zod schemas |
-| next | **5** | |
+| done | **2**, **3**, **4**, **4.5**, **4.6**, **5** | Through a11y Batch 5 |
+| next | **6** | Platform & config |
 | then | 5 → 6 | Unchanged |
 | then | **7** Bundle | **Analysis only** this phase |
 | then | 8+ / cleanup | Unchanged |
@@ -121,6 +121,16 @@ SESSION_SECRET=REPLACE_ME__not_a_real_secret__min_32_chars
 | **44** | Option (b): removed mock form/`submitContact`/`validateContact`; contact page is mailto + tel (`ContactDirect`). |
 
 - Unchanged from prior plan; zod **approved** for Batch 4.6.
+
+### BATCH 5 — Accessibility (§21)
+
+| ID | Commit | Change |
+|---|---|---|
+| **5a** | `d8eea3c` | `useModalFocus` — Tab trap + restore on all 5 dialogs |
+| **5b** | `f9898b2` | Image alts: **decorative** logos/motion (+`aria-hidden`); **meaningful** portraits/list/file/upload previews |
+| **5c** | `d46d7a8` | Label audit → **114** correctly labelled / **0** unlinked / **0** none (wrap adjacent pairs; aria-label file/message/filters) |
+| **5d** | `07f341a` | Team/Service modal backdrops → `<button>` (audit listed 2; no remaining div onClick) |
+| **5e** | — | Marketing routes checked: **no route renders multiple `<h1>`**. Home/Services/About/Contact/Blog = one each; Portfolio sole `<h1>` is project index in `GsapProjectsSection` (not a duplicate). No duplicate fix applied. |
 
 ### BATCH 4.6 — Schemas (zod v4)
 
