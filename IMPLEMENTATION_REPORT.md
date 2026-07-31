@@ -1,238 +1,208 @@
-# IMPLEMENTATION REPORT (in progress)
+# IMPLEMENTATION REPORT
 
-**Phase context (updated):** This phase still closes frontend production gaps.
-A **real backend + database starts after this phase**. Treat seed/`lib/data`/`schemas`
-as the migration seam, not as permanent product architecture.
+**Phase:** Frontend production closure (Phase 3). A real backend + database starts after this phase.
 
-## Phase batch order (adjusted)
+## A. Summary
 
-| Order | Batch | Notes |
+This phase closed the worst production gaps on the Next.js frontend: forged client sessions and fake Google/register paths are gone; auth is signed `__Host-jz_session` cookies with server role/kind gates; public contact is real mailto/tel; portals gained empty states and safer indexed access; seed reads go through `lib/data` with Zod on the server; a11y, error/SEO/CSP/HSTS/tsconfig/CI/bundle deferrals landed. What did not change: seed still is the product content, there is still no CMS/API/i18n/tests, CSP still allows `script-src 'unsafe-inline'`, and `npm audit` still reports high issues via `next`→postcss/sharp. The app is materially safer and more operable than when the phase started, but it is not a finished production backend product.
+
+## B. Changes applied
+
+| ID | Severity | File(s) | What changed | Commit |
+|---|---|---|---|---|
+| 1 / admin creds | P0 | `adminAuth` / env | Remove client-bundled admin demo credentials | `14ab48d` |
+| 1 / employee creds | P0 | `employeeAuth` / env | Remove client-bundled employee demo password | `36a4756` |
+| 1 / env example | P0 | `.env.example` | Strip demo credentials from example | `a5fcb41` |
+| 1 / customer password | P0 | customer auth paths | Remove hardcoded customer demo password from client | `f4268e2` |
+| 11 | P0 | admin login | Remove fake Google admin sign-in | `8ae19f7` |
+| 42 | P0 | `login` copy / UI | Remove public `demoHint` password exposure | `0cebb05` |
+| 48 | P1 | dashboard seed file name | Rename seed row that advertised staging credentials | `40b4080` |
+| 3 | P0 | `env` / `.env.example` | Document + validate server-only `DEMO_*` auth env | `2d77b0a` |
+| 49 | P0 | customer login | Remove fake Google customer sign-in | `54e34f3` |
+| 50 | P0 | employee login | Remove fake Google employee sign-in | `eecb854` |
+| 51 | P0 | register | Remove fake Google register sign-in | `d6ce0e7` |
+| 52 | P0 | `/register` | Delete register route (password collected, no store) | `4c17bef` |
+| 5–10, 12 / 3.5 | P0 | `session`, shells, layouts | Signed httpOnly cookie sessions replace `sessionStorage` | `6a6167b` |
+| 3.5 lookup | P0 | `lookupCredentials` | Centralize credential lookup + timing-safe compare | `a1fb1c5` |
+| 10 / 8b | P0 | employee layouts / access | Server `requireEmployeeKind` + SESSION_SECRET placeholder clarity | `f18d544` |
+| 46 | P1 | `scrollStory` | Remove unused external URL `sources` | `67f52aa` |
+| 45 | P1 | about location copy | Remove false “50 states” claim | `d1314ca` |
+| 43 | P1 | about / contact | Real email + phone | `2a0197b` |
+| 44 | P1 | contact | Replace mock form with mailto + tel | `87bcd57` |
+| 40b | P1 | portal shells | Close drawers on nav click, not pathname effect | `2ed33af` |
+| 40c | P1 | forgot-password modal | Reset state by remount key | `9f5f225` |
+| 40d | P1 | `DonutChart` | Non-mutating segment offsets | `e90feda` |
+| lint | P1 | `ScrollFrameSequence` | `prefer-const` on loaded frame count | `e8ffd90` |
+| 40-lint | P2 | `eslint.config.mjs` | Allow CommonJS in `scripts/**/*.cjs` | `4cbb988` |
+| 4a | P1 | portal/blog lists | Shared empty states | `7398312` |
+| 4b | P1 | indexed access sites | Guard empty-collection `[0]` access | `22251b6` |
+| 4.5 | P1 | `lib/data/*`, consumers | Async data seam; components stop importing `constants` seed directly | `e6eb42b` |
+| 4.6 / 28 | P1 | `schemas/*`, login submits, `env` | Zod v4; delete hand-rolled validators | `4b75c37` |
+| 5a | P1 | modals + `useModalFocus` | Focus trap + restore | `d8eea3c` |
+| 5b | P1 | images | Decorative vs meaningful alts | `f9898b2` |
+| 5c | P1 | forms | Label association | `d46d7a8` |
+| 5d | P1 | team/service modals | Backdrop `<button>` | `07f341a` |
+| 5e | P1 | marketing headings | Audit only — no duplicate `<h1>` fix needed | `43ca018` |
+| 15 | P0 | `error.tsx`, `global-error.tsx` | Error boundaries | `376de1d` |
+| 24 | P1 | `not-found.tsx` | Branded not-found | `b9904b1` |
+| 25 | P1 | `sitemap.ts`, `robots.ts` | Data-driven SEO files | `9368754` |
+| 14 | P0→P2 | `next.config.ts` | CSP `object-src 'none'`; keep `script-src 'unsafe-inline'` | `344a123` |
+| 34 | P2 | `next.config.ts` | Production HSTS | `55f2530` |
+| 31 | P1 | `tsconfig.json` | Remaining strict flags (0 fallout files) | `b4f4039` |
+| 30 | P1 | `eslint.config.mjs` | `no-console: error` | `b59847b` |
+| 33 | P2 | `package.json` | `engines.node >=20.9.0` | `eaf877f` |
+| 32 | P2 | `package.json` | Drop `--webpack` from `dev` | `4e81e68` |
+| tokens | P2 | `globals.css`, `dashboard.ts` | `engagementMix` colors → CSS vars | `e0df08d` |
+| 29 | P1 | `.github/workflows/frontend-ci.yml` | CI: tsc, eslint, build, audit | `227ec89` |
+| 30 follow-up | P1 | `eslint.config.mjs` | Exempt CLI scripts from `no-console` | `6cd6788` |
+| 15 follow-up | P0 | error pages | Use `Link` for home CTA | `c3a0cc3` |
+| 6 docs | — | this report | Batch 6 notes | `ac50d7f` |
+| 7 | P2 | `RevealText`, `AboutBelowFold` | Defer below-fold animation chunks + async GSAP in RevealText | `365adfd` |
+| 7 docs | — | this report | Batch 7 notes | `8d9d030` |
+
+Docs-only commits and cleanup commit update this file; they are not separate product fixes.
+
+## C. Verification
+
+### Final §7 gate (pasted)
+
+```
+TSC_EXIT:0
+ESLINT_EXIT:0
+BUILD_EXIT:0
+AUDIT_EXIT:1
+```
+
+`AUDIT_EXIT:1` is expected: 3 high vulns via `next`→postcss/sharp. Do not `npm audit fix --force` (pulls `next@9.3.3`).
+
+### Cleanup Step 1 — numeric after (final audit run before artifact deletion)
+
+**Constants (AST inventory of `src/constants/**/*.ts`)** — total **1526**
+
+| Category | Count |
+|---|---|
+| UI LABEL | 381 |
+| BUSINESS CONTENT | 335 |
+| MOCK/SEED RECORD | 231 |
+| IDENTIFIER/KEY | 164 |
+| CONTENT IMAGE | 123 |
+| PII/THIRD-PARTY-DATA | 114 |
+| ROUTE CONSTANT | 92 |
+| TYPE/ENUM MEMBER | 83 |
+| CREDENTIAL/SECRET | 2 |
+| BRAND ASSET | 1 |
+| DESIGN TOKEN | 0 |
+
+Credential/secret rows remaining are non-secret UI copy: login “use demo customer email and password” message, and sales `••••` mask marker — not live passwords.
+
+**Phase coverage scan (`src/components` + `src/app`)**
+
+| Metric | Phase 1.5 before | Final after |
 |---|---|---|
-| done | 1, Google fakes #49–51, #52, **3.5** (+ 8a–8d acceptance) | Cookie sessions + role/kind gates + swappable `lookupCredentials` |
-| done | **2**, **3**, **4**, **4.5**, **4.6**, **5**, **6**, **7** | Through bundle Batch 7 |
-| next | Cleanup + final report | Re-run audits, delete artifacts, finalize `IMPLEMENTATION_REPORT.md` |
+| Files scanned | 166 | 175 |
+| `.map()` call sites | 166 | 166 |
+| `[0]` element accesses | 23 | 22 |
+| Image alt issues (empty/decorative flags) | 29 | 18 |
+| Click on non-interactive | 4 | 0 |
+| Index-as-key suspects | 0 | 0 |
+
+List pages that were Empty:N now use empty-state UI (#4a). Remaining alt issues are intentional decorative `alt=""` (+ `aria-hidden` where applied).
+
+**First-load gzip (shared + per-route client assets)**
+
+| Metric | Phase 1.5 | Final |
+|---|---|---|
+| Shared | 162.3 KB | 168.8 KB |
+| `/about` | 244.7 KB | **206.1 KB** |
+| `/` | (over budget) | 202.6 KB |
+| `/services` | — | 204.4 KB |
+| `/portfolio` | — | 204.6 KB |
+| `/contact` | — | 202.5 KB |
+| `/blog` | — | 206.1 KB |
+| Route count | 57 | 56 |
+
+Batch 7 alone moved `/about` **250.1 → 206.1 KB (−44)** on the post–Batch-6 baseline. Shared alone still exceeds a ~180 KB first-load budget.
+
+### Zod client-chunk proof (Batch 4.6)
+
+After production build: search of `.next/static/chunks` for `zod` → **0 hits**.
+
+## D. Not implemented, and why
+
+| Finding / item | Why not done | Current risk |
+|---|---|---|
+| **13** `src/server/api/**` / backend | Explicitly out of scope; backend+DB after this phase | No real API; portals are demo UX |
+| **16, 17** Replace seed with CMS/API; purge constants content | Out of scope; `constants/` kept except named line fixes | Marketing + portal content requires deploy to change; seed ships in repo |
+| **18** `[locale]` / next-intl | Out of scope | English-only; no locale routing |
+| **19, 20** Server-preloaded portal data / URL filters | Out of scope pending backend | Client providers still hold demo state; filters often local `useState` |
+| **26** `generateMetadata` from CMS | Out of scope | SEO metadata still static in pages |
+| **27** Test suites | Out of scope | No unit/integration/E2E |
+| **21, 22** Money as numeric + `Intl` | Not in authorized batches | Amounts remain display strings (e.g. `PKR …`) |
+| **23** Hardcoded `en-US` formatters in demo providers | Not in authorized batches | Locale not user-driven |
+| **14 full** Remove `script-src 'unsafe-inline'` | §6.1: leave script-src; no `proxy.ts`/nonces | XSS defense weaker than nonce CSP |
+| **35** Ban remaining inline `style={{}}` | Not in Batch 6/7 list | Some motion/layout still uses inline styles |
+| **36** Shrink `"use client"` surface | Analysis-only / not batched | Large client surface remains |
+| **37** Split oversized files | Not batched | Large modules remain (e.g. admin seed) |
+| **38** Fix npm audit highs | ACCEPTED this phase; force-fix destroys Next | 3 high via transitive deps |
+| **39** Empty feature dirs | Not batched | Empty structural dirs may still exist |
+| **41** Narrating eslint comment | Trivial; not required for gate | Cosmetic |
+| Library consolidation (GSAP vs Framer) | Batch 7 proposal only | Two animation libs still ship |
+| Client→server conversion of `lib/data` consumers | Listed in 4.5; not converted | Seed can still enter client chunks via client providers |
+
+Findings **5–10, 12** were listed out-of-scope initially, then **authorized and closed** via Batch 3.5 / 8a–8d (cookie sessions + role/kind gates).
 
 ## E. Residual risk register
 
-Status legend: **CLOSED** | **SCHEDULED** (lands with backend — not accepted forever) | **ACCEPTED** (won't fix in known plan) | **OPEN** | **Downgraded**
-
 | Risk | Status | Detail |
 |---|---|---|
-| Client-only `sessionStorage` sessions | **CLOSED (Batch 3.5)** | Signed `__Host-jz_session` httpOnly cookies. |
-| Role confinement | **CLOSED (8a)** | `requireSession(role)` → `verifySession(role)` → `readSessionValue` rejects `payload.role !== role`. Proven with cross-role GETs + SA. |
-| Employee kind gating (finding 10) | **CLOSED (8b)** | Server: `requireEmployeeKind` in nested layouts under `sales`/`leads` (sales-only) and `clients`/`projects`/`files` (delivery-only). Client shell UX redirect retained; server is source of truth. |
-| Seed data in client chunks | **SCHEDULED (backend)** | Leaves client bundle when portals read via server `lib/data` + DB. |
-| Login rate limiting | **SCHEDULED (backend)** | Needs DB-backed bucket (§11). |
-| Session revocation / durable sessions | **SCHEDULED (backend)** | Current: signed cookie, **8h** exp, no revoke list. |
-| Server-side authz beyond role cookie | **SCHEDULED (backend)** | Fine-grained resource authz with real data access. |
-| Finding 14 CSP `unsafe-inline` scripts | **Downgraded to P2** | Batch 6 as specified. |
-| Fake Google / register | **CLOSED (#49–52)** | |
-| No backend / CMS / i18n / tests | **SCHEDULED (post-phase)** | Backend+DB after this phase. |
-| `npm audit` high via next→postcss/sharp | **ACCEPTED (this phase)** | Do not `audit fix --force`. |
-| Seed as product data in `constants/` | **SCHEDULED (backend)** | Seam: `lib/data` async getters; constants only consumed there. |
+| Client-only `sessionStorage` auth | **CLOSED** | `__Host-jz_session` httpOnly, Secure, SameSite=Lax, 8h |
+| Role confinement | **CLOSED** | Server rejects wrong-role cookies |
+| Employee kind gating | **CLOSED** | Server `requireEmployeeKind` on nested routes |
+| Fake Google / register password collection | **CLOSED** | Removed |
+| Public password in login UI | **CLOSED** | `demoHint` removed |
+| Contact form “not delivered” mock | **CLOSED** | mailto + tel only |
+| No backend / real persistence | **SCHEDULED** | After this phase |
+| Seed / mock as product data | **SCHEDULED** | `lib/data` seam only |
+| Seed still reachable from client bundles | **SCHEDULED** | Until portals fetch server-only |
+| Login rate limiting | **SCHEDULED** | Needs durable store |
+| Session revocation | **SCHEDULED** | Cookie expiry only today |
+| Fine-grained resource authz | **SCHEDULED** | Role/kind only |
+| No automated tests | **SCHEDULED** | Finding 27 |
+| No i18n | **SCHEDULED** | Finding 18 |
+| CSP `script-src 'unsafe-inline'` | **ACCEPTED (this phase)** / Downgraded P2 | Needs nonce + proxy approval later |
+| `npm audit` high (postcss/sharp via next) | **ACCEPTED (this phase)** | Do not force-fix |
+| Demo portal enterability | **OPEN decision** | Passwords only in server `DEMO_*` env — prospects cannot log in without ops-shared secrets |
+| Credential rotation | **Action if history exposed** | Demo passwords and any old client-bundled secrets that ever lived in git should be treated as burned; use new `DEMO_*` + `SESSION_SECRET` in deployed envs |
 
-## F. Decisions needed / answered
+## F. Decisions needed
 
-| Item | Answer |
+| Item | Status |
 |---|---|
-| 6.1 CSP | Leave script-src; no proxy; apply object-src/HSTS/etc. as specified |
-| 6.2 Contact | (b) mailto + tel |
-| 6.3 Contact details | email `ikram@jumpifzero.com`, phone `03079222055`, delete “50 states”, keep Lahore |
-| 3.5 cookies | Implemented with amendments 1–4; **accepted pending 8a–8d (now done)** |
-| 4.6 validation lib | **APPROVED — zod v4** (prove zero client chunk hits) |
-| **Demo portal accessibility** | **FLAG — needs your decision.** With `demoHint` removed and all portal passwords only in server env (`DEMO_*`), admin/employee/customer portals are **not enterable by anyone without server/env access**. If these portals are meant to be demonstrable to prospects, say how you want that handled (separate demo creds doc, staged invite, etc.). Not recorded as a residual risk — product decision. |
+| 6.1 CSP / `proxy.ts` nonces | **Answered** — leave `script-src`; applied `object-src` + HSTS only |
+| 6.2 Contact form | **Answered** — (b) mailto + tel |
+| 6.3 Real contact + geography | **Answered** — `ikram@jumpifzero.com`, `03079222055`, keep Lahore, drop “50 states” |
+| 4.6 validation library | **Answered** — Zod v4 approved |
+| **Demo portal accessibility** | **Still needs you** — how should prospects enter admin/employee/customer demos without reading server env? |
+| Post-phase backend/CMS/i18n/tests | Expected next phase — not decided here |
 
-## New findings filed
+## G. Files deleted
 
-| ID | Severity | Location | Issue | Status |
-|---|---|---|---|---|
-| **49** | P0 | customer Google fake | Fake Google grants customer session | **fixed** |
-| **50** | P0 | employee Google fake | Fake Google grants employee session | **fixed** |
-| **51** | P0 | register Google fake | Fake Google on register | **fixed** |
-| **52** | P0 | `/register` + `submitRegister` | Password collected; no user store | **fixed by deletion** |
+Confirmed before delete: no `package.json` script and no CI workflow referenced the audit scripts. `optimize-images.cjs` retained.
 
-## Batch notes
-
-### Batch 3.5 acceptance — 8a / 8b / 8c / 8d
-
-**8a — Role confinement (PASS)**  
-`requireSession(role)` compares `payload.role` (via `readSessionValue`). Evidence (`:3011`):
-
-```
-customer -> /admin: 307 .../admin/login
-customer -> /employee: 307 .../employee/login
-employee -> /admin: 307 .../admin/login
-admin -> /dashboard: 307 .../login
-customer -> /dashboard (control): 200
-customer cookie + submitSignOut("admin"): 303 x-action-redirect: /admin/login;push
-```
-
-Expected for admin→/dashboard: **reject** (not impersonate customer). Confirmed redirect to `/login`.
-
-**8b — Employee kind (PASS, server-enforced)**  
-`src/lib/auth/requireEmployeeAccess.ts` + nested layouts. Evidence (RSC body contains redirect when nested layout runs; HTTP may still be 200 with flight digest):
-
-```
-delivery->sales -> NEXT_REDIRECT;replace;/employee
-delivery->leads -> NEXT_REDIRECT;replace;/employee
-sales->sales -> NO_REDIRECT (rendered)
-sales->clients -> NEXT_REDIRECT;replace;/employee
-sales->leads -> NO_REDIRECT (rendered)
-delivery->clients -> NO_REDIRECT (rendered)
-```
-
-**8c — `__Host-` / Secure (PASS)** — unconditional `secure: true`:
-
-```ts
-function cookieOptions(maxAge: number) {
-  return {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax" as const,
-    path: "/",
-    maxAge,
-  };
-}
-```
-
-**8d — `.env.example` SESSION_SECRET (PASS)** — obvious placeholder, length ≥32:
-
-```
-SESSION_SECRET=REPLACE_ME__not_a_real_secret__min_32_chars
-```
-
-### #52 — register removal
-- Batch 3 lint `submitRegister.ts:8 unused _values`: **resolved by deletion**.
-- `credentialsError` still used on failed customer login — kept.
-
-### Batch 3.5 — cookie sessions
-- Swappable credential lookup: `src/lib/auth/lookupCredentials.ts`
-- Cookie: `__Host-jz_session`, httpOnly, Secure, SameSite=Lax, Path=/, maxAge=**8h**
-
-### BATCH 2 — Public-site correctness (done this session)
-| ID | Change |
+| File | Size (bytes) |
 |---|---|
-| **46** | Deleted `scrollStory.sources` (`bitnextechnologies.com` / `jumpifzero.com`). `rg sources frontend/src` → empty. |
-| **45** | Removed “50 states” claim; `locationLede` is address-derived only. Lahore block kept. |
-| **43** | Real email/phone on about + contact: `ikram@jumpifzero.com`, `03079222055` (`tel:+923079222055`). |
-| **44** | Option (b): removed mock form/`submitContact`/`validateContact`; contact page is mailto + tel (`ContactDirect`). |
+| `FRONTEND_PRODUCTION_AUDIT_v2_REPORT.md` | 20,897 |
+| `FRONTEND_PRODUCTION_AUDIT_v2_PHASE15.md` | 146,164 |
+| `FRONTEND_PRODUCTION_AUDIT_v2_PHASE15_ADDENDUM.md` | 17,649 |
+| `FRONTEND_PRODUCTION_AUDIT_v2_PHASE15_BUNDLE.json` | 15,419 |
+| `FRONTEND_PRODUCTION_AUDIT_v2_PHASE15_RAW.json` | 99,518 |
+| `FRONTEND_PRODUCTION_AUDIT_v2_HARDCODED_CONSTANTS.md` | 172,956 |
+| `FRONTEND_PRODUCTION_AUDIT_v2_HARDCODED_CONSTANTS.json` | 304,659 |
+| `FRONTEND_PRODUCTION_AUDIT_v2_CONSTANTS_CORRECTION.md` | 5,770 |
+| `frontend/scripts/audit-constants-ast.cjs` | 16,783 |
+| `frontend/scripts/audit-phase15.cjs` | 22,349 |
+| `frontend/scripts/audit-firstload.cjs` | 6,268 |
+| `frontend/scripts/audit-bundle-sizes.cjs` | 3,946 |
+| **Total** | **832,378** |
 
-- Unchanged from prior plan; zod **approved** for Batch 4.6.
-
-### BATCH 7 — Bundle (measure + safe wins)
-
-**Library map**
-
-| Library | Files (count) | Role |
-|---|---|---|
-| **gsap** (+ ScrollTrigger) | **11** — `GsapProjectsSection`, `AltFaq`, `AltTeam`, `AltContact`, `AltTestimonials`, `AltWhy`, `AltServices`, `ImagesFlow`, `PinnedScrollFan`, `RevealText`, `FloatingGallery/useGalleryAnimation` (+ dynamic `import()` in `AboutPageClient`, `ScrollFrameSequence`) | Scroll-pinned / scrub / reveal |
-| **framer-motion** | **2** — `ThreeDMarquee`, `TeamMemberCard` | Marquee drift + card hover |
-
-**Consolidation proposal (do not migrate this batch):** GSAP already covers almost all scroll storytelling. Framer is only hover/marquee polish on two surfaces. One library *could* replace both (keep GSAP; rewrite the two Framer call sites), but the savings are small vs. rewrite risk — defer until a dedicated motion pass.
-
-**AboutPageClient split:** Yes. Hero already dynamic-imports GSAP in `useEffect`; `AboutBelowFold` was already `next/dynamic`. Remaining sync weight was `RevealText`’s static `import "gsap"` (pulled GSAP into the about client graph) plus static `ImagesFlow` / `TeamMemberCard` inside the below-fold chunk. Further split option (not done): server-render static hero copy and isolate a tiny client reveal island.
-
-**Safe wins shipped** (`365adfd`)
-- `RevealText`: async `import("gsap")` / `ScrollTrigger` inside `useEffect`
-- `AboutBelowFold`: `next/dynamic` for `ImagesFlow` (GSAP) and `TeamMemberCard` (Framer)
-- Home / services / portfolio below-fold animation clients were already dynamic — left alone
-- No library removed
-
-**First-load gzip (audit-firstload.cjs)**
-
-| Metric | Before | After |
-|---|---|---|
-| Shared | 168.8 KB | 168.8 KB |
-| `/about` | **250.1 KB** | **206.1 KB** (−44.0) |
-| `/` | 202.6 KB | 202.6 KB |
-| `/services` | 204.4 KB | 204.4 KB |
-| `/portfolio` | 204.6 KB | 204.6 KB |
-| `/contact` | 202.5 KB | 202.5 KB |
-| `/blog` | 206.1 KB | 206.1 KB |
-
-`/about` dropped from heaviest route to rank ~38. Shared still dominates (~180 KB budget); further cuts need shared-chunk work or library removal (out of scope).
-
-**§7 gate:** `TSC_EXIT:0` · `ESLINT_EXIT:0` · `BUILD_EXIT:0`
-
-### BATCH 6 — Platform & config
-
-| ID | Commit | Change |
-|---|---|---|
-| **15** | `376de1d` + `c3a0cc3` | `error.tsx` / `global-error.tsx`; Link for home CTA (eslint fallout) |
-| **24** | `b9904b1` | `not-found.tsx` |
-| **25** | `9368754` | `sitemap.ts` / `robots.ts` from nav + blog |
-| **14** | `344a123` | CSP `object-src 'none'`; **kept** `script-src 'unsafe-inline'` (§6.1) |
-| **34** | `55f2530` | Prod HSTS `max-age=63072000; includeSubDomains; preload` |
-| **31** | `b4f4039` | Strict tsconfig flags; fallout **0** files |
-| **30** | `b59847b` + `6cd6788` | `no-console: error`; CLI `scripts/**/*.cjs` exempt |
-| **33** | `eaf877f` | `"engines": { "node": ">=20.9.0" }` |
-| **32** | `4e81e68` | Dropped `--webpack`; Turbopack Ready (smoke `:3015`) |
-| **tokens** | `e0df08d` | `engagementMix` → `var(--color-brand|brand-deep|secondary|secondary-deep)` |
-| **29** | `227ec89` | `.github/workflows/frontend-ci.yml` |
-| **40-lint** | (already present) | `scripts/**/*.cjs` CommonJS override — no new commit |
-
-**§7 gate:** `TSC_EXIT:0` · `ESLINT_EXIT:0` · `BUILD_EXIT:0`
-
-**Flags**
-- CI step `npm audit --omit=dev --audit-level=high` **will fail today** (next→postcss/sharp highs; ACCEPTED this phase — do not `audit fix --force`). Workflow still includes the step as specified.
-- Demo portal accessibility decision still open (Batch notes F).
-
-### BATCH 5 — Accessibility (§21)
-
-| ID | Commit | Change |
-|---|---|---|
-| **5a** | `d8eea3c` | `useModalFocus` — Tab trap + restore on all 5 dialogs |
-| **5b** | `f9898b2` | Image alts: **decorative** logos/motion (+`aria-hidden`); **meaningful** portraits/list/file/upload previews |
-| **5c** | `d46d7a8` | Label audit → **114** correctly labelled / **0** unlinked / **0** none (wrap adjacent pairs; aria-label file/message/filters) |
-| **5d** | `07f341a` | Team/Service modal backdrops → `<button>` (audit listed 2; no remaining div onClick) |
-| **5e** | — | Marketing routes checked: **no route renders multiple `<h1>`**. Home/Services/About/Contact/Blog = one each; Portfolio sole `<h1>` is project index in `GsapProjectsSection` (not a duplicate). No duplicate fix applied. |
-
-### BATCH 4.6 — Schemas (zod v4)
-
-**Installed:** `zod@^4.4.3`
-
-**Delivered**
-- `src/schemas/{admin,login,customer,env,index}.ts` — entity + login + env schemas; types via `z.infer` / `z.input`
-- `constants/adminDemo.ts` / login auth types / `demoCustomer` consume schema types (no hand-written entity interfaces)
-- Runtime validation on server: `submitLogin` / `submitAdminLogin` / `submitEmployeeLogin` + `lib/env.ts`
-- **Replaced** (deleted): `validateLogin.ts`, `validateAdminLogin.ts`, `validateEmployeeLogin.ts`
-- Client login forms use server-returned `fieldErrors` (zod never imported in client components)
-
-**Server-only proof** (after `npm run build`):
-
-```
-rg -l "zod" frontend/.next/static/chunks
-→ 0 hits (exit 1)
-```
-
-### BATCH 4.5 — Data-access seam
-
-**Delivered**
-- `src/lib/data/{admin,customer,dashboard,blog,team,services,portfolio,index}.ts`
-- Async getters: `getClients`, `getProjects`, `getInvoices`, `getMessages`, `getFiles`, `getSales`, `getLeads`, `getEmployees`, `getAdminDemoState`, `getDemoCustomer`, dashboard demo getters, blog/team/services/portfolio getters
-- Components/app/auth import seed from `@/lib/data/*` only; `constants/*` seed consumed by `lib/data` (plus `constants/serviceDetails` → `servicesStory` internal)
-- Transitional sync re-exports kept so clients stay green without conversion this batch
-- `app/(public)/blog/[slug]/page.tsx` already `await getBlogPost` (server; no Suspense)
-
-**Files changed (import rewire):** **45** under `components/` + `app/` (plus `lib/auth/lookupCredentials.ts`, `lib/auth/requireEmployeeAccess.ts`, `constants/employee.ts` type path)
-
-**Async → client→server / Suspense — listed only, not converted**
-
-| Site | Why |
-|---|---|
-| `AdminDemoProvider.tsx` | Client; `useState(initialAdminDemoState)` — needs server-fetched initial props or Suspense |
-| `EmployeeDemoProvider.tsx` | Same |
-| `EmployeeShell.tsx` | Client; reads `initialAdminDemoState` |
-| `BlogPageClient.tsx` | Client; maps `blogPosts` |
-| `BlogDetailClient.tsx` | Client; filters `blogPosts` for related |
-| `PortfolioPageClient.tsx` | Client; `portfolioProjects` / marquee |
-| `AltTeam.tsx` | Client; `teamMembers` |
-| `AltServices.tsx` | Client; `serviceChapters` |
-| `AboutBelowFold.tsx` | Client; `teamMembers` |
-| `DashboardShell.tsx` | Client; `demoCustomer` |
-| `ProfilePage.tsx` | Client; `demoCustomer` |
-| `FilesPage.tsx` (dashboard) | Client; `demoFiles` |
-| `MessagesPage.tsx` (dashboard) | Client; `demoMessages` |
-| `InvoicesPage.tsx` (dashboard) | Client; `demoInvoices` |
-
-**Not conversion sites (can await in place later):** async `lookupCredentials` / `requireEmployeeAccess`; server `OverviewPage` / `ProjectsPage` / `dashboard/layout`; `generateStaticParams` → `async` + `await getBlogPosts()`. Type-only admin/employee CRUD imports get data from demo providers.
+None of the deleted files were imported by application runtime code.
