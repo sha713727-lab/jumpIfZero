@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { adminIcons } from "@/components/admin/AdminIcons";
 import { AdminDemoProvider } from "@/components/admin/AdminDemoProvider";
 import {
@@ -52,10 +52,6 @@ function AdminShellInner({
   const SignOutIcon = adminIcons.signOut;
   const MenuIcon = adminIcons.menu;
   const CloseIcon = adminIcons.close;
-
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
 
   const onSignOut = async () => {
     if (signingOut) {

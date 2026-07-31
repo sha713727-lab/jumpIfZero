@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { demoCustomer } from "@/constants/demoCustomer";
 import {
   dashboardNav,
@@ -38,10 +38,6 @@ export function DashboardShell({
   const MenuIcon = dashboardIcons.menu;
   const CloseIcon = dashboardIcons.close;
 
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
-
   const onSignOut = async () => {
     if (signingOut) {
       return;
@@ -62,6 +58,7 @@ export function DashboardShell({
           <Link
             key={item.id}
             href={item.href}
+            onClick={() => setOpen(false)}
             className={`inline-flex items-center gap-3 rounded-xl px-3 py-2.5 text-[0.92rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary ${
               active
                 ? "bg-[rgba(116,129,95,0.16)] text-brand"
