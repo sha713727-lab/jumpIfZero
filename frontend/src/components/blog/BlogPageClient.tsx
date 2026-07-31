@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { MagneticLink } from "@/components/landingAlt/MagneticLink";
 import styles from "@/components/landingAlt/landingAlt.module.css";
-import { blogCopy, blogPosts } from "@/constants/blog";
+import { blogCopy, blogPosts } from "@/lib/data/blog";
 import { applyHeaderTone } from "@/lib/headerTone";
 import { EmptyState } from "@/components/ui/EmptyState";
 

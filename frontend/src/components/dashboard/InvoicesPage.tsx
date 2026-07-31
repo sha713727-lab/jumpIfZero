@@ -5,7 +5,7 @@ import {
   dashboardEmptyCopy,
   demoInvoices,
   type InvoiceStatus,
-} from "@/constants/dashboard";
+} from "@/lib/data/dashboard";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 type InvoiceRow = {

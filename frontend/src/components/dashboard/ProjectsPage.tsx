@@ -1,4 +1,4 @@
-import { dashboardEmptyCopy, demoProjects } from "@/constants/dashboard";
+import { dashboardEmptyCopy, demoProjects } from "@/lib/data/dashboard";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 const statusClass: Record<(typeof demoProjects)[number]["status"], string> = {

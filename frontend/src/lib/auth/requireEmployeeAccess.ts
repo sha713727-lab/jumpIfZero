@@ -1,7 +1,7 @@
 import {
   initialAdminDemoState,
   type EmployeeKind,
-} from "@/constants/adminDemo";
+} from "@/lib/data/admin";
 import {
   clearSession,
   requireSession,

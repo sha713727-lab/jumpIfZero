@@ -12,7 +12,7 @@ import {
 } from "@/components/admin/AdminFormModal";
 import { ConfirmDeleteModal } from "@/components/admin/ConfirmDeleteModal";
 import { adminIcons } from "@/components/admin/AdminIcons";
-import type { AdminEmployee, EmployeeKind } from "@/constants/adminDemo";
+import type { AdminEmployee, EmployeeKind } from "@/lib/data/admin";
 import { employeeKindLabel } from "@/constants/sales";
 
 const cardClass =

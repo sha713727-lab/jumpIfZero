@@ -10,7 +10,7 @@ import {
 } from "@/components/admin/AdminFormModal";
 import { ConfirmDeleteModal } from "@/components/admin/ConfirmDeleteModal";
 import { adminIcons } from "@/components/admin/AdminIcons";
-import type { AdminFaq } from "@/constants/adminDemo";
+import type { AdminFaq } from "@/lib/data/admin";
 
 const cardClass =
   "overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";

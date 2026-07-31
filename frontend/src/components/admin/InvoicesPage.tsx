@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useAdminDemo } from "@/components/admin/AdminDemoProvider";
-import type { AdminInvoice } from "@/constants/adminDemo";
+import type { AdminInvoice } from "@/lib/data/admin";
 
 const cardClass =
   "overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";

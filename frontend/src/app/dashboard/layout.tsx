@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { demoCustomer } from "@/constants/demoCustomer";
+import { demoCustomer } from "@/lib/data/customer";
 import { clearSession, requireSession } from "@/lib/session";
 
 export const metadata: Metadata = {

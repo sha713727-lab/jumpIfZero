@@ -1,7 +1,7 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { demoAdmin } from "@/constants/adminAuth";
-import { initialAdminDemoState } from "@/constants/adminDemo";
-import { demoCustomer } from "@/constants/demoCustomer";
+import { initialAdminDemoState } from "@/lib/data/admin";
+import { demoCustomer } from "@/lib/data/customer";
 import type { SessionRole } from "@/lib/session";
 
 export type CredentialLookupResult =

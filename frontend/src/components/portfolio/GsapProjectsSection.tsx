@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, type RefObject } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import type { PortfolioGsapProject } from "@/constants/portfolio";
+import type { PortfolioGsapProject } from "@/lib/data/portfolio";
 
 gsap.registerPlugin(ScrollTrigger);
 

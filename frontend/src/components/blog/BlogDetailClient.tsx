@@ -7,9 +7,9 @@ import { MagneticLink } from "@/components/landingAlt/MagneticLink";
 import styles from "@/components/landingAlt/landingAlt.module.css";
 import {
   blogCopy,
-  getRelatedPosts,
+  blogPosts,
   type BlogPost,
-} from "@/constants/blog";
+} from "@/lib/data/blog";
 import { applyHeaderTone } from "@/lib/headerTone";
 
 const HEADER_HEIGHT = 72;
@@ -25,7 +25,9 @@ export function BlogDetailClient({ post }: BlogDetailClientProps) {
   const articleRef = useRef<HTMLElement | null>(null);
   const relatedRef = useRef<HTMLElement | null>(null);
   const ctaRef = useRef<HTMLElement | null>(null);
-  const related = getRelatedPosts(post.slug, 3);
+  const related = blogPosts
+    .filter((item) => item.slug !== post.slug)
+    .slice(0, 3);
 
   useEffect(() => {
     const zones: ReadonlyArray<{

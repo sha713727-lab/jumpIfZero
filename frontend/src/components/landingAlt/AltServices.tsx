@@ -6,7 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ServiceDetailModal } from "@/components/services/ServiceDetailModal";
 import { getServiceDetail } from "@/constants/serviceDetails";
-import { serviceChapters, servicesIntro } from "@/constants/servicesStory";
+import { serviceChapters, servicesIntro } from "@/lib/data/services";
 import { applyHeaderTone } from "@/lib/headerTone";
 import styles from "./landingAlt.module.css";
 

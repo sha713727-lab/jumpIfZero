@@ -14,7 +14,7 @@ import {
 } from "@/constants/employee";
 import { site } from "@/constants/site";
 import { submitSignOut } from "@/lib/submitSignOut";
-import { initialAdminDemoState } from "@/constants/adminDemo";
+import { initialAdminDemoState } from "@/lib/data/admin";
 
 function navIdFromPath(
   pathname: string,

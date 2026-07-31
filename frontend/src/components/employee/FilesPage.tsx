@@ -9,7 +9,7 @@ import {
 } from "@/components/employee/EmployeeDemoProvider";
 import { ConfirmDeleteModal } from "@/components/admin/ConfirmDeleteModal";
 import { employeeIcons } from "@/components/employee/EmployeeIcons";
-import type { AdminFile } from "@/constants/adminDemo";
+import type { AdminFile } from "@/lib/data/admin";
 import { employeeEmptyCopy } from "@/constants/employee";
 import { EmptyState } from "@/components/ui/EmptyState";
 

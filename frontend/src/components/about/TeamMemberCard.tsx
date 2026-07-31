@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import type { TeamSocialNetwork } from "@/constants/team";
+import type { TeamSocialNetwork } from "@/lib/data/team";
 
 export type TeamMemberCardAccent = "brand" | "secondary" | "dark";
 

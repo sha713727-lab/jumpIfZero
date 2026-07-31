@@ -2,8 +2,8 @@
 
 import { useId, useState } from "react";
 import type { FormEvent } from "react";
-import { demoCustomer } from "@/constants/demoCustomer";
-import { profileCopy } from "@/constants/dashboard";
+import { demoCustomer } from "@/lib/data/customer";
+import { profileCopy } from "@/lib/data/dashboard";
 
 type ProfileValues = {
   name: string;

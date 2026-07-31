@@ -1,4 +1,4 @@
-import type { EmployeeKind } from "@/constants/adminDemo";
+import type { EmployeeKind } from "@/lib/data/admin";
 
 export type EmployeeNavId =
   | "overview"

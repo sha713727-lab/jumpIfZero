@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { adminTodayLabel, useAdminDemo } from "@/components/admin/AdminDemoProvider";
 import { adminIcons } from "@/components/admin/AdminIcons";
-import type { AdminCallback } from "@/constants/adminDemo";
+import type { AdminCallback } from "@/lib/data/admin";
 
 const cardClass =
   "overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";

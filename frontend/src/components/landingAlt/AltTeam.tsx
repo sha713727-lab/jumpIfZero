@@ -6,8 +6,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { teamIntro, teamMembers } from "@/constants/team";
-import type { TeamSocialNetwork } from "@/constants/team";
+import { teamIntro, teamMembers } from "@/lib/data/team";
+import type { TeamSocialNetwork } from "@/lib/data/team";
 import { applyHeaderTone } from "@/lib/headerTone";
 import styles from "./landingAlt.module.css";
 

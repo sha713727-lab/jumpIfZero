@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { dashboardEmptyCopy, demoFiles } from "@/constants/dashboard";
+import { dashboardEmptyCopy, demoFiles } from "@/lib/data/dashboard";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 export function FilesPage() {

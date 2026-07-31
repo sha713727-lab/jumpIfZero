@@ -2,14 +2,14 @@ import Link from "next/link";
 import { AreaChart } from "@/components/dashboard/AreaChart";
 import { DonutChart } from "@/components/dashboard/DonutChart";
 import { MetricCard } from "@/components/dashboard/MetricCard";
-import { demoCustomer } from "@/constants/demoCustomer";
+import { demoCustomer } from "@/lib/data/customer";
 import {
   engagementMix,
   overviewCopy,
   overviewMetrics,
   progressSeries,
   recentActivity,
-} from "@/constants/dashboard";
+} from "@/lib/data/dashboard";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 export function OverviewPage() {

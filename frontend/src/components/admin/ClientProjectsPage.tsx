@@ -15,7 +15,7 @@ import {
   projectStatuses,
   type ProjectStatus,
 } from "@/constants/admin";
-import type { AdminProject } from "@/constants/adminDemo";
+import type { AdminProject } from "@/lib/data/admin";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 const cardClass =

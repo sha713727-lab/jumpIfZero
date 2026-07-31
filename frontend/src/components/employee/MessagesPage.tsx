@@ -8,7 +8,7 @@ import {
   useEmployeeDemo,
 } from "@/components/employee/EmployeeDemoProvider";
 import { adminFieldClass } from "@/components/admin/AdminFormModal";
-import type { AdminMessage, AdminSalesMessage } from "@/constants/adminDemo";
+import type { AdminMessage, AdminSalesMessage } from "@/lib/data/admin";
 
 const cardClass =
   "grid overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)] lg:grid-cols-[18rem_1fr]";

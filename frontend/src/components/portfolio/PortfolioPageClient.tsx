@@ -10,7 +10,7 @@ import {
   portfolioCopy,
   portfolioMarqueeImages,
   portfolioProjects,
-} from "@/constants/portfolio";
+} from "@/lib/data/portfolio";
 import { bindHeaderSectionSync } from "@/lib/headerSectionSync";
 
 const CREAM_BG = "#f7f5f0";

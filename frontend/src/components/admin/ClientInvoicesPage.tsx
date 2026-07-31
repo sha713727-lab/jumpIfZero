@@ -10,7 +10,7 @@ import {
   adminLabelClass,
 } from "@/components/admin/AdminFormModal";
 import { adminEmptyCopy } from "@/constants/admin";
-import type { AdminInvoice } from "@/constants/adminDemo";
+import type { AdminInvoice } from "@/lib/data/admin";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 const cardClass =

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { adminTodayLabel, useAdminDemo } from "@/components/admin/AdminDemoProvider";
 import { adminIcons } from "@/components/admin/AdminIcons";
-import type { AdminContactMessage } from "@/constants/adminDemo";
+import type { AdminContactMessage } from "@/lib/data/admin";
 import { createPortal } from "react-dom";
 import { useEffect, useId, useRef } from "react";
 

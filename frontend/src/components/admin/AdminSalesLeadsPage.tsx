@@ -12,7 +12,7 @@ import { ConfirmDeleteModal } from "@/components/admin/ConfirmDeleteModal";
 import { adminIcons } from "@/components/admin/AdminIcons";
 import { adminEmptyCopy } from "@/constants/admin";
 import { leadStatuses, leadStatusLabel } from "@/constants/sales";
-import type { AdminLead, LeadStatus } from "@/constants/adminDemo";
+import type { AdminLead, LeadStatus } from "@/lib/data/admin";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 const cardClass =

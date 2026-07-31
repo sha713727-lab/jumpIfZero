@@ -6,7 +6,7 @@ import { EmployeePageHeader } from "@/components/employee/EmployeePageHeader";
 import { useEmployeeDemo } from "@/components/employee/EmployeeDemoProvider";
 import { employeeEmptyCopy } from "@/constants/employee";
 import { maskTaxId, saleStatusLabel } from "@/constants/sales";
-import type { SaleStatus } from "@/constants/adminDemo";
+import type { SaleStatus } from "@/lib/data/admin";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 const cardClass =

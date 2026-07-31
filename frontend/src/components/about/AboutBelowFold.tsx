@@ -11,7 +11,7 @@ import {
 } from "@/components/scroll/PinRotateSections";
 import { aboutCopy } from "@/constants/about";
 import { aboutFlowCopy, aboutFlowImages } from "@/constants/aboutFlow";
-import { teamIntro, teamMembers, type TeamMember } from "@/constants/team";
+import { teamIntro, teamMembers, type TeamMember } from "@/lib/data/team";
 
 const CREAM_BG = "#f7f5f0";
 

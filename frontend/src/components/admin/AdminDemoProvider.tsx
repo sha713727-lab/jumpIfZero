@@ -27,7 +27,7 @@ import {
   type AdminSalesMessage,
   type AdminService,
   type AdminTeamMember,
-} from "@/constants/adminDemo";
+} from "@/lib/data/admin";
 import type { ProjectStatus } from "@/constants/admin";
 
 type AdminDemoContextValue = {

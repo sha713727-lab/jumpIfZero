@@ -19,7 +19,7 @@ import {
   saleStatusLabel,
   type CarrierSaleFields,
 } from "@/constants/sales";
-import type { AdminSale, SaleStatus } from "@/constants/adminDemo";
+import type { AdminSale, SaleStatus } from "@/lib/data/admin";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 const cardClass =

@@ -1,5 +1,5 @@
 import { dashboardIcons } from "@/components/dashboard/DashboardIcons";
-import type { overviewMetrics } from "@/constants/dashboard";
+import type { overviewMetrics } from "@/lib/data/dashboard";
 
 type Metric = (typeof overviewMetrics)[number];
 

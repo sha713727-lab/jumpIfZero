@@ -12,7 +12,7 @@ import {
   adminLabelClass,
 } from "@/components/admin/AdminFormModal";
 import { leadStatuses, leadStatusLabel } from "@/constants/sales";
-import type { AdminLead, LeadStatus } from "@/constants/adminDemo";
+import type { AdminLead, LeadStatus } from "@/lib/data/admin";
 
 const cardClass =
   "rounded-2xl border border-black/8 bg-white p-5 shadow-[0_8px_24px_rgba(47,58,40,0.04)] md:p-6";

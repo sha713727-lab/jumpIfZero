@@ -7,7 +7,7 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useAdminDemo } from "@/components/admin/AdminDemoProvider";
 import { adminFieldClass } from "@/components/admin/AdminFormModal";
 import { adminEmptyCopy } from "@/constants/admin";
-import type { AdminMessage } from "@/constants/adminDemo";
+import type { AdminMessage } from "@/lib/data/admin";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 function messageFromLabel(from: AdminMessage["from"]): string {

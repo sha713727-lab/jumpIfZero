@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogDetailClient } from "@/components/blog/BlogDetailClient";
-import { blogPosts, getBlogPost } from "@/constants/blog";
+import { blogPosts, getBlogPost } from "@/lib/data/blog";
 
 type BlogDetailPageProps = {
   readonly params: Promise<{ slug: string }>;
@@ -15,7 +15,7 @@ export async function generateMetadata({
   params,
 }: BlogDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = getBlogPost(slug);
+  const post = await getBlogPost(slug);
 
   if (!post) {
     return { title: "Blog" };
@@ -29,7 +29,7 @@ export async function generateMetadata({
 
 export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
   const { slug } = await params;
-  const post = getBlogPost(slug);
+  const post = await getBlogPost(slug);
 
   if (!post) {
     notFound();

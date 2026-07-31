@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import type { FormEvent } from "react";
-import { dashboardEmptyCopy, demoMessages } from "@/constants/dashboard";
+import { dashboardEmptyCopy, demoMessages } from "@/lib/data/dashboard";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 type MessageRow = {

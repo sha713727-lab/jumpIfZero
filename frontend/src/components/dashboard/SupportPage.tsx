@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import type { FormEvent } from "react";
-import { supportCopy } from "@/constants/dashboard";
+import { supportCopy } from "@/lib/data/dashboard";
 
 export function SupportPage() {
   const formId = useId();

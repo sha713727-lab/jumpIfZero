@@ -8,7 +8,7 @@ import { adminTodayLabel, useAdminDemo } from "@/components/admin/AdminDemoProvi
 import { ConfirmDeleteModal } from "@/components/admin/ConfirmDeleteModal";
 import { adminIcons } from "@/components/admin/AdminIcons";
 import { adminEmptyCopy } from "@/constants/admin";
-import type { AdminFile } from "@/constants/adminDemo";
+import type { AdminFile } from "@/lib/data/admin";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 const cardClass =

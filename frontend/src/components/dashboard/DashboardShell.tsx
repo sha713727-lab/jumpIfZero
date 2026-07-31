@@ -4,12 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { demoCustomer } from "@/constants/demoCustomer";
+import { demoCustomer } from "@/lib/data/customer";
 import {
   dashboardNav,
   overviewCopy,
   type DashboardNavId,
-} from "@/constants/dashboard";
+} from "@/lib/data/dashboard";
 import { site } from "@/constants/site";
 import { submitSignOut } from "@/lib/submitSignOut";
 import { dashboardIcons } from "@/components/dashboard/DashboardIcons";

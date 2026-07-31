@@ -18,7 +18,7 @@ import {
   type AdminProject,
   type AdminSale,
   type AdminSalesMessage,
-} from "@/constants/adminDemo";
+} from "@/lib/data/admin";
 
 type EmployeeDemoState = {
   employee: AdminEmployee;
