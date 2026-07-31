@@ -3,13 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  useEffect,
   useId,
   useRef,
   type MouseEvent as ReactMouseEvent,
 } from "react";
 import { createPortal } from "react-dom";
 import type { TeamMember, TeamSocialNetwork } from "@/lib/data/team";
+import { useModalFocus } from "@/lib/useModalFocus";
 
 type TeamDetailModalProps = {
   readonly member: TeamMember | null;
@@ -51,31 +51,16 @@ function SocialIcon({ network }: { readonly network: TeamSocialNetwork }) {
 
 export function TeamDetailModal({ member, onClose }: TeamDetailModalProps) {
   const titleId = useId();
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const closeRef = useRef<HTMLButtonElement | null>(null);
   const open = member !== null;
 
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onClose]);
+  useModalFocus({
+    open,
+    containerRef,
+    initialFocusRef: closeRef,
+    onClose,
+  });
 
   if (!open || !member || typeof document === "undefined") {
     return null;
@@ -89,6 +74,7 @@ export function TeamDetailModal({ member, onClose }: TeamDetailModalProps) {
 
   return createPortal(
     <div
+      ref={containerRef}
       role="presentation"
       className="fixed inset-0 z-[80] flex items-end justify-center bg-[rgba(13,18,11,0.72)] p-0 backdrop-blur-[6px] sm:items-center sm:p-6 md:p-10"
       onClick={onBackdropClick}

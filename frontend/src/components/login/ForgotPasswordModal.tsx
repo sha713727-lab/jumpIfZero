@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { forgotPasswordCopy } from "@/constants/login";
+import { useModalFocus } from "@/lib/useModalFocus";
 
 type ForgotPasswordModalProps = {
   readonly open: boolean;
@@ -37,33 +38,18 @@ function ForgotPasswordModalContent({
 }) {
   const titleId = useId();
   const formId = useId();
-  const closeRef = useRef<HTMLButtonElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const emailRef = useRef<HTMLInputElement | null>(null);
   const [email, setEmail] = useState(initialEmail);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
 
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    window.setTimeout(() => {
-      emailRef.current?.focus();
-    }, 0);
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [onClose]);
+  useModalFocus({
+    open: true,
+    containerRef,
+    initialFocusRef: emailRef,
+    onClose,
+  });
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -95,7 +81,10 @@ function ForgotPasswordModalContent({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-5">
+    <div
+      ref={containerRef}
+      className="fixed inset-0 z-[120] flex items-center justify-center p-5"
+    >
       <button
         type="button"
         aria-label="Close overlay"
@@ -109,7 +98,6 @@ function ForgotPasswordModalContent({
         className="relative z-10 w-full max-w-[24rem] rounded-2xl border border-black/10 bg-cream p-6 shadow-[0_28px_70px_rgba(13,18,11,0.28)] md:p-7"
       >
         <button
-          ref={closeRef}
           type="button"
           aria-label={forgotPasswordCopy.close}
           onClick={onClose}

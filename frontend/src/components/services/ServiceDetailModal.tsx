@@ -1,15 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import {
-  useEffect,
-  useId,
-  useRef,
-  type MouseEvent as ReactMouseEvent,
-} from "react";
+import { useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { ServiceDetail } from "@/constants/serviceDetails";
 import { MagneticLink } from "@/components/landingAlt/MagneticLink";
+import { useModalFocus } from "@/lib/useModalFocus";
 
 type ServiceDetailModalProps = {
   readonly detail: ServiceDetail | null;
@@ -21,47 +17,31 @@ export function ServiceDetailModal({
   onClose,
 }: ServiceDetailModalProps) {
   const titleId = useId();
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const closeRef = useRef<HTMLButtonElement | null>(null);
   const open = detail !== null;
 
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onClose]);
+  useModalFocus({
+    open,
+    containerRef,
+    initialFocusRef: closeRef,
+    onClose,
+  });
 
   if (!open || !detail || typeof document === "undefined") {
     return null;
   }
 
-  const onBackdropClick = (event: ReactMouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) {
-      onClose();
-    }
-  };
-
   return createPortal(
     <div
+      ref={containerRef}
       role="presentation"
       className="fixed inset-0 z-[80] flex items-end justify-center bg-[rgba(13,18,11,0.72)] p-0 backdrop-blur-[6px] sm:items-center sm:p-6 md:p-10"
-      onClick={onBackdropClick}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose();
+        }
+      }}
     >
       <div
         role="dialog"

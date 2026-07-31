@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { adminIcons } from "@/components/admin/AdminIcons";
+import { useModalFocus } from "@/lib/useModalFocus";
 
 type AdminFormModalProps = {
   readonly open: boolean;
@@ -22,38 +23,26 @@ export function AdminFormModal({
   children,
 }: AdminFormModalProps) {
   const titleId = useId();
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const closeRef = useRef<HTMLButtonElement | null>(null);
   const CloseIcon = adminIcons.close;
 
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.setTimeout(() => closeRef.current?.focus(), 0);
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onClose]);
+  useModalFocus({
+    open,
+    containerRef,
+    initialFocusRef: closeRef,
+    onClose,
+  });
 
   if (!open || typeof document === "undefined") {
     return null;
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[80] flex items-end justify-center bg-[rgba(13,18,11,0.72)] p-0 sm:items-center sm:p-6">
+    <div
+      ref={containerRef}
+      className="fixed inset-0 z-[80] flex items-end justify-center bg-[rgba(13,18,11,0.72)] p-0 sm:items-center sm:p-6"
+    >
       <button
         type="button"
         aria-label="Close dialog"
