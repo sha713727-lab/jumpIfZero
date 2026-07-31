@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef } from "react";
-import { ContactAside, ContactForm } from "@/components/contact/ContactForm";
+import { ContactAside, ContactDirect } from "@/components/contact/ContactForm";
 import { contactCopy } from "@/constants/contact";
 import { applyHeaderTone } from "@/lib/headerTone";
 
@@ -108,15 +108,7 @@ export function ContactPageClient() {
       >
         <div className="mx-auto grid w-full max-w-[1360px] gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-16 lg:items-start">
           <div className="order-2 lg:order-1">
-            {process.env.NODE_ENV === "development" ? (
-              <p
-                role="status"
-                className="mb-6 rounded-md border border-black/15 bg-white px-4 py-3 text-[0.85rem] font-medium text-black/70"
-              >
-                {contactCopy.mockNotice}
-              </p>
-            ) : null}
-            <ContactForm />
+            <ContactDirect />
           </div>
           <div className="order-1 lg:order-2">
             <ContactAside />
