@@ -10,11 +10,13 @@ import {
   adminLabelClass,
 } from "@/components/admin/AdminFormModal";
 import {
+  adminEmptyCopy,
   projectStatusLabel,
   projectStatuses,
   type ProjectStatus,
 } from "@/constants/admin";
 import type { AdminProject } from "@/constants/adminDemo";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const cardClass =
   "overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";
@@ -78,44 +80,48 @@ export function ClientProjectsPage() {
       />
 
       <div className={cardClass}>
-        <ul className="divide-y divide-black/8">
-          {projects.map((project) => (
-            <li
-              key={project.id}
-              className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div>
-                <p className="text-[0.92rem] font-semibold text-[#0d120b]">
-                  {project.title}
-                </p>
-                <p className="mt-0.5 text-[0.82rem] font-medium text-black/45">
-                  {project.service} · Updated {project.updatedAt}
-                </p>
-              </div>
-              <select
-                value={project.status}
-                onChange={(event) =>
-                  updateProjectStatus(
-                    project.id,
-                    event.target.value as ProjectStatus,
-                  )
-                }
-                className="rounded-xl border border-black/10 bg-[#f3f5ef] px-3 py-2 text-[0.84rem] font-semibold"
+        {projects.length === 0 ? (
+          <EmptyState message={adminEmptyCopy.clientProjects} />
+        ) : (
+          <ul className="divide-y divide-black/8">
+            {projects.map((project) => (
+              <li
+                key={project.id}
+                className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
               >
-                {projectStatuses.map((status) => (
-                  <option key={status} value={status}>
-                    {projectStatusLabel[status]}
-                  </option>
-                ))}
-              </select>
-              <span
-                className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[0.72rem] font-bold ${statusPillClass[project.status]}`}
-              >
-                {projectStatusLabel[project.status]}
-              </span>
-            </li>
-          ))}
-        </ul>
+                <div>
+                  <p className="text-[0.92rem] font-semibold text-[#0d120b]">
+                    {project.title}
+                  </p>
+                  <p className="mt-0.5 text-[0.82rem] font-medium text-black/45">
+                    {project.service} · Updated {project.updatedAt}
+                  </p>
+                </div>
+                <select
+                  value={project.status}
+                  onChange={(event) =>
+                    updateProjectStatus(
+                      project.id,
+                      event.target.value as ProjectStatus,
+                    )
+                  }
+                  className="rounded-xl border border-black/10 bg-[#f3f5ef] px-3 py-2 text-[0.84rem] font-semibold"
+                >
+                  {projectStatuses.map((status) => (
+                    <option key={status} value={status}>
+                      {projectStatusLabel[status]}
+                    </option>
+                  ))}
+                </select>
+                <span
+                  className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[0.72rem] font-bold ${statusPillClass[project.status]}`}
+                >
+                  {projectStatusLabel[project.status]}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <AdminFormModal

@@ -89,6 +89,19 @@ export const adminOverviewCopy = {
   faqsLive: "Live from database",
 } as const;
 
+export const adminEmptyCopy = {
+  sales: "No sales yet.",
+  leads: "No leads yet.",
+  clientProjects: "No projects for this client yet.",
+  clientFiles: "No files for this client yet.",
+  clientInvoices: "No invoices for this client yet.",
+  clientMessages: "No messages for this client yet.",
+  clientTeam: "No delivery employees to assign.",
+  clientEmployeesAssigned: "No employees assigned yet.",
+  clientRecentProjects: "No projects for this client yet.",
+  viewAllProjects: "View all projects",
+} as const;
+
 export const projectStatuses = [
   "requested",
   "approved",

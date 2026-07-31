@@ -21,6 +21,14 @@ export const overviewCopy = {
   coverageLede: "How your engagements move from kickoff to launch.",
   mixTitle: "Engagement mix",
   mixLede: "Share of active work across your account.",
+  emptyActivity: "No recent activity yet.",
+} as const;
+
+export const dashboardEmptyCopy = {
+  projects: "No projects yet.",
+  files: "No files yet.",
+  invoices: "No invoices yet.",
+  messages: "No messages yet.",
 } as const;
 
 export const overviewMetrics = [

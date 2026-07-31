@@ -10,9 +10,11 @@ import {
   progressSeries,
   recentActivity,
 } from "@/constants/dashboard";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export function OverviewPage() {
   const mixTotal = engagementMix.reduce((sum, item) => sum + item.value, 0);
+  const activity: readonly (typeof recentActivity)[number][] = recentActivity;
 
   return (
     <div className="space-y-6">
@@ -43,23 +45,27 @@ export function OverviewPage() {
             {overviewCopy.recentLink}
           </Link>
         </div>
-        <ul className="mt-4 divide-y divide-black/8">
-          {recentActivity.map((item) => (
-            <li key={item.id}>
-              <Link
-                href={item.href}
-                className="flex flex-col gap-1 py-3.5 transition-colors hover:bg-[#f3f5ef]/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary sm:flex-row sm:items-center sm:justify-between"
-              >
-                <span className="text-[0.92rem] font-semibold text-[#0d120b]">
-                  {item.title}
-                </span>
-                <span className="text-[0.8rem] font-medium text-black/40">
-                  {item.meta}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        {activity.length === 0 ? (
+          <EmptyState message={overviewCopy.emptyActivity} />
+        ) : (
+          <ul className="mt-4 divide-y divide-black/8">
+            {activity.map((item) => (
+              <li key={item.id}>
+                <Link
+                  href={item.href}
+                  className="flex flex-col gap-1 py-3.5 transition-colors hover:bg-[#f3f5ef]/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <span className="text-[0.92rem] font-semibold text-[#0d120b]">
+                    {item.title}
+                  </span>
+                  <span className="text-[0.8rem] font-medium text-black/40">
+                    {item.meta}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <div className="grid gap-4 lg:grid-cols-2">

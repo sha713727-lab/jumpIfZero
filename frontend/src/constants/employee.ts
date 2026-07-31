@@ -81,3 +81,11 @@ export const employeeOverviewCopy = {
   salesLede: "Your sales, leads, follow-ups, and team chat.",
   signOut: "Sign out",
 } as const;
+
+export const employeeEmptyCopy = {
+  sales: "No sales yet.",
+  leads: "No leads yet.",
+  clients: "No clients assigned yet.",
+  projects: "No projects assigned yet.",
+  files: "No files yet.",
+} as const;

@@ -7,7 +7,9 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { adminTodayLabel, useAdminDemo } from "@/components/admin/AdminDemoProvider";
 import { ConfirmDeleteModal } from "@/components/admin/ConfirmDeleteModal";
 import { adminIcons } from "@/components/admin/AdminIcons";
+import { adminEmptyCopy } from "@/constants/admin";
 import type { AdminFile } from "@/constants/adminDemo";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const cardClass =
   "overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";
@@ -112,48 +114,52 @@ export function ClientFilesPage() {
       />
 
       <div className={cardClass}>
-        <ul className="divide-y divide-black/8">
-          {files.map((file) => (
-            <li
-              key={file.id}
-              className="flex items-center justify-between gap-4 px-5 py-4"
-            >
-              <div className="flex min-w-0 items-center gap-3">
-                {file.url ? (
-                  <div className="relative size-12 shrink-0 overflow-hidden rounded-lg border border-black/8">
-                    <Image
-                      src={file.url}
-                      alt=""
-                      fill
-                      unoptimized
-                      className="object-cover"
-                      sizes="48px"
-                    />
-                  </div>
-                ) : null}
-                <div className="min-w-0">
-                  <p className="truncate text-[0.92rem] font-semibold text-[#0d120b]">
-                    {file.name}
-                  </p>
-                  <p className="text-[0.82rem] font-medium text-black/45">
-                    {file.kind} · {file.updatedAt}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                aria-label="Delete"
-                onClick={() => {
-                  setDeleteId(file.id);
-                  setDeleteOpen(true);
-                }}
-                className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-black/10 bg-white"
+        {files.length === 0 ? (
+          <EmptyState message={adminEmptyCopy.clientFiles} />
+        ) : (
+          <ul className="divide-y divide-black/8">
+            {files.map((file) => (
+              <li
+                key={file.id}
+                className="flex items-center justify-between gap-4 px-5 py-4"
               >
-                <TrashIcon className="size-4" />
-              </button>
-            </li>
-          ))}
-        </ul>
+                <div className="flex min-w-0 items-center gap-3">
+                  {file.url ? (
+                    <div className="relative size-12 shrink-0 overflow-hidden rounded-lg border border-black/8">
+                      <Image
+                        src={file.url}
+                        alt=""
+                        fill
+                        unoptimized
+                        className="object-cover"
+                        sizes="48px"
+                      />
+                    </div>
+                  ) : null}
+                  <div className="min-w-0">
+                    <p className="truncate text-[0.92rem] font-semibold text-[#0d120b]">
+                      {file.name}
+                    </p>
+                    <p className="text-[0.82rem] font-medium text-black/45">
+                      {file.kind} · {file.updatedAt}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Delete"
+                  onClick={() => {
+                    setDeleteId(file.id);
+                    setDeleteOpen(true);
+                  }}
+                  className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-black/10 bg-white"
+                >
+                  <TrashIcon className="size-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <ConfirmDeleteModal

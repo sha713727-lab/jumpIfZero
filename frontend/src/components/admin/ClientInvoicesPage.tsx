@@ -9,7 +9,9 @@ import {
   adminFieldClass,
   adminLabelClass,
 } from "@/components/admin/AdminFormModal";
+import { adminEmptyCopy } from "@/constants/admin";
 import type { AdminInvoice } from "@/constants/adminDemo";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const cardClass =
   "overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";
@@ -75,28 +77,32 @@ export function ClientInvoicesPage() {
       />
 
       <div className={cardClass}>
-        <ul className="divide-y divide-black/8">
-          {invoices.map((invoice) => (
-            <li
-              key={invoice.id}
-              className="flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div>
-                <p className="text-[0.92rem] font-semibold text-[#0d120b]">
-                  {invoice.title}
-                </p>
-                <p className="text-[0.82rem] font-medium text-black/45">
-                  {invoice.number} · {invoice.amount} · {invoice.updatedAt}
-                </p>
-              </div>
-              <span
-                className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[0.72rem] font-bold capitalize ${invoiceStatusClass[invoice.status]}`}
+        {invoices.length === 0 ? (
+          <EmptyState message={adminEmptyCopy.clientInvoices} />
+        ) : (
+          <ul className="divide-y divide-black/8">
+            {invoices.map((invoice) => (
+              <li
+                key={invoice.id}
+                className="flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
               >
-                {invoice.status}
-              </span>
-            </li>
-          ))}
-        </ul>
+                <div>
+                  <p className="text-[0.92rem] font-semibold text-[#0d120b]">
+                    {invoice.title}
+                  </p>
+                  <p className="text-[0.82rem] font-medium text-black/45">
+                    {invoice.number} · {invoice.amount} · {invoice.updatedAt}
+                  </p>
+                </div>
+                <span
+                  className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[0.72rem] font-bold capitalize ${invoiceStatusClass[invoice.status]}`}
+                >
+                  {invoice.status}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <AdminFormModal

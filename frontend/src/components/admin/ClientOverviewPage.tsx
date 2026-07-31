@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useAdminDemo } from "@/components/admin/AdminDemoProvider";
-import { projectStatusLabel } from "@/constants/admin";
+import { adminEmptyCopy, projectStatusLabel } from "@/constants/admin";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const cardClass =
   "rounded-2xl border border-black/8 bg-white p-5 shadow-[0_8px_24px_rgba(47,58,40,0.04)] md:p-6";
@@ -92,9 +94,7 @@ export function ClientOverviewPage() {
           Assigned employees
         </h2>
         {assigned.length === 0 ? (
-          <p className="mt-3 text-[0.88rem] font-medium text-black/45">
-            No employees assigned yet.
-          </p>
+          <EmptyState message={adminEmptyCopy.clientEmployeesAssigned} />
         ) : (
           <ul className="mt-4 divide-y divide-black/8">
             {assigned.map((employee) => (
@@ -123,21 +123,35 @@ export function ClientOverviewPage() {
         <h2 className="text-[1.05rem] font-extrabold tracking-[-0.02em] text-[#0d120b]">
           Recent projects
         </h2>
-        <ul className="mt-4 divide-y divide-black/8">
-          {projects.slice(0, 5).map((project) => (
-            <li
-              key={project.id}
-              className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <span className="text-[0.9rem] font-semibold text-[#0d120b]">
-                {project.title}
-              </span>
-              <span className="text-[0.82rem] font-medium text-black/45">
-                {projectStatusLabel[project.status]} · {project.updatedAt}
-              </span>
-            </li>
-          ))}
-        </ul>
+        {projects.length === 0 ? (
+          <EmptyState message={adminEmptyCopy.clientRecentProjects} />
+        ) : (
+          <>
+            <ul className="mt-4 divide-y divide-black/8">
+              {projects.slice(0, 5).map((project) => (
+                <li
+                  key={project.id}
+                  className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <span className="text-[0.9rem] font-semibold text-[#0d120b]">
+                    {project.title}
+                  </span>
+                  <span className="text-[0.82rem] font-medium text-black/45">
+                    {projectStatusLabel[project.status]} · {project.updatedAt}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {projects.length > 5 ? (
+              <Link
+                href={`/admin/clients/${clientId}/projects`}
+                className="mt-4 inline-flex text-[0.84rem] font-bold text-brand"
+              >
+                {adminEmptyCopy.viewAllProjects}
+              </Link>
+            ) : null}
+          </>
+        )}
       </section>
     </div>
   );

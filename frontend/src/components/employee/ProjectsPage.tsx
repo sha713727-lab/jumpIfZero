@@ -4,6 +4,8 @@ import Link from "next/link";
 import { EmployeePageHeader } from "@/components/employee/EmployeePageHeader";
 import { useEmployeeDemo } from "@/components/employee/EmployeeDemoProvider";
 import { projectStatusLabel, type ProjectStatus } from "@/constants/admin";
+import { employeeEmptyCopy } from "@/constants/employee";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const cardClass =
   "overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";
@@ -26,39 +28,43 @@ export function ProjectsPage() {
       />
 
       <div className={cardClass}>
-        <ul className="divide-y divide-black/8">
-          {state.projects.map((project) => {
-            const client = state.clients.find((c) => c.id === project.clientId);
+        {state.projects.length === 0 ? (
+          <EmptyState message={employeeEmptyCopy.projects} />
+        ) : (
+          <ul className="divide-y divide-black/8">
+            {state.projects.map((project) => {
+              const client = state.clients.find((c) => c.id === project.clientId);
 
-            return (
-              <li key={project.id}>
-                <Link
-                  href={`/employee/projects/${project.id}`}
-                  className="flex flex-col gap-2 px-5 py-4 transition-colors hover:bg-[#f3f5ef]/70 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div>
-                    <p className="text-[0.92rem] font-semibold text-[#0d120b]">
-                      {project.title}
-                    </p>
-                    <p className="text-[0.82rem] font-medium text-black/45">
-                      {client?.company} · {project.service}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-[0.72rem] font-bold ${statusPillClass[project.status]}`}
-                    >
-                      {projectStatusLabel[project.status]}
-                    </span>
-                    <span className="text-[0.8rem] font-medium text-black/35">
-                      {project.updatedAt}
-                    </span>
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+              return (
+                <li key={project.id}>
+                  <Link
+                    href={`/employee/projects/${project.id}`}
+                    className="flex flex-col gap-2 px-5 py-4 transition-colors hover:bg-[#f3f5ef]/70 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div>
+                      <p className="text-[0.92rem] font-semibold text-[#0d120b]">
+                        {project.title}
+                      </p>
+                      <p className="text-[0.82rem] font-medium text-black/45">
+                        {client?.company} · {project.service}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[0.72rem] font-bold ${statusPillClass[project.status]}`}
+                      >
+                        {projectStatusLabel[project.status]}
+                      </span>
+                      <span className="text-[0.8rem] font-medium text-black/35">
+                        {project.updatedAt}
+                      </span>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
     </div>
   );

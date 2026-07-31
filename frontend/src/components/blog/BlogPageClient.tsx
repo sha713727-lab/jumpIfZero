@@ -7,6 +7,7 @@ import { MagneticLink } from "@/components/landingAlt/MagneticLink";
 import styles from "@/components/landingAlt/landingAlt.module.css";
 import { blogCopy, blogPosts } from "@/constants/blog";
 import { applyHeaderTone } from "@/lib/headerTone";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const HEADER_HEIGHT = 72;
 const HERO_BG = "#74815f";
@@ -16,6 +17,7 @@ export function BlogPageClient() {
   const heroRef = useRef<HTMLElement | null>(null);
   const gridRef = useRef<HTMLElement | null>(null);
   const ctaRef = useRef<HTMLElement | null>(null);
+  const posts: readonly (typeof blogPosts)[number][] = blogPosts;
 
   useEffect(() => {
     const zones: ReadonlyArray<{
@@ -120,92 +122,96 @@ export function BlogPageClient() {
             </p>
           </div>
 
-          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-7">
-            {blogPosts.map((post, index) => {
-              const colorful =
-                index % 2 === 0
-                  ? {
-                      card: "border-brand/20 bg-brand text-cream shadow-[0_22px_50px_rgba(116,129,95,0.22)] hover:border-secondary/50 hover:shadow-[0_28px_60px_rgba(249,161,55,0.22)]",
-                      bloom: "bg-secondary/25",
-                      meta: "text-cream/55",
-                      title: "text-cream hover:text-logo-gradient",
-                      excerpt: "text-cream/70",
-                      read: "text-logo-gradient hover:text-cream",
-                      bar: "bg-logo-gradient",
-                    }
-                  : {
-                      card: "border-secondary/25 bg-logo-gradient text-black shadow-[0_22px_50px_rgba(249,161,55,0.2)] hover:border-brand/40 hover:shadow-[0_28px_60px_rgba(116,129,95,0.2)]",
-                      bloom: "bg-white/30",
-                      meta: "text-[#2f3a28]/65",
-                      title: "text-black hover:text-brand",
-                      excerpt: "text-black/70",
-                      read: "text-brand hover:text-black",
-                      bar: "bg-brand",
-                    };
+          {posts.length === 0 ? (
+            <EmptyState message={blogCopy.empty} />
+          ) : (
+            <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-7">
+              {posts.map((post, index) => {
+                const colorful =
+                  index % 2 === 0
+                    ? {
+                        card: "border-brand/20 bg-brand text-cream shadow-[0_22px_50px_rgba(116,129,95,0.22)] hover:border-secondary/50 hover:shadow-[0_28px_60px_rgba(249,161,55,0.22)]",
+                        bloom: "bg-secondary/25",
+                        meta: "text-cream/55",
+                        title: "text-cream hover:text-logo-gradient",
+                        excerpt: "text-cream/70",
+                        read: "text-logo-gradient hover:text-cream",
+                        bar: "bg-logo-gradient",
+                      }
+                    : {
+                        card: "border-secondary/25 bg-logo-gradient text-black shadow-[0_22px_50px_rgba(249,161,55,0.2)] hover:border-brand/40 hover:shadow-[0_28px_60px_rgba(116,129,95,0.2)]",
+                        bloom: "bg-white/30",
+                        meta: "text-[#2f3a28]/65",
+                        title: "text-black hover:text-brand",
+                        excerpt: "text-black/70",
+                        read: "text-brand hover:text-black",
+                        bar: "bg-brand",
+                      };
 
-              return (
-                <li key={post.slug}>
-                  <article
-                    className={`group relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 ${colorful.card}`}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className={`pointer-events-none absolute -top-16 -right-12 size-40 rounded-full blur-2xl ${colorful.bloom}`}
-                    />
-                    <Link
-                      href={`/blog/${post.slug}`}
-                      className="relative aspect-[16/10] overflow-hidden bg-[#e2e4de] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+                return (
+                  <li key={post.slug}>
+                    <article
+                      className={`group relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 ${colorful.card}`}
                     >
-                      <Image
-                        src={post.image}
-                        alt={post.imageAlt}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        loading="lazy"
-                      />
-                      <div
-                        aria-hidden="true"
-                        className="absolute inset-0 bg-[linear-gradient(to_top,rgba(13,18,11,0.28)_0%,transparent_58%)]"
-                      />
-                    </Link>
-
-                    <div className="relative flex flex-1 flex-col px-5 py-6 md:px-6">
                       <span
                         aria-hidden="true"
-                        className={`mb-4 h-1 w-12 rounded-full ${colorful.bar}`}
+                        className={`pointer-events-none absolute -top-16 -right-12 size-40 rounded-full blur-2xl ${colorful.bloom}`}
                       />
-                      <p
-                        className={`text-[0.66rem] font-extrabold tracking-[0.18em] uppercase ${colorful.meta}`}
-                      >
-                        {post.dateLabel} · {post.readTime}
-                      </p>
-                      <h3 className="mt-3 text-[clamp(1.1rem,2vw,1.35rem)] leading-[1.2] font-extrabold tracking-[-0.03em]">
-                        <Link
-                          href={`/blog/${post.slug}`}
-                          className={`transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary ${colorful.title}`}
-                        >
-                          {post.title}
-                        </Link>
-                      </h3>
-                      <p
-                        className={`mt-3 flex-1 text-[0.92rem] leading-[1.6] font-medium ${colorful.excerpt}`}
-                      >
-                        {post.excerpt}
-                      </p>
                       <Link
                         href={`/blog/${post.slug}`}
-                        className={`mt-6 inline-flex w-fit items-center gap-2 text-[0.66rem] font-extrabold tracking-[0.2em] uppercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary ${colorful.read}`}
+                        className="relative aspect-[16/10] overflow-hidden bg-[#e2e4de] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
                       >
-                        {blogCopy.readLabel}
-                        <span aria-hidden="true">→</span>
+                        <Image
+                          src={post.image}
+                          alt={post.imageAlt}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          loading="lazy"
+                        />
+                        <div
+                          aria-hidden="true"
+                          className="absolute inset-0 bg-[linear-gradient(to_top,rgba(13,18,11,0.28)_0%,transparent_58%)]"
+                        />
                       </Link>
-                    </div>
-                  </article>
-                </li>
-              );
-            })}
-          </ul>
+
+                      <div className="relative flex flex-1 flex-col px-5 py-6 md:px-6">
+                        <span
+                          aria-hidden="true"
+                          className={`mb-4 h-1 w-12 rounded-full ${colorful.bar}`}
+                        />
+                        <p
+                          className={`text-[0.66rem] font-extrabold tracking-[0.18em] uppercase ${colorful.meta}`}
+                        >
+                          {post.dateLabel} · {post.readTime}
+                        </p>
+                        <h3 className="mt-3 text-[clamp(1.1rem,2vw,1.35rem)] leading-[1.2] font-extrabold tracking-[-0.03em]">
+                          <Link
+                            href={`/blog/${post.slug}`}
+                            className={`transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary ${colorful.title}`}
+                          >
+                            {post.title}
+                          </Link>
+                        </h3>
+                        <p
+                          className={`mt-3 flex-1 text-[0.92rem] leading-[1.6] font-medium ${colorful.excerpt}`}
+                        >
+                          {post.excerpt}
+                        </p>
+                        <Link
+                          href={`/blog/${post.slug}`}
+                          className={`mt-6 inline-flex w-fit items-center gap-2 text-[0.66rem] font-extrabold tracking-[0.2em] uppercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary ${colorful.read}`}
+                        >
+                          {blogCopy.readLabel}
+                          <span aria-hidden="true">→</span>
+                        </Link>
+                      </div>
+                    </article>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       </section>
 

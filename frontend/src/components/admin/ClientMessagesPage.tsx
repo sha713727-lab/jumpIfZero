@@ -6,7 +6,9 @@ import { useParams } from "next/navigation";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useAdminDemo } from "@/components/admin/AdminDemoProvider";
 import { adminFieldClass } from "@/components/admin/AdminFormModal";
+import { adminEmptyCopy } from "@/constants/admin";
 import type { AdminMessage } from "@/constants/adminDemo";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 function messageFromLabel(from: AdminMessage["from"]): string {
   if (from === "admin") {
@@ -67,52 +69,60 @@ export function ClientMessagesPage() {
       />
 
       <div className={cardClass}>
-        <ul className="divide-y divide-black/8 border-b border-black/8 lg:border-r lg:border-b-0">
-          {clientMessages.map((message) => (
-            <li key={message.id} className="px-4 py-4">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-[0.88rem] font-bold text-[#0d120b]">
-                  {messageFromLabel(message.from)}
+        {clientMessages.length === 0 ? (
+          <EmptyState message={adminEmptyCopy.clientMessages} />
+        ) : (
+          <ul className="divide-y divide-black/8 border-b border-black/8 lg:border-r lg:border-b-0">
+            {clientMessages.map((message) => (
+              <li key={message.id} className="px-4 py-4">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[0.88rem] font-bold text-[#0d120b]">
+                    {messageFromLabel(message.from)}
+                  </p>
+                  {!message.read && message.from === "client" ? (
+                    <span className="size-2 rounded-full bg-logo-gradient" />
+                  ) : null}
+                </div>
+                <p className="mt-0.5 text-[0.72rem] font-medium text-black/40">
+                  {message.at}
                 </p>
-                {!message.read && message.from === "client" ? (
-                  <span className="size-2 rounded-full bg-logo-gradient" />
-                ) : null}
-              </div>
-              <p className="mt-0.5 text-[0.72rem] font-medium text-black/40">
-                {message.at}
-              </p>
-              <p className="mt-2 line-clamp-3 text-[0.82rem] font-medium text-black/55">
-                {message.body}
-              </p>
-            </li>
-          ))}
-        </ul>
+                <p className="mt-2 line-clamp-3 text-[0.82rem] font-medium text-black/55">
+                  {message.body}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
 
         <div className="flex min-h-[20rem] flex-col p-5 md:p-6">
           <div className="flex-1 space-y-4 overflow-y-auto">
-            {clientMessages.map((message) => (
-              <div
-                key={message.id}
-                className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                  isStaffMessage(message.from)
-                    ? "ml-auto bg-brand text-cream"
-                    : "bg-[#f3f5ef] text-[#0d120b]"
-                }`}
-              >
-                <p className="text-[0.88rem] font-medium leading-relaxed">
-                  {message.body}
-                </p>
-                <p
-                  className={`mt-1 text-[0.72rem] font-medium ${
+            {clientMessages.length === 0 ? (
+              <EmptyState message={adminEmptyCopy.clientMessages} />
+            ) : (
+              clientMessages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                     isStaffMessage(message.from)
-                      ? "text-cream/70"
-                      : "text-black/40"
+                      ? "ml-auto bg-brand text-cream"
+                      : "bg-[#f3f5ef] text-[#0d120b]"
                   }`}
                 >
-                  {messageFromLabel(message.from)} · {message.at}
-                </p>
-              </div>
-            ))}
+                  <p className="text-[0.88rem] font-medium leading-relaxed">
+                    {message.body}
+                  </p>
+                  <p
+                    className={`mt-1 text-[0.72rem] font-medium ${
+                      isStaffMessage(message.from)
+                        ? "text-cream/70"
+                        : "text-black/40"
+                    }`}
+                  >
+                    {messageFromLabel(message.from)} · {message.at}
+                  </p>
+                </div>
+              ))
+            )}
           </div>
 
           <form id={formId} onSubmit={onSend} className="mt-4 flex gap-2">

@@ -10,6 +10,7 @@ export const blogCopy = {
   ctaHref: "/contact" as const,
   backLabel: "Back to blog",
   readLabel: "Read",
+  empty: "No posts yet.",
 } as const;
 
 export const blogPosts = [
