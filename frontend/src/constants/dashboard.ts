@@ -98,10 +98,10 @@ export const progressSeries = [
 ] as const;
 
 export const engagementMix = [
-  { label: "Website", value: 9, percent: 29, color: "#74815f" },
-  { label: "App", value: 6, percent: 19, color: "#2f3a28" },
-  { label: "SEO", value: 12, percent: 39, color: "#f9a137" },
-  { label: "Support", value: 4, percent: 13, color: "#e8891a" },
+  { label: "Website", value: 9, percent: 29, color: "var(--color-brand)" },
+  { label: "App", value: 6, percent: 19, color: "var(--color-brand-deep)" },
+  { label: "SEO", value: 12, percent: 39, color: "var(--color-secondary)" },
+  { label: "Support", value: 4, percent: 13, color: "var(--color-secondary-deep)" },
 ] as const;
 
 export const demoProjects = [
