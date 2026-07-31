@@ -6,8 +6,14 @@ import { supportCopy } from "@/constants/dashboard";
 
 export function SupportPage() {
   const formId = useId();
+  const defaultSubject = supportCopy.subjects[0];
+
+  if (defaultSubject === undefined) {
+    throw new Error("supportCopy.subjects must include at least one subject");
+  }
+
   const [subject, setSubject] = useState<(typeof supportCopy.subjects)[number]>(
-    supportCopy.subjects[0],
+    defaultSubject,
   );
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "sent">("idle");

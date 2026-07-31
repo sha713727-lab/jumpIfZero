@@ -188,7 +188,7 @@ export function AltServices() {
     });
   };
 
-  const chapter = serviceChapters[active] ?? serviceChapters[0];
+  const chapter = serviceChapters[active] ?? serviceChapters.at(0);
   const openDetail =
     detailCategory === null
       ? null

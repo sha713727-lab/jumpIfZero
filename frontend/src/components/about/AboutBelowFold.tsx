@@ -139,9 +139,11 @@ export function AboutBelowFold() {
             <h2 className="relative text-[clamp(1.55rem,3.4vw,2.55rem)] font-extrabold tracking-[-0.02em] text-black uppercase">
               {teamIntro.title}
             </h2>
-            <p className="relative mt-4 text-[clamp(0.95rem,1.8vw,1.12rem)] leading-[1.55] font-medium text-black/55 italic">
-              {teamIntro.lines[0]}
-            </p>
+            {teamIntro.lines[0] ? (
+              <p className="relative mt-4 text-[clamp(0.95rem,1.8vw,1.12rem)] leading-[1.55] font-medium text-black/55 italic">
+                {teamIntro.lines[0]}
+              </p>
+            ) : null}
           </div>
 
           <div className="mt-4 md:mt-8">
