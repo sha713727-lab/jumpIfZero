@@ -9,9 +9,8 @@ as the migration seam, not as permanent product architecture.
 | Order | Batch | Notes |
 |---|---|---|
 | done | 1, Google fakes #49–51, #52, **3.5** (+ 8a–8d acceptance) | Cookie sessions + role/kind gates + swappable `lookupCredentials` |
-| done | **2**, **3**, **4**, **4.5**, **4.6**, **5**, **6** | Through platform & config Batch 6 |
-| next | **7** Bundle | Analysis + safe dynamic imports only |
-| then | Cleanup + final report | Unchanged |
+| done | **2**, **3**, **4**, **4.5**, **4.6**, **5**, **6**, **7** | Through bundle Batch 7 |
+| next | Cleanup + final report | Re-run audits, delete artifacts, finalize `IMPLEMENTATION_REPORT.md` |
 
 ## E. Residual risk register
 
@@ -119,6 +118,41 @@ SESSION_SECRET=REPLACE_ME__not_a_real_secret__min_32_chars
 | **44** | Option (b): removed mock form/`submitContact`/`validateContact`; contact page is mailto + tel (`ContactDirect`). |
 
 - Unchanged from prior plan; zod **approved** for Batch 4.6.
+
+### BATCH 7 — Bundle (measure + safe wins)
+
+**Library map**
+
+| Library | Files (count) | Role |
+|---|---|---|
+| **gsap** (+ ScrollTrigger) | **11** — `GsapProjectsSection`, `AltFaq`, `AltTeam`, `AltContact`, `AltTestimonials`, `AltWhy`, `AltServices`, `ImagesFlow`, `PinnedScrollFan`, `RevealText`, `FloatingGallery/useGalleryAnimation` (+ dynamic `import()` in `AboutPageClient`, `ScrollFrameSequence`) | Scroll-pinned / scrub / reveal |
+| **framer-motion** | **2** — `ThreeDMarquee`, `TeamMemberCard` | Marquee drift + card hover |
+
+**Consolidation proposal (do not migrate this batch):** GSAP already covers almost all scroll storytelling. Framer is only hover/marquee polish on two surfaces. One library *could* replace both (keep GSAP; rewrite the two Framer call sites), but the savings are small vs. rewrite risk — defer until a dedicated motion pass.
+
+**AboutPageClient split:** Yes. Hero already dynamic-imports GSAP in `useEffect`; `AboutBelowFold` was already `next/dynamic`. Remaining sync weight was `RevealText`’s static `import "gsap"` (pulled GSAP into the about client graph) plus static `ImagesFlow` / `TeamMemberCard` inside the below-fold chunk. Further split option (not done): server-render static hero copy and isolate a tiny client reveal island.
+
+**Safe wins shipped** (`365adfd`)
+- `RevealText`: async `import("gsap")` / `ScrollTrigger` inside `useEffect`
+- `AboutBelowFold`: `next/dynamic` for `ImagesFlow` (GSAP) and `TeamMemberCard` (Framer)
+- Home / services / portfolio below-fold animation clients were already dynamic — left alone
+- No library removed
+
+**First-load gzip (audit-firstload.cjs)**
+
+| Metric | Before | After |
+|---|---|---|
+| Shared | 168.8 KB | 168.8 KB |
+| `/about` | **250.1 KB** | **206.1 KB** (−44.0) |
+| `/` | 202.6 KB | 202.6 KB |
+| `/services` | 204.4 KB | 204.4 KB |
+| `/portfolio` | 204.6 KB | 204.6 KB |
+| `/contact` | 202.5 KB | 202.5 KB |
+| `/blog` | 206.1 KB | 206.1 KB |
+
+`/about` dropped from heaviest route to rank ~38. Shared still dominates (~180 KB budget); further cuts need shared-chunk work or library removal (out of scope).
+
+**§7 gate:** `TSC_EXIT:0` · `ESLINT_EXIT:0` · `BUILD_EXIT:0`
 
 ### BATCH 6 — Platform & config
 
