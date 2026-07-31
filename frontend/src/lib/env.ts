@@ -32,15 +32,3 @@ export const env = {
   siteUrl: resolveSiteUrl(),
   nodeEnv: process.env.NODE_ENV ?? "development",
 } as const;
-
-export function getDemoEmployeePassword(): string {
-  const password = process.env.NEXT_PUBLIC_DEMO_EMPLOYEE_PASSWORD?.trim();
-
-  if (!password) {
-    throw new Error(
-      "Missing required environment variable: NEXT_PUBLIC_DEMO_EMPLOYEE_PASSWORD",
-    );
-  }
-
-  return password;
-}

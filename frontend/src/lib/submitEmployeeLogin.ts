@@ -1,6 +1,7 @@
+"use server";
+
 import type { EmployeeLoginFormValues } from "@/constants/employeeAuth";
 import { initialAdminDemoState } from "@/constants/adminDemo";
-import { getDemoEmployeePassword } from "@/lib/env";
 
 export type EmployeeLoginSubmitResult =
   | { readonly ok: true; readonly employeeId: string }
@@ -9,13 +10,14 @@ export type EmployeeLoginSubmitResult =
 export async function submitEmployeeLogin(
   values: EmployeeLoginFormValues,
 ): Promise<EmployeeLoginSubmitResult> {
-  await new Promise((resolve) => {
-    window.setTimeout(resolve, 900);
-  });
+  const expectedPassword = process.env.DEMO_EMPLOYEE_PASSWORD;
+
+  if (expectedPassword === undefined || expectedPassword === "") {
+    return { ok: false, reason: "server" };
+  }
 
   const email = values.email.trim().toLowerCase();
   const password = values.password;
-  const expectedPassword = getDemoEmployeePassword();
 
   const employee = initialAdminDemoState.employees.find(
     (item) => item.active && item.email.toLowerCase() === email,
