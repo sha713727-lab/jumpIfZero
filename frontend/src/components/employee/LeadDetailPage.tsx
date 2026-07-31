@@ -1,0 +1,334 @@
+"use client";
+
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { EmployeePageHeader } from "@/components/employee/EmployeePageHeader";
+import {
+  employeeTodayLabel,
+  useEmployeeDemo,
+} from "@/components/employee/EmployeeDemoProvider";
+import {
+  adminFieldClass,
+  adminLabelClass,
+} from "@/components/admin/AdminFormModal";
+import { ConfirmDeleteModal } from "@/components/admin/ConfirmDeleteModal";
+import { leadStatuses, leadStatusLabel } from "@/constants/sales";
+import type {
+  AdminLead,
+  AdminLeadFollowUp,
+  LeadStatus,
+} from "@/constants/adminDemo";
+
+const cardClass =
+  "rounded-2xl border border-black/8 bg-white p-5 shadow-[0_8px_24px_rgba(47,58,40,0.04)] md:p-6";
+
+type LeadForm = {
+  company: string;
+  contactName: string;
+  phone: string;
+  email: string;
+  source: string;
+  status: LeadStatus;
+  notes: string;
+};
+
+function followUpTimestamp(): string {
+  const time = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date());
+
+  return `${employeeTodayLabel()} · ${time}`;
+}
+
+function formFromLead(lead: AdminLead): LeadForm {
+  return {
+    company: lead.company,
+    contactName: lead.contactName,
+    phone: lead.phone,
+    email: lead.email,
+    source: lead.source,
+    status: lead.status,
+    notes: lead.notes,
+  };
+}
+
+function LeadDetailFields({
+  lead,
+  followUps,
+  leads,
+  allFollowUps,
+  setLeads,
+  setLeadFollowUps,
+}: Readonly<{
+  lead: AdminLead;
+  followUps: AdminLeadFollowUp[];
+  leads: AdminLead[];
+  allFollowUps: AdminLeadFollowUp[];
+  setLeads: (items: AdminLead[]) => void;
+  setLeadFollowUps: (items: AdminLeadFollowUp[]) => void;
+}>) {
+  const router = useRouter();
+  const [form, setForm] = useState(() => formFromLead(lead));
+  const [followUpNote, setFollowUpNote] = useState("");
+  const [followUpOutcome, setFollowUpOutcome] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const save = () => {
+    const company = form.company.trim();
+    if (!company) {
+      return;
+    }
+
+    const payload: AdminLead = {
+      ...lead,
+      company,
+      contactName: form.contactName.trim(),
+      phone: form.phone.trim(),
+      email: form.email.trim(),
+      source: form.source.trim(),
+      status: form.status,
+      notes: form.notes.trim(),
+      updatedAt: employeeTodayLabel(),
+    };
+
+    setLeads(leads.map((item) => (item.id === lead.id ? payload : item)));
+  };
+
+  const addFollowUp = () => {
+    const note = followUpNote.trim();
+    if (!note) {
+      return;
+    }
+
+    const payload: AdminLeadFollowUp = {
+      id: crypto.randomUUID(),
+      leadId: lead.id,
+      at: followUpTimestamp(),
+      note,
+      outcome: followUpOutcome.trim(),
+    };
+
+    setLeadFollowUps([...allFollowUps, payload]);
+    setFollowUpNote("");
+    setFollowUpOutcome("");
+  };
+
+  const confirmDelete = () => {
+    setLeads(leads.filter((item) => item.id !== lead.id));
+    setLeadFollowUps(allFollowUps.filter((item) => item.leadId !== lead.id));
+    setDeleteOpen(false);
+    router.push("/employee/leads");
+  };
+
+  return (
+    <div className="space-y-6">
+      <EmployeePageHeader
+        title={lead.company}
+        lede={`${lead.contactName} · Updated ${lead.updatedAt}`}
+      />
+
+      <section className={`${cardClass} space-y-4`}>
+        <div>
+          <label className={adminLabelClass}>Company</label>
+          <input
+            className={adminFieldClass}
+            value={form.company}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, company: event.target.value }))
+            }
+          />
+        </div>
+        <div>
+          <label className={adminLabelClass}>Contact name</label>
+          <input
+            className={adminFieldClass}
+            value={form.contactName}
+            onChange={(event) =>
+              setForm((current) => ({
+                ...current,
+                contactName: event.target.value,
+              }))
+            }
+          />
+        </div>
+        <div>
+          <label className={adminLabelClass}>Phone</label>
+          <input
+            className={adminFieldClass}
+            value={form.phone}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, phone: event.target.value }))
+            }
+          />
+        </div>
+        <div>
+          <label className={adminLabelClass}>Email</label>
+          <input
+            type="email"
+            className={adminFieldClass}
+            value={form.email}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, email: event.target.value }))
+            }
+          />
+        </div>
+        <div>
+          <label className={adminLabelClass}>Source</label>
+          <input
+            className={adminFieldClass}
+            value={form.source}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, source: event.target.value }))
+            }
+          />
+        </div>
+        <div>
+          <label className={adminLabelClass}>Status</label>
+          <select
+            className={adminFieldClass}
+            value={form.status}
+            onChange={(event) =>
+              setForm((current) => ({
+                ...current,
+                status: event.target.value as LeadStatus,
+              }))
+            }
+          >
+            {leadStatuses.map((status) => (
+              <option key={status} value={status}>
+                {leadStatusLabel[status]}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className={adminLabelClass}>Notes</label>
+          <textarea
+            className={`${adminFieldClass} min-h-[6rem] resize-y`}
+            value={form.notes}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, notes: event.target.value }))
+            }
+          />
+        </div>
+        <div className="flex flex-wrap justify-end gap-2 pt-2">
+          <button
+            type="button"
+            onClick={() => setDeleteOpen(true)}
+            className="rounded-xl border border-black/12 bg-white px-4 py-2.5 text-[0.88rem] font-semibold text-[#0d120b]"
+          >
+            Delete
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/employee/leads")}
+            className="rounded-xl border border-black/12 bg-white px-4 py-2.5 text-[0.88rem] font-semibold"
+          >
+            Back
+          </button>
+          <button
+            type="button"
+            onClick={save}
+            className="rounded-xl bg-brand px-4 py-2.5 text-[0.88rem] font-bold text-cream"
+          >
+            Save
+          </button>
+        </div>
+      </section>
+
+      <section className={`${cardClass} space-y-4`}>
+        <h2 className="text-[1.05rem] font-extrabold tracking-[-0.02em] text-[#0d120b]">
+          Follow-ups
+        </h2>
+        <ul className="divide-y divide-black/8">
+          {followUps.map((item) => (
+            <li key={item.id} className="py-3.5">
+              <p className="text-[0.92rem] font-semibold text-[#0d120b]">
+                {item.note}
+              </p>
+              {item.outcome ? (
+                <p className="mt-1 text-[0.84rem] font-medium text-black/50">
+                  Outcome: {item.outcome}
+                </p>
+              ) : null}
+              <p className="mt-1 text-[0.8rem] font-medium text-black/35">
+                {item.at}
+              </p>
+            </li>
+          ))}
+        </ul>
+        <div className="space-y-3 border-t border-black/8 pt-4">
+          <div>
+            <label className={adminLabelClass}>Note</label>
+            <textarea
+              className={`${adminFieldClass} min-h-[4rem] resize-y`}
+              value={followUpNote}
+              onChange={(event) => setFollowUpNote(event.target.value)}
+            />
+          </div>
+          <div>
+            <label className={adminLabelClass}>Outcome</label>
+            <input
+              className={adminFieldClass}
+              value={followUpOutcome}
+              onChange={(event) => setFollowUpOutcome(event.target.value)}
+            />
+          </div>
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={addFollowUp}
+              className="rounded-xl bg-brand px-4 py-2.5 text-[0.88rem] font-bold text-cream"
+            >
+              Add follow-up
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <ConfirmDeleteModal
+        open={deleteOpen}
+        title="Delete lead"
+        lede={`Remove "${lead.company}" from your pipeline?`}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={confirmDelete}
+      />
+    </div>
+  );
+}
+
+export function LeadDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const { state, setLeads, setLeadFollowUps } = useEmployeeDemo();
+
+  const leadId = typeof params.id === "string" ? params.id : "";
+  const lead = state.leads.find((item) => item.id === leadId);
+
+  const followUps = state.leadFollowUps
+    .filter((item) => item.leadId === leadId)
+    .sort((a, b) => b.at.localeCompare(a.at));
+
+  useEffect(() => {
+    if (!lead) {
+      router.replace("/employee/leads");
+    }
+  }, [lead, router]);
+
+  if (!lead) {
+    return null;
+  }
+
+  return (
+    <LeadDetailFields
+      key={lead.id}
+      lead={lead}
+      followUps={followUps}
+      leads={state.leads}
+      allFollowUps={state.leadFollowUps}
+      setLeads={setLeads}
+      setLeadFollowUps={setLeadFollowUps}
+    />
+  );
+}

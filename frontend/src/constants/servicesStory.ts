@@ -1,6 +1,6 @@
 export const servicesIntro = {
-  watermark: "Services",
-  title: "Our Key Services",
+  watermark: "Our Key Services",
+  title: "Services",
   lines: [
     "Eight services. One growth system.",
     "Strategy, creative, and technology — built so your business grows smarter.",

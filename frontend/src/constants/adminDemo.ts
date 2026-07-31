@@ -1,0 +1,841 @@
+import type { ProjectStatus } from "@/constants/admin";
+
+export type AdminService = {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  path: string;
+  image: string;
+  active: boolean;
+  updatedAt: string;
+};
+
+export type AdminPortfolioItem = {
+  id: string;
+  title: string;
+  category: string;
+  summary: string;
+  image: string;
+  active: boolean;
+  updatedAt: string;
+};
+
+export type AdminBlogPost = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  image: string;
+  active: boolean;
+  updatedAt: string;
+};
+
+export type AdminFaq = {
+  id: string;
+  question: string;
+  answer: string;
+  active: boolean;
+  updatedAt: string;
+};
+
+export type AdminTeamMember = {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  image: string;
+  active: boolean;
+  employeeId: string | null;
+  updatedAt: string;
+};
+
+export type EmployeeKind = "delivery" | "sales";
+
+export type AdminEmployee = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  department: string;
+  kind: EmployeeKind;
+  image: string;
+  active: boolean;
+  teamMemberId: string | null;
+  updatedAt: string;
+};
+
+export type SaleStatus = "draft" | "quoted" | "won" | "lost";
+
+export type LeadStatus =
+  | "new"
+  | "contacted"
+  | "qualified"
+  | "converted"
+  | "closed";
+
+export type AdminSale = {
+  id: string;
+  repId: string;
+  status: SaleStatus;
+  usDot: string;
+  mc: string;
+  legalName: string;
+  dba: string;
+  businessAddress: string;
+  ownerOperatorDriver: string;
+  taxId: string;
+  salesAgent: string;
+  businessTelephone: string;
+  truckType: string;
+  type: string;
+  contactName: string;
+  contactPhone: string;
+  contactEmail: string;
+  truck: string;
+  trailer: string;
+  insuranceName: string;
+  insurancePhone: string;
+  insuranceStreet: string;
+  insuranceCityStateZip: string;
+  insuranceEmail: string;
+  factoringName: string;
+  factoringPhone: string;
+  factoringStreet: string;
+  factoringCityStateZip: string;
+  factoringEmail: string;
+  approvedBy: string;
+  updatedAt: string;
+};
+
+export type AdminLead = {
+  id: string;
+  repId: string;
+  company: string;
+  contactName: string;
+  phone: string;
+  email: string;
+  source: string;
+  status: LeadStatus;
+  notes: string;
+  updatedAt: string;
+};
+
+export type AdminLeadFollowUp = {
+  id: string;
+  leadId: string;
+  at: string;
+  note: string;
+  outcome: string;
+};
+
+export type AdminSalesMessage = {
+  id: string;
+  fromRepId: string;
+  toRepId: string;
+  body: string;
+  at: string;
+  read: boolean;
+};
+
+export type AdminClient = {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  phone: string;
+  status: "active" | "paused";
+  initials: string;
+  memberSince: string;
+  assignedEmployeeIds: string[];
+  updatedAt: string;
+};
+
+export type AdminProject = {
+  id: string;
+  clientId: string;
+  title: string;
+  service: string;
+  status: ProjectStatus;
+  notes: string;
+  updatedAt: string;
+};
+
+export type AdminMessage = {
+  id: string;
+  clientId: string;
+  from: "admin" | "client" | "employee";
+  body: string;
+  at: string;
+  read: boolean;
+};
+
+export type AdminInvoice = {
+  id: string;
+  clientId: string;
+  number: string;
+  title: string;
+  amount: string;
+  status: "draft" | "sent" | "paid";
+  updatedAt: string;
+};
+
+export type AdminFile = {
+  id: string;
+  clientId: string;
+  name: string;
+  kind: string;
+  url: string | null;
+  updatedAt: string;
+};
+
+export type AdminCallback = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  note: string;
+  status: "new" | "resolved";
+  updatedAt: string;
+};
+
+export type AdminContactMessage = {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  body: string;
+  status: "new" | "read";
+  updatedAt: string;
+};
+
+export type AdminDemoState = {
+  services: AdminService[];
+  portfolio: AdminPortfolioItem[];
+  blog: AdminBlogPost[];
+  faqs: AdminFaq[];
+  team: AdminTeamMember[];
+  employees: AdminEmployee[];
+  clients: AdminClient[];
+  projects: AdminProject[];
+  messages: AdminMessage[];
+  invoices: AdminInvoice[];
+  files: AdminFile[];
+  callbacks: AdminCallback[];
+  contactMessages: AdminContactMessage[];
+  sales: AdminSale[];
+  leads: AdminLead[];
+  leadFollowUps: AdminLeadFollowUp[];
+  salesMessages: AdminSalesMessage[];
+};
+
+export const initialAdminDemoState: AdminDemoState = {
+  services: [
+    {
+      id: "svc_01",
+      title: "Website Development",
+      slug: "website-development",
+      description: "Conversion-first sites engineered to sell while you sleep.",
+      path: "/services",
+      image: "/images/services/website.jpg",
+      active: true,
+      updatedAt: "Jul 22, 2026",
+    },
+    {
+      id: "svc_02",
+      title: "Software Development",
+      slug: "software-development",
+      description: "Custom software that fits your workflow.",
+      path: "/services",
+      image: "/images/services/software.jpg",
+      active: true,
+      updatedAt: "Jul 20, 2026",
+    },
+    {
+      id: "svc_03",
+      title: "App Development",
+      slug: "app-development",
+      description: "Mobile apps built for speed and clarity.",
+      path: "/services",
+      image: "/images/services/app.jpg",
+      active: true,
+      updatedAt: "Jul 18, 2026",
+    },
+    {
+      id: "svc_04",
+      title: "SEO",
+      slug: "seo",
+      description: "SEO that targets intent, not vanity keywords.",
+      path: "/services",
+      image: "/images/services/seo.jpg",
+      active: true,
+      updatedAt: "Jul 15, 2026",
+    },
+    {
+      id: "svc_05",
+      title: "Digital Marketing",
+      slug: "digital-marketing",
+      description: "Social content that earns attention and drives action.",
+      path: "/services",
+      image: "/images/services/smm.jpg",
+      active: true,
+      updatedAt: "Jul 12, 2026",
+    },
+  ],
+  portfolio: [
+    {
+      id: "port_01",
+      title: "Conversion website system",
+      category: "Website",
+      summary: "Northline retail launch system with scoped growth loop.",
+      image: "/images/services/website.jpg",
+      active: true,
+      updatedAt: "Jul 21, 2026",
+    },
+    {
+      id: "port_02",
+      title: "Custom operations platform",
+      category: "Software",
+      summary: "Internal ops tool for order and inventory clarity.",
+      image: "/images/services/software.jpg",
+      active: true,
+      updatedAt: "Jul 10, 2026",
+    },
+    {
+      id: "port_03",
+      title: "Mobile product launch",
+      category: "App",
+      summary: "Consumer app with day-one useful flows.",
+      image: "/images/services/app.jpg",
+      active: true,
+      updatedAt: "Jun 28, 2026",
+    },
+  ],
+  blog: [
+    {
+      id: "blog_01",
+      title: "Why conversion-first websites outperform pretty templates",
+      slug: "conversion-first-websites",
+      excerpt: "Design that sells beats design that only impresses.",
+      image: "/images/services/website.jpg",
+      active: true,
+      updatedAt: "Jul 19, 2026",
+    },
+    {
+      id: "blog_02",
+      title: "Custom software should fit the team",
+      slug: "software-fit-the-team",
+      excerpt: "Build around workflow, not the other way around.",
+      image: "/images/services/software.jpg",
+      active: true,
+      updatedAt: "Jul 08, 2026",
+    },
+  ],
+  faqs: [
+    {
+      id: "faq_01",
+      question: "How long does a typical project take?",
+      answer:
+        "Most websites ship in 4–8 weeks. Custom software usually runs 8–16 weeks.",
+      active: true,
+      updatedAt: "Jul 14, 2026",
+    },
+    {
+      id: "faq_02",
+      question: "Do you work with startups and established brands?",
+      answer: "Yes — early-stage launches and growing companies alike.",
+      active: true,
+      updatedAt: "Jul 14, 2026",
+    },
+    {
+      id: "faq_03",
+      question: "Will we own the final files and code?",
+      answer: "Yes. You own deliverables defined in the scoped proposal.",
+      active: true,
+      updatedAt: "Jul 01, 2026",
+    },
+    {
+      id: "faq_04",
+      question: "How do pricing and engagement work?",
+      answer: "Scoped proposal first. Fixed builds or retainers after that.",
+      active: true,
+      updatedAt: "Jun 20, 2026",
+    },
+  ],
+  team: [
+    {
+      id: "team_01",
+      name: "Alex Rivera",
+      role: "Founder & CEO",
+      bio: "Leads strategy and delivery end to end.",
+      image: "/images/hero-office.png",
+      active: true,
+      employeeId: "emp_01",
+      updatedAt: "Jul 01, 2026",
+    },
+    {
+      id: "team_02",
+      name: "Jordan Blake",
+      role: "Creative Director",
+      bio: "Shapes brand systems and visual identity.",
+      image: "/images/hero-team.png",
+      active: true,
+      employeeId: "emp_02",
+      updatedAt: "Jul 01, 2026",
+    },
+    {
+      id: "team_03",
+      name: "Sam Chen",
+      role: "Head of Growth",
+      bio: "Builds acquisition and retention systems.",
+      image: "/images/welcome-hero.png",
+      active: true,
+      employeeId: "emp_03",
+      updatedAt: "Jul 01, 2026",
+    },
+  ],
+  employees: [
+    {
+      id: "emp_01",
+      name: "Alex Rivera",
+      email: "alex@jz.enterprises",
+      role: "Founder & CEO",
+      department: "Leadership",
+      kind: "delivery",
+      image: "/images/hero-office.png",
+      active: true,
+      teamMemberId: "team_01",
+      updatedAt: "Jul 01, 2026",
+    },
+    {
+      id: "emp_02",
+      name: "Jordan Blake",
+      email: "jordan@jz.enterprises",
+      role: "Creative Director",
+      department: "Design",
+      kind: "delivery",
+      image: "/images/hero-team.png",
+      active: true,
+      teamMemberId: "team_02",
+      updatedAt: "Jul 01, 2026",
+    },
+    {
+      id: "emp_03",
+      name: "Sam Chen",
+      email: "sam@jz.enterprises",
+      role: "Head of Growth",
+      department: "Growth",
+      kind: "delivery",
+      image: "/images/welcome-hero.png",
+      active: true,
+      teamMemberId: "team_03",
+      updatedAt: "Jul 01, 2026",
+    },
+    {
+      id: "emp_04",
+      name: "Riley Okonkwo",
+      email: "riley@jz.enterprises",
+      role: "Senior Engineer",
+      department: "Engineering",
+      kind: "delivery",
+      image: "",
+      active: true,
+      teamMemberId: null,
+      updatedAt: "Jul 05, 2026",
+    },
+    {
+      id: "emp_05",
+      name: "Dana Ortiz",
+      email: "dana@jz.enterprises",
+      role: "Sales Lead",
+      department: "Truck Dispatch",
+      kind: "sales",
+      image: "",
+      active: true,
+      teamMemberId: null,
+      updatedAt: "Jul 10, 2026",
+    },
+    {
+      id: "emp_06",
+      name: "Chris Patel",
+      email: "chris@jz.enterprises",
+      role: "Sales Associate",
+      department: "Truck Dispatch",
+      kind: "sales",
+      image: "",
+      active: true,
+      teamMemberId: null,
+      updatedAt: "Jul 12, 2026",
+    },
+  ],
+  clients: [
+    {
+      id: "cust_demo_001",
+      name: "Ayesha Rahman",
+      email: "ayesha@northline.co",
+      company: "Northline Retail",
+      phone: "+92 300 555 0142",
+      status: "active",
+      initials: "AR",
+      memberSince: "Nov 2025",
+      assignedEmployeeIds: ["emp_02", "emp_04"],
+      updatedAt: "Jul 28, 2026",
+    },
+    {
+      id: "cust_demo_002",
+      name: "Hassan Malik",
+      email: "hassan@brightpath.io",
+      company: "Brightpath",
+      phone: "+92 321 555 0199",
+      status: "active",
+      initials: "HM",
+      memberSince: "Jan 2026",
+      assignedEmployeeIds: ["emp_03"],
+      updatedAt: "Jul 25, 2026",
+    },
+    {
+      id: "cust_demo_003",
+      name: "Sara Khan",
+      email: "sara@orbitlabs.co",
+      company: "Orbit Labs",
+      phone: "+92 333 555 0111",
+      status: "paused",
+      initials: "SK",
+      memberSince: "Mar 2026",
+      assignedEmployeeIds: [],
+      updatedAt: "Jul 10, 2026",
+    },
+  ],
+  projects: [
+    {
+      id: "proj_01",
+      clientId: "cust_demo_001",
+      title: "Homepage redesign",
+      service: "Website Development",
+      status: "in_progress",
+      notes: "Hero copy board in progress. Awaiting client feedback.",
+      updatedAt: "Jul 28, 2026",
+    },
+    {
+      id: "proj_02",
+      clientId: "cust_demo_001",
+      title: "SEO retainer — July",
+      service: "SEO",
+      status: "approved",
+      notes: "Keyword set approved. Content calendar next.",
+      updatedAt: "Jul 22, 2026",
+    },
+    {
+      id: "proj_03",
+      clientId: "cust_demo_002",
+      title: "Ops platform MVP",
+      service: "Software Development",
+      status: "requested",
+      notes: "Waiting on admin approval before kickoff.",
+      updatedAt: "Jul 25, 2026",
+    },
+    {
+      id: "proj_04",
+      clientId: "cust_demo_002",
+      title: "Brand system refresh",
+      service: "Graphic Designing",
+      status: "completed",
+      notes: "Final assets delivered.",
+      updatedAt: "Jun 30, 2026",
+    },
+  ],
+  messages: [
+    {
+      id: "msg_01",
+      clientId: "cust_demo_001",
+      from: "client",
+      body: "Can we review homepage hero copy this week?",
+      at: "Jul 28, 2026 · 10:14",
+      read: false,
+    },
+    {
+      id: "msg_02",
+      clientId: "cust_demo_001",
+      from: "admin",
+      body: "Yes — sharing a draft board today.",
+      at: "Jul 28, 2026 · 11:02",
+      read: true,
+    },
+    {
+      id: "msg_03",
+      clientId: "cust_demo_002",
+      from: "client",
+      body: "Need clarity on MVP scope before kickoff.",
+      at: "Jul 25, 2026 · 16:40",
+      read: false,
+    },
+  ],
+  invoices: [
+    {
+      id: "inv_01",
+      clientId: "cust_demo_001",
+      number: "INV-1048",
+      title: "Homepage redesign — milestone 2",
+      amount: "PKR 180,000",
+      status: "sent",
+      updatedAt: "Jul 22, 2026",
+    },
+    {
+      id: "inv_02",
+      clientId: "cust_demo_001",
+      number: "INV-1041",
+      title: "SEO retainer — July",
+      amount: "PKR 95,000",
+      status: "paid",
+      updatedAt: "Jul 05, 2026",
+    },
+    {
+      id: "inv_03",
+      clientId: "cust_demo_002",
+      number: "INV-1050",
+      title: "Brand system refresh",
+      amount: "PKR 220,000",
+      status: "paid",
+      updatedAt: "Jun 28, 2026",
+    },
+  ],
+  files: [
+    {
+      id: "file_01",
+      clientId: "cust_demo_001",
+      name: "Brand guidelines.pdf",
+      kind: "PDF",
+      url: null,
+      updatedAt: "Jul 20, 2026",
+    },
+    {
+      id: "file_02",
+      clientId: "cust_demo_001",
+      name: "Homepage wireframes.fig",
+      kind: "Figma",
+      url: null,
+      updatedAt: "Jul 27, 2026",
+    },
+    {
+      id: "file_03",
+      clientId: "cust_demo_002",
+      name: "MVP scope.docx",
+      kind: "Doc",
+      url: null,
+      updatedAt: "Jul 24, 2026",
+    },
+  ],
+  callbacks: [
+    {
+      id: "cb_01",
+      name: "Omar Farooq",
+      email: "omar@example.com",
+      phone: "+92 300 111 2233",
+      note: "Wants a scoped website proposal.",
+      status: "new",
+      updatedAt: "Jul 29, 2026",
+    },
+    {
+      id: "cb_02",
+      name: "Nadia Hussain",
+      email: "nadia@example.com",
+      phone: "+92 321 444 5566",
+      note: "SEO audit request.",
+      status: "resolved",
+      updatedAt: "Jul 18, 2026",
+    },
+  ],
+  contactMessages: [
+    {
+      id: "cm_01",
+      name: "Bilal Ahmed",
+      email: "bilal@example.com",
+      subject: "App discovery workshop",
+      body: "Looking to scope a consumer app in Q3.",
+      status: "new",
+      updatedAt: "Jul 29, 2026",
+    },
+    {
+      id: "cm_02",
+      name: "Mehwish Ali",
+      email: "mehwish@example.com",
+      subject: "Retainer inquiry",
+      body: "Need ongoing design + marketing support.",
+      status: "read",
+      updatedAt: "Jul 21, 2026",
+    },
+  ],
+  sales: [
+    {
+      id: "sale_01",
+      repId: "emp_05",
+      status: "won",
+      usDot: "3456789",
+      mc: "MC-912345",
+      legalName: "Horizon Freight LLC",
+      dba: "Horizon Freight",
+      businessAddress: "1200 Industrial Pkwy, Dallas, TX 75201",
+      ownerOperatorDriver: "Imran Qureshi",
+      taxId: "12-3456789",
+      salesAgent: "Dana Ortiz",
+      businessTelephone: "+1 214 555 0188",
+      truckType: "Dry Van",
+      type: "Carrier",
+      contactName: "Imran Qureshi",
+      contactPhone: "+1 214 555 0188",
+      contactEmail: "imran@horizonfreight.example",
+      truck: "Freightliner Cascadia",
+      trailer: "53' Dry Van",
+      insuranceName: "North Star Mutual",
+      insurancePhone: "+1 800 555 0101",
+      insuranceStreet: "400 Insurance Way",
+      insuranceCityStateZip: "Austin, TX 78701",
+      insuranceEmail: "claims@northstar.example",
+      factoringName: "Relay Factoring",
+      factoringPhone: "+1 800 555 0199",
+      factoringStreet: "88 Finance Blvd",
+      factoringCityStateZip: "Houston, TX 77002",
+      factoringEmail: "ops@relayfactor.example",
+      approvedBy: "Dana Ortiz",
+      updatedAt: "Jul 28, 2026",
+    },
+    {
+      id: "sale_02",
+      repId: "emp_05",
+      status: "quoted",
+      usDot: "2987654",
+      mc: "MC-778821",
+      legalName: "Atlas Haulage Inc",
+      dba: "Atlas Haulage",
+      businessAddress: "55 Dock Road, Chicago, IL 60608",
+      ownerOperatorDriver: "Lina Brooks",
+      taxId: "36-9988776",
+      salesAgent: "Dana Ortiz",
+      businessTelephone: "+1 312 555 0140",
+      truckType: "Reefer",
+      type: "Carrier",
+      contactName: "Lina Brooks",
+      contactPhone: "+1 312 555 0140",
+      contactEmail: "lina@atlashaulage.example",
+      truck: "Volvo VNL",
+      trailer: "53' Reefer",
+      insuranceName: "Prairie Cover",
+      insurancePhone: "+1 800 555 0133",
+      insuranceStreet: "12 Policy St",
+      insuranceCityStateZip: "Chicago, IL 60601",
+      insuranceEmail: "desk@prairiecover.example",
+      factoringName: "",
+      factoringPhone: "",
+      factoringStreet: "",
+      factoringCityStateZip: "",
+      factoringEmail: "",
+      approvedBy: "",
+      updatedAt: "Jul 29, 2026",
+    },
+    {
+      id: "sale_03",
+      repId: "emp_06",
+      status: "draft",
+      usDot: "4112233",
+      mc: "MC-554433",
+      legalName: "Cedar Logistics LLC",
+      dba: "Cedar Logistics",
+      businessAddress: "9 Yard Lane, Atlanta, GA 30303",
+      ownerOperatorDriver: "Omar Shah",
+      taxId: "58-1122334",
+      salesAgent: "Chris Patel",
+      businessTelephone: "+1 404 555 0177",
+      truckType: "Flatbed",
+      type: "Carrier",
+      contactName: "Omar Shah",
+      contactPhone: "+1 404 555 0177",
+      contactEmail: "omar@cedarlogistics.example",
+      truck: "Kenworth T680",
+      trailer: "48' Flatbed",
+      insuranceName: "",
+      insurancePhone: "",
+      insuranceStreet: "",
+      insuranceCityStateZip: "",
+      insuranceEmail: "",
+      factoringName: "",
+      factoringPhone: "",
+      factoringStreet: "",
+      factoringCityStateZip: "",
+      factoringEmail: "",
+      approvedBy: "",
+      updatedAt: "Jul 27, 2026",
+    },
+  ],
+  leads: [
+    {
+      id: "lead_01",
+      repId: "emp_05",
+      company: "Pacific Reef Shipping",
+      contactName: "Nora Ellison",
+      phone: "+1 312 555 0144",
+      email: "nora@pacificreef.example",
+      source: "Referral",
+      status: "contacted",
+      notes: "Needs refrigerated capacity in Q3.",
+      updatedAt: "Jul 29, 2026",
+    },
+    {
+      id: "lead_02",
+      repId: "emp_06",
+      company: "Summit Parcel Co",
+      contactName: "Gabe Nunez",
+      phone: "+1 214 555 0190",
+      email: "gabe@summitparcel.example",
+      source: "Inbound",
+      status: "new",
+      notes: "Asked for rate sheet.",
+      updatedAt: "Jul 30, 2026",
+    },
+    {
+      id: "lead_03",
+      repId: "emp_05",
+      company: "Ironbelt Carriers",
+      contactName: "Priya Nair",
+      phone: "+1 416 555 0172",
+      email: "priya@ironbelt.example",
+      source: "Cold call",
+      status: "qualified",
+      notes: "Decision maker confirmed.",
+      updatedAt: "Jul 26, 2026",
+    },
+  ],
+  leadFollowUps: [
+    {
+      id: "fu_01",
+      leadId: "lead_01",
+      at: "Jul 29, 2026 · 14:20",
+      note: "Sent lane options and insurance packet.",
+      outcome: "Awaiting reply",
+    },
+    {
+      id: "fu_02",
+      leadId: "lead_03",
+      at: "Jul 26, 2026 · 11:05",
+      note: "Qualified budget and volume.",
+      outcome: "Book discovery call",
+    },
+  ],
+  salesMessages: [
+    {
+      id: "sm_01",
+      fromRepId: "emp_06",
+      toRepId: "emp_05",
+      body: "Can you review the Atlas Haulage quote before I send?",
+      at: "Jul 29, 2026 · 09:40",
+      read: true,
+    },
+    {
+      id: "sm_02",
+      fromRepId: "emp_05",
+      toRepId: "emp_06",
+      body: "Looks good — tighten the detention clause and send.",
+      at: "Jul 29, 2026 · 10:12",
+      read: false,
+    },
+  ],
+};
