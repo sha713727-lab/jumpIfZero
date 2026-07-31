@@ -1,3 +1,5 @@
+"use server";
+
 import { demoCustomer } from "@/constants/demoCustomer";
 import type { LoginFormValues } from "@/constants/login";
 
@@ -5,21 +7,21 @@ export type LoginSubmitResult =
   | { readonly ok: true }
   | { readonly ok: false; readonly reason: "credentials" | "server" };
 
-const DEMO_PASSWORD = "northline";
-
 export async function submitLogin(
   values: LoginFormValues,
 ): Promise<LoginSubmitResult> {
-  await new Promise((resolve) => {
-    window.setTimeout(resolve, 900);
-  });
+  const expectedPassword = process.env.DEMO_CUSTOMER_PASSWORD;
+
+  if (expectedPassword === undefined || expectedPassword === "") {
+    return { ok: false, reason: "server" };
+  }
 
   const email = values.email.trim().toLowerCase();
   const password = values.password;
 
   if (
     email !== demoCustomer.email.toLowerCase() ||
-    password !== DEMO_PASSWORD
+    password !== expectedPassword
   ) {
     return { ok: false, reason: "credentials" };
   }
