@@ -9,11 +9,9 @@ as the migration seam, not as permanent product architecture.
 | Order | Batch | Notes |
 |---|---|---|
 | done | 1, Google fakes #49–51, #52, **3.5** (+ 8a–8d acceptance) | Cookie sessions + role/kind gates + swappable `lookupCredentials` |
-| done | **2**, **3**, **4**, **4.5**, **4.6**, **5** | Through a11y Batch 5 |
-| next | **6** | Platform & config |
-| then | 5 → 6 | Unchanged |
-| then | **7** Bundle | **Analysis only** this phase |
-| then | 8+ / cleanup | Unchanged |
+| done | **2**, **3**, **4**, **4.5**, **4.6**, **5**, **6** | Through platform & config Batch 6 |
+| next | **7** Bundle | Analysis + safe dynamic imports only |
+| then | Cleanup + final report | Unchanged |
 
 ## E. Residual risk register
 
@@ -121,6 +119,29 @@ SESSION_SECRET=REPLACE_ME__not_a_real_secret__min_32_chars
 | **44** | Option (b): removed mock form/`submitContact`/`validateContact`; contact page is mailto + tel (`ContactDirect`). |
 
 - Unchanged from prior plan; zod **approved** for Batch 4.6.
+
+### BATCH 6 — Platform & config
+
+| ID | Commit | Change |
+|---|---|---|
+| **15** | `376de1d` + `c3a0cc3` | `error.tsx` / `global-error.tsx`; Link for home CTA (eslint fallout) |
+| **24** | `b9904b1` | `not-found.tsx` |
+| **25** | `9368754` | `sitemap.ts` / `robots.ts` from nav + blog |
+| **14** | `344a123` | CSP `object-src 'none'`; **kept** `script-src 'unsafe-inline'` (§6.1) |
+| **34** | `55f2530` | Prod HSTS `max-age=63072000; includeSubDomains; preload` |
+| **31** | `b4f4039` | Strict tsconfig flags; fallout **0** files |
+| **30** | `b59847b` + `6cd6788` | `no-console: error`; CLI `scripts/**/*.cjs` exempt |
+| **33** | `eaf877f` | `"engines": { "node": ">=20.9.0" }` |
+| **32** | `4e81e68` | Dropped `--webpack`; Turbopack Ready (smoke `:3015`) |
+| **tokens** | `e0df08d` | `engagementMix` → `var(--color-brand|brand-deep|secondary|secondary-deep)` |
+| **29** | `227ec89` | `.github/workflows/frontend-ci.yml` |
+| **40-lint** | (already present) | `scripts/**/*.cjs` CommonJS override — no new commit |
+
+**§7 gate:** `TSC_EXIT:0` · `ESLINT_EXIT:0` · `BUILD_EXIT:0`
+
+**Flags**
+- CI step `npm audit --omit=dev --audit-level=high` **will fail today** (next→postcss/sharp highs; ACCEPTED this phase — do not `audit fix --force`). Workflow still includes the step as specified.
+- Demo portal accessibility decision still open (Batch notes F).
 
 ### BATCH 5 — Accessibility (§21)
 
