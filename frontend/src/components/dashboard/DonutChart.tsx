@@ -16,7 +16,14 @@ export function DonutChart({
   const stroke = 28;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
-  let offset = 0;
+  const segments = slices.map((slice, index) => {
+    const length = (slice.percent / 100) * circumference;
+    const offset = slices
+      .slice(0, index)
+      .reduce((sum, item) => sum + (item.percent / 100) * circumference, 0);
+
+    return { slice, length, offset };
+  });
 
   return (
     <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
@@ -36,27 +43,21 @@ export function DonutChart({
             stroke="rgba(13,18,11,0.06)"
             strokeWidth={stroke}
           />
-          {slices.map((slice) => {
-            const length = (slice.percent / 100) * circumference;
-            const current = offset;
-            offset += length;
-
-            return (
-              <circle
-                key={slice.label}
-                cx={size / 2}
-                cy={size / 2}
-                r={radius}
-                fill="none"
-                stroke={slice.color}
-                strokeWidth={stroke}
-                strokeDasharray={`${length} ${circumference - length}`}
-                strokeDashoffset={-current}
-                strokeLinecap="butt"
-                transform={`rotate(-90 ${size / 2} ${size / 2})`}
-              />
-            );
-          })}
+          {segments.map(({ slice, length, offset }) => (
+            <circle
+              key={slice.label}
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="none"
+              stroke={slice.color}
+              strokeWidth={stroke}
+              strokeDasharray={`${length} ${circumference - length}`}
+              strokeDashoffset={-offset}
+              strokeLinecap="butt"
+              transform={`rotate(-90 ${size / 2} ${size / 2})`}
+            />
+          ))}
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <p className="text-[0.65rem] font-extrabold tracking-[0.16em] text-black/40 uppercase">
