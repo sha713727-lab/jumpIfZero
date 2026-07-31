@@ -425,10 +425,6 @@ export function LoginPageClient() {
                 {loginCopy.registerLink}
               </Link>
             </p>
-
-            <p className="text-center text-[0.78rem] leading-[1.45] font-medium text-black/40">
-              {loginCopy.demoHint}
-            </p>
           </form>
         </div>
       </section>

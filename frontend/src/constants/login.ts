@@ -12,7 +12,6 @@ export const loginCopy = {
   registerPrompt: "Don't have an account?",
   registerLink: "Register",
   registerHref: "/register" as const,
-  demoHint: "Demo customer: ayesha@northline.co · password: northline",
   orDivider: "or",
   google: "Continue with Google",
   googleSubmitting: "Connecting…",
