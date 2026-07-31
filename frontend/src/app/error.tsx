@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 type ErrorPageProps = {
   readonly error: Error & { digest?: string };
   readonly reset: () => void;
@@ -26,12 +28,12 @@ export default function ErrorPage({ reset }: ErrorPageProps) {
           >
             Try again
           </button>
-          <a
+          <Link
             href="/"
             className="rounded-xl border border-black/12 bg-white px-5 py-3 text-[0.88rem] font-semibold text-[#0d120b]"
           >
             Go home
-          </a>
+          </Link>
         </div>
       </div>
     </main>

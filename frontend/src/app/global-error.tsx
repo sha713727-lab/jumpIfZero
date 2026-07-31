@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { nourd } from "@/lib/fonts";
 import "@/styles/globals.css";
 
@@ -31,12 +32,12 @@ export default function GlobalError({ reset }: GlobalErrorProps) {
               >
                 Try again
               </button>
-              <a
+              <Link
                 href="/"
                 className="rounded-xl border border-black/12 bg-white px-5 py-3 text-[0.88rem] font-semibold text-[#0d120b]"
               >
                 Go home
-              </a>
+              </Link>
             </div>
           </div>
         </main>
