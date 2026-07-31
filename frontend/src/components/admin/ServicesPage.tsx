@@ -257,28 +257,33 @@ export function ServicesPage() {
         submitLabel={editingId ? "Save changes" : "Add service"}
       >
         <div>
-          <label className={adminLabelClass}>Title</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Title</span>
+            <input
             className={adminFieldClass}
             value={form.title}
             onChange={(event) =>
               setForm((current) => ({ ...current, title: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Slug</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Slug</span>
+            <input
             className={adminFieldClass}
             value={form.slug}
             onChange={(event) =>
               setForm((current) => ({ ...current, slug: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Description</label>
-          <textarea
+          <label className="block">
+            <span className={adminLabelClass}>Description</span>
+            <textarea
             className={`${adminFieldClass} min-h-[5rem] resize-y`}
             value={form.description}
             onChange={(event) =>
@@ -288,6 +293,7 @@ export function ServicesPage() {
               }))
             }
           />
+          </label>
         </div>
         <AdminImageField
           label="Image"
@@ -295,14 +301,16 @@ export function ServicesPage() {
           onChange={(image) => setForm((current) => ({ ...current, image }))}
         />
         <div>
-          <label className={adminLabelClass}>Path</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Path</span>
+            <input
             className={adminFieldClass}
             value={form.path}
             onChange={(event) =>
               setForm((current) => ({ ...current, path: event.target.value }))
             }
           />
+          </label>
         </div>
         <label className="inline-flex items-center gap-2 text-[0.88rem] font-semibold">
           <input

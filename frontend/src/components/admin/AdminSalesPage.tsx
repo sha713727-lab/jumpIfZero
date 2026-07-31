@@ -172,10 +172,14 @@ export function AdminSalesPage() {
       />
 
       <div className="flex flex-wrap items-center gap-3">
-        <label className="text-[0.84rem] font-semibold text-black/50">
+        <label
+          htmlFor="admin-sales-status-filter"
+          className="text-[0.84rem] font-semibold text-black/50"
+        >
           Status
         </label>
         <select
+          id="admin-sales-status-filter"
           className={`${adminFieldClass} w-auto min-w-[10rem]`}
           value={statusFilter}
           onChange={(event) =>
@@ -289,8 +293,9 @@ export function AdminSalesPage() {
         onSubmit={save}
       >
         <div>
-          <label className={adminLabelClass}>Rep</label>
-          <select
+          <label className="block">
+            <span className={adminLabelClass}>Rep</span>
+            <select
             className={adminFieldClass}
             value={form.repId}
             onChange={(event) => {
@@ -310,10 +315,12 @@ export function AdminSalesPage() {
               </option>
             ))}
           </select>
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Pipeline status</label>
-          <select
+          <label className="block">
+            <span className={adminLabelClass}>Pipeline status</span>
+            <select
             className={adminFieldClass}
             value={form.status}
             onChange={(event) =>
@@ -329,6 +336,7 @@ export function AdminSalesPage() {
               </option>
             ))}
           </select>
+          </label>
         </div>
         <CarrierSalesSheetFields
           value={form}

@@ -209,34 +209,40 @@ export function TeamPage() {
         onSubmit={save}
       >
         <div>
-          <label className={adminLabelClass}>Name</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Name</span>
+            <input
             className={adminFieldClass}
             value={form.name}
             onChange={(event) =>
               setForm((current) => ({ ...current, name: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Role</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Role</span>
+            <input
             className={adminFieldClass}
             value={form.role}
             onChange={(event) =>
               setForm((current) => ({ ...current, role: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Bio</label>
-          <textarea
+          <label className="block">
+            <span className={adminLabelClass}>Bio</span>
+            <textarea
             className={`${adminFieldClass} min-h-[5rem] resize-y`}
             value={form.bio}
             onChange={(event) =>
               setForm((current) => ({ ...current, bio: event.target.value }))
             }
           />
+          </label>
         </div>
         <AdminImageField
           label="Image"
@@ -244,8 +250,9 @@ export function TeamPage() {
           onChange={(image) => setForm((current) => ({ ...current, image }))}
         />
         <div>
-          <label className={adminLabelClass}>Linked employee</label>
-          <select
+          <label className="block">
+            <span className={adminLabelClass}>Linked employee</span>
+            <select
             className={adminFieldClass}
             value={form.employeeId}
             onChange={(event) =>
@@ -259,6 +266,7 @@ export function TeamPage() {
               </option>
             ))}
           </select>
+          </label>
         </div>
         <label className="inline-flex items-center gap-2 text-[0.88rem] font-semibold">
           <input

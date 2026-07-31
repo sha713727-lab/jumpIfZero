@@ -173,24 +173,28 @@ export function FaqsPage() {
         onSubmit={save}
       >
         <div>
-          <label className={adminLabelClass}>Question</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Question</span>
+            <input
             className={adminFieldClass}
             value={form.question}
             onChange={(event) =>
               setForm((current) => ({ ...current, question: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Answer</label>
-          <textarea
+          <label className="block">
+            <span className={adminLabelClass}>Answer</span>
+            <textarea
             className={`${adminFieldClass} min-h-[6rem] resize-y`}
             value={form.answer}
             onChange={(event) =>
               setForm((current) => ({ ...current, answer: event.target.value }))
             }
           />
+          </label>
         </div>
         <label className="inline-flex items-center gap-2 text-[0.88rem] font-semibold">
           <input

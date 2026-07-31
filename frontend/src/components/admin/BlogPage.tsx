@@ -206,34 +206,40 @@ export function BlogPage() {
         onSubmit={save}
       >
         <div>
-          <label className={adminLabelClass}>Title</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Title</span>
+            <input
             className={adminFieldClass}
             value={form.title}
             onChange={(event) =>
               setForm((current) => ({ ...current, title: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Slug</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Slug</span>
+            <input
             className={adminFieldClass}
             value={form.slug}
             onChange={(event) =>
               setForm((current) => ({ ...current, slug: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Excerpt</label>
-          <textarea
+          <label className="block">
+            <span className={adminLabelClass}>Excerpt</span>
+            <textarea
             className={`${adminFieldClass} min-h-[5rem] resize-y`}
             value={form.excerpt}
             onChange={(event) =>
               setForm((current) => ({ ...current, excerpt: event.target.value }))
             }
           />
+          </label>
         </div>
         <AdminImageField
           label="Image"

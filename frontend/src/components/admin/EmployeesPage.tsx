@@ -242,18 +242,21 @@ export function EmployeesPage() {
         onSubmit={save}
       >
         <div>
-          <label className={adminLabelClass}>Name</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Name</span>
+            <input
             className={adminFieldClass}
             value={form.name}
             onChange={(event) =>
               setForm((current) => ({ ...current, name: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Email</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Email</span>
+            <input
             type="email"
             className={adminFieldClass}
             value={form.email}
@@ -261,30 +264,36 @@ export function EmployeesPage() {
               setForm((current) => ({ ...current, email: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Role</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Role</span>
+            <input
             className={adminFieldClass}
             value={form.role}
             onChange={(event) =>
               setForm((current) => ({ ...current, role: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Department</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Department</span>
+            <input
             className={adminFieldClass}
             value={form.department}
             onChange={(event) =>
               setForm((current) => ({ ...current, department: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Kind</label>
-          <select
+          <label className="block">
+            <span className={adminLabelClass}>Kind</span>
+            <select
             className={adminFieldClass}
             value={form.kind}
             onChange={(event) =>
@@ -297,6 +306,7 @@ export function EmployeesPage() {
             <option value="delivery">{employeeKindLabel.delivery}</option>
             <option value="sales">{employeeKindLabel.sales}</option>
           </select>
+          </label>
         </div>
         <AdminImageField
           label="Image"

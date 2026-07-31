@@ -68,22 +68,26 @@ export function SecurityPage() {
         submitLabel="Update password"
       >
         <div>
-          <label className={adminLabelClass}>New password</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>New password</span>
+            <input
             type="password"
             className={adminFieldClass}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Confirm password</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Confirm password</span>
+            <input
             type="password"
             className={adminFieldClass}
             value={confirm}
             onChange={(event) => setConfirm(event.target.value)}
           />
+          </label>
         </div>
       </AdminFormModal>
     </div>

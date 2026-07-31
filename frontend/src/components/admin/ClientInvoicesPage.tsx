@@ -113,28 +113,33 @@ export function ClientInvoicesPage() {
         submitLabel="Create"
       >
         <div>
-          <label className={adminLabelClass}>Invoice number</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Invoice number</span>
+            <input
             className={adminFieldClass}
             value={form.number}
             onChange={(event) =>
               setForm((current) => ({ ...current, number: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Title</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Title</span>
+            <input
             className={adminFieldClass}
             value={form.title}
             onChange={(event) =>
               setForm((current) => ({ ...current, title: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Amount</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Amount</span>
+            <input
             className={adminFieldClass}
             value={form.amount}
             onChange={(event) =>
@@ -142,10 +147,12 @@ export function ClientInvoicesPage() {
             }
             placeholder="PKR 100,000"
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Status</label>
-          <select
+          <label className="block">
+            <span className={adminLabelClass}>Status</span>
+            <select
             className={adminFieldClass}
             value={form.status}
             onChange={(event) =>
@@ -159,6 +166,7 @@ export function ClientInvoicesPage() {
             <option value="sent">Sent</option>
             <option value="paid">Paid</option>
           </select>
+          </label>
         </div>
       </AdminFormModal>
     </div>

@@ -207,34 +207,40 @@ export function PortfolioPage() {
         onSubmit={save}
       >
         <div>
-          <label className={adminLabelClass}>Title</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Title</span>
+            <input
             className={adminFieldClass}
             value={form.title}
             onChange={(event) =>
               setForm((current) => ({ ...current, title: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Category</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Category</span>
+            <input
             className={adminFieldClass}
             value={form.category}
             onChange={(event) =>
               setForm((current) => ({ ...current, category: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Summary</label>
-          <textarea
+          <label className="block">
+            <span className={adminLabelClass}>Summary</span>
+            <textarea
             className={`${adminFieldClass} min-h-[5rem] resize-y`}
             value={form.summary}
             onChange={(event) =>
               setForm((current) => ({ ...current, summary: event.target.value }))
             }
           />
+          </label>
         </div>
         <AdminImageField
           label="Image"

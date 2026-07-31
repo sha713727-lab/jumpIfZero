@@ -96,12 +96,15 @@ export function ProjectDetailPage() {
         <h2 className="text-[1.05rem] font-extrabold tracking-[-0.02em] text-[#0d120b]">
           Notes
         </h2>
-        <textarea
-          rows={6}
-          value={notes}
-          onChange={(event) => setNotes(event.target.value)}
-          className={`${adminFieldClass} mt-4 resize-y`}
-        />
+        <label className="mt-4 block">
+          <span className="sr-only">Notes</span>
+          <textarea
+            rows={6}
+            value={notes}
+            onChange={(event) => setNotes(event.target.value)}
+            className={`${adminFieldClass} resize-y`}
+          />
+        </label>
         <button
           type="button"
           onClick={onSaveNotes}

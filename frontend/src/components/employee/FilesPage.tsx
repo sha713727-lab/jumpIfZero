@@ -138,6 +138,7 @@ export function FilesPage() {
         ref={fileInputRef}
         type="file"
         className="sr-only"
+        aria-label="Upload file"
         onChange={(event) => {
           void onFileSelect(event);
         }}

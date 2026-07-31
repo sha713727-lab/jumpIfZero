@@ -174,6 +174,7 @@ function DeliveryMessagesPage() {
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
                   placeholder="Write a message…"
+                  aria-label="Write a message"
                 />
                 <button
                   type="submit"
@@ -358,6 +359,7 @@ function SalesMessagesPage() {
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
                   placeholder="Write a message…"
+                  aria-label="Write a message"
                 />
                 <button
                   type="submit"

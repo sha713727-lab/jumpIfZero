@@ -66,19 +66,17 @@ export function TeamDetailModal({ member, onClose }: TeamDetailModalProps) {
     return null;
   }
 
-  const onBackdropClick = (event: ReactMouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) {
-      onClose();
-    }
-  };
-
   return createPortal(
     <div
       ref={containerRef}
-      role="presentation"
       className="fixed inset-0 z-[80] flex items-end justify-center bg-[rgba(13,18,11,0.72)] p-0 backdrop-blur-[6px] sm:items-center sm:p-6 md:p-10"
-      onClick={onBackdropClick}
     >
+      <button
+        type="button"
+        aria-label="Close team member details"
+        className="absolute inset-0"
+        onClick={onClose}
+      />
       <div
         role="dialog"
         aria-modal="true"

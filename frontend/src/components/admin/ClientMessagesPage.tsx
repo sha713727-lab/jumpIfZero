@@ -131,6 +131,7 @@ export function ClientMessagesPage() {
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               placeholder="Reply as admin…"
+              aria-label="Reply as admin"
             />
             <button
               type="submit"

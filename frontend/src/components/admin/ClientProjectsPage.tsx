@@ -99,6 +99,7 @@ export function ClientProjectsPage() {
                 </div>
                 <select
                   value={project.status}
+                  aria-label={`Status for ${project.title}`}
                   onChange={(event) =>
                     updateProjectStatus(
                       project.id,
@@ -132,18 +133,21 @@ export function ClientProjectsPage() {
         submitLabel="Create project"
       >
         <div>
-          <label className={adminLabelClass}>Title</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Title</span>
+            <input
             className={adminFieldClass}
             value={form.title}
             onChange={(event) =>
               setForm((current) => ({ ...current, title: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Service</label>
-          <select
+          <label className="block">
+            <span className={adminLabelClass}>Service</span>
+            <select
             className={adminFieldClass}
             value={form.service}
             onChange={(event) =>
@@ -157,10 +161,12 @@ export function ClientProjectsPage() {
               </option>
             ))}
           </select>
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Status</label>
-          <select
+          <label className="block">
+            <span className={adminLabelClass}>Status</span>
+            <select
             className={adminFieldClass}
             value={form.status}
             onChange={(event) =>
@@ -176,6 +182,7 @@ export function ClientProjectsPage() {
               </option>
             ))}
           </select>
+          </label>
         </div>
       </AdminFormModal>
     </div>

@@ -127,8 +127,9 @@ function SaleFormFields({
 
       <section className={`${cardClass} space-y-6`}>
         <div>
-          <label className={adminLabelClass}>Pipeline status</label>
-          <select
+          <label className="block">
+            <span className={adminLabelClass}>Pipeline status</span>
+            <select
             className={adminFieldClass}
             value={status}
             onChange={(event) => setStatus(event.target.value as SaleStatus)}
@@ -139,6 +140,7 @@ function SaleFormFields({
               </option>
             ))}
           </select>
+          </label>
         </div>
 
         <CarrierSalesSheetFields

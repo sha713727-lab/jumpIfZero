@@ -74,18 +74,21 @@ export function LeadFormPage() {
 
       <section className={`${cardClass} space-y-4`}>
         <div>
-          <label className={adminLabelClass}>Company</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Company</span>
+            <input
             className={adminFieldClass}
             value={form.company}
             onChange={(event) =>
               setForm((current) => ({ ...current, company: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Contact name</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Contact name</span>
+            <input
             className={adminFieldClass}
             value={form.contactName}
             onChange={(event) =>
@@ -95,20 +98,24 @@ export function LeadFormPage() {
               }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Phone</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Phone</span>
+            <input
             className={adminFieldClass}
             value={form.phone}
             onChange={(event) =>
               setForm((current) => ({ ...current, phone: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Email</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Email</span>
+            <input
             type="email"
             className={adminFieldClass}
             value={form.email}
@@ -116,20 +123,24 @@ export function LeadFormPage() {
               setForm((current) => ({ ...current, email: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Source</label>
-          <input
+          <label className="block">
+            <span className={adminLabelClass}>Source</span>
+            <input
             className={adminFieldClass}
             value={form.source}
             onChange={(event) =>
               setForm((current) => ({ ...current, source: event.target.value }))
             }
           />
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Status</label>
-          <select
+          <label className="block">
+            <span className={adminLabelClass}>Status</span>
+            <select
             className={adminFieldClass}
             value={form.status}
             onChange={(event) =>
@@ -145,16 +156,19 @@ export function LeadFormPage() {
               </option>
             ))}
           </select>
+          </label>
         </div>
         <div>
-          <label className={adminLabelClass}>Notes</label>
-          <textarea
+          <label className="block">
+            <span className={adminLabelClass}>Notes</span>
+            <textarea
             className={`${adminFieldClass} min-h-[6rem] resize-y`}
             value={form.notes}
             onChange={(event) =>
               setForm((current) => ({ ...current, notes: event.target.value }))
             }
           />
+          </label>
         </div>
         <div className="flex flex-wrap justify-end gap-2 pt-2">
           <button
