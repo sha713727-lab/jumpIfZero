@@ -1,5 +1,6 @@
-import { demoAdmin, type AdminLoginFormValues } from "@/constants/adminAuth";
-import { getDemoAdminCredentials } from "@/lib/env";
+"use server";
+
+import type { AdminLoginFormValues } from "@/constants/adminAuth";
 
 export type AdminLoginSubmitResult =
   | { readonly ok: true }
@@ -8,17 +9,19 @@ export type AdminLoginSubmitResult =
 export async function submitAdminLogin(
   values: AdminLoginFormValues,
 ): Promise<AdminLoginSubmitResult> {
-  await new Promise((resolve) => {
-    window.setTimeout(resolve, 900);
-  });
+  const expectedEmail = process.env.DEMO_ADMIN_EMAIL?.trim();
+  const expectedPassword = process.env.DEMO_ADMIN_PASSWORD;
+
+  if (!expectedEmail || expectedPassword === undefined || expectedPassword === "") {
+    return { ok: false, reason: "server" };
+  }
 
   const email = values.email.trim().toLowerCase();
   const password = values.password;
-  const credentials = getDemoAdminCredentials();
 
   if (
-    email !== demoAdmin.email.toLowerCase() ||
-    password !== credentials.password
+    email !== expectedEmail.toLowerCase() ||
+    password !== expectedPassword
   ) {
     return { ok: false, reason: "credentials" };
   }

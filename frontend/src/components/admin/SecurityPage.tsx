@@ -45,12 +45,6 @@ export function SecurityPage() {
             </dd>
           </div>
           <div className="flex justify-between gap-4">
-            <dt className="text-[0.84rem] font-medium text-black/45">Email</dt>
-            <dd className="text-[0.88rem] font-semibold text-[#0d120b]">
-              {demoAdmin.email}
-            </dd>
-          </div>
-          <div className="flex justify-between gap-4">
             <dt className="text-[0.84rem] font-medium text-black/45">Role</dt>
             <dd className="text-[0.88rem] font-semibold text-[#0d120b]">
               {demoAdmin.role}

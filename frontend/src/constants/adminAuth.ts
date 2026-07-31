@@ -1,11 +1,6 @@
-import { getDemoAdminCredentials } from "@/lib/env";
-
-const credentials = getDemoAdminCredentials();
-
 export const demoAdmin = {
   id: "admin_demo_001",
   name: "Alex Rivera",
-  email: credentials.email,
   role: "Founder & Admin",
   initials: "AR",
 } as const;
