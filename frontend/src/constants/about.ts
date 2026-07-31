@@ -50,10 +50,10 @@
     mapEmbedUrl:
       "https://maps.google.com/maps?q=182%20LDA%20Avenue%20One%20Road%2C%20Public%20Health%20Society%20Block%20B%2C%20Lahore%2C%20Punjab%2C%20Pakistan&z=15&output=embed",
     emailLabel: "Email",
-    email: "hello@example.com",
+    email: "ikram@jumpifzero.com",
     phoneLabel: "Phone",
-    phone: "+1 (555) 010-0000",
-    phoneHref: "tel:+15550100000",
+    phone: "03079222055",
+    phoneHref: "tel:+923079222055",
     ctaLabel: "Start a scoped engagement",
     ctaHref: "/contact",
   },

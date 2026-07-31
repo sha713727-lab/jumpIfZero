@@ -23,7 +23,7 @@ export const contactCopy = {
 } as const;
 
 export const contactDetails = {
-  email: "hello@example.com",
+  email: "ikram@jumpifzero.com",
 } as const;
 
 export const projectTypes = [
