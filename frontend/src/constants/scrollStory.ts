@@ -13,8 +13,4 @@ export const scrollStory = {
     "Technical excellence. Clear communication. Outcomes you can scale.",
     "That is how Jump If Zero works.",
   ] as const,
-  sources: {
-    jumpIfZero: "https://jumpifzero.com/",
-    bitnex: "https://bitnextechnologies.com/",
-  } as const,
 } as const;
