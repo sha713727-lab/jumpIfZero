@@ -1,11 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import styles from "./landingAlt.module.css";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const WORD_DURATION = 0.95;
 const WORD_STAGGER = 0.06;
@@ -37,29 +33,48 @@ export function RevealText({
       return;
     }
 
-    const words = host.querySelectorAll<HTMLElement>(`.${styles.revealInner}`);
+    let cancelled = false;
+    let ctx: { revert: () => void } | null = null;
 
-    const ctx = gsap.context(() => {
-      const motion = {
-        yPercent: 120,
-        duration: WORD_DURATION,
-        ease: "power4.out",
-        stagger: WORD_STAGGER,
-        delay,
-      };
+    void (async () => {
+      const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
+        import("gsap"),
+        import("gsap/ScrollTrigger"),
+      ]);
 
-      if (playOnLoad) {
-        gsap.from(words, motion);
+      if (cancelled || !hostRef.current) {
         return;
       }
 
-      gsap.from(words, {
-        ...motion,
-        scrollTrigger: { trigger: host, start: TRIGGER_START },
-      });
-    }, host);
+      gsap.registerPlugin(ScrollTrigger);
 
-    return () => ctx.revert();
+      const words = host.querySelectorAll<HTMLElement>(`.${styles.revealInner}`);
+
+      ctx = gsap.context(() => {
+        const motion = {
+          yPercent: 120,
+          duration: WORD_DURATION,
+          ease: "power4.out",
+          stagger: WORD_STAGGER,
+          delay,
+        };
+
+        if (playOnLoad) {
+          gsap.from(words, motion);
+          return;
+        }
+
+        gsap.from(words, {
+          ...motion,
+          scrollTrigger: { trigger: host, start: TRIGGER_START },
+        });
+      }, host);
+    })();
+
+    return () => {
+      cancelled = true;
+      ctx?.revert();
+    };
   }, [delay, playOnLoad, text]);
 
   return (

@@ -1,10 +1,9 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
 import { TeamDetailModal } from "@/components/about/TeamDetailModal";
-import { TeamMemberCard } from "@/components/about/TeamMemberCard";
-import { ImagesFlow } from "@/components/scroll/ImagesFlow";
 import {
   PinRotateSection,
   PinRotateSections,
@@ -14,6 +13,36 @@ import { aboutFlowCopy, aboutFlowImages } from "@/constants/aboutFlow";
 import { teamIntro, teamMembers, type TeamMember } from "@/lib/data/team";
 
 const CREAM_BG = "#f7f5f0";
+
+const ImagesFlow = dynamic(
+  () =>
+    import("@/components/scroll/ImagesFlow").then((mod) => ({
+      default: mod.ImagesFlow,
+    })),
+  {
+    loading: () => (
+      <section
+        className="min-h-[100svh] bg-[#f3f5ef] [content-visibility:auto] [contain-intrinsic-size:1px_100svh]"
+        aria-hidden="true"
+      />
+    ),
+  },
+);
+
+const TeamMemberCard = dynamic(
+  () =>
+    import("@/components/about/TeamMemberCard").then((mod) => ({
+      default: mod.TeamMemberCard,
+    })),
+  {
+    loading: () => (
+      <div
+        className="min-h-[18rem] [content-visibility:auto] [contain-intrinsic-size:1px_18rem]"
+        aria-hidden="true"
+      />
+    ),
+  },
+);
 
 function splitName(name: string): { firstName: string; lastName: string } {
   const parts = name.trim().split(/\s+/);
