@@ -2,7 +2,7 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { demoAdmin } from "@/constants/adminAuth";
 import { initialAdminDemoState } from "@/lib/data/admin";
 import { demoCustomer } from "@/lib/data/customer";
-import { env } from "@/lib/env";
+import { readDemoCredentials } from "@/schemas/env";
 import type { SessionRole } from "@/lib/session";
 
 export type CredentialLookupResult =
@@ -37,12 +37,18 @@ async function verifyPassword(
 export async function lookupCredentials(
   input: CredentialLookupInput,
 ): Promise<CredentialLookupResult> {
+  const credentials = readDemoCredentials();
+
+  if (!credentials) {
+    return { ok: false, reason: "server" };
+  }
+
   const email = input.email.trim().toLowerCase();
   const password = input.password;
 
   if (input.role === "admin") {
-    const expectedEmail = env.demoAdminEmail.toLowerCase();
-    const expectedPassword = env.demoAdminPassword;
+    const expectedEmail = credentials.DEMO_ADMIN_EMAIL.toLowerCase();
+    const expectedPassword = credentials.DEMO_ADMIN_PASSWORD;
 
     const emailOk = secretsEqual(email, expectedEmail);
     const passwordOk = await verifyPassword(password, expectedPassword);
@@ -55,7 +61,7 @@ export async function lookupCredentials(
   }
 
   if (input.role === "customer") {
-    const expectedPassword = env.demoCustomerPassword;
+    const expectedPassword = credentials.DEMO_CUSTOMER_PASSWORD;
 
     const emailOk = secretsEqual(email, demoCustomer.email.toLowerCase());
     const passwordOk = await verifyPassword(password, expectedPassword);
@@ -67,7 +73,7 @@ export async function lookupCredentials(
     return { ok: true, role: "customer", subjectId: demoCustomer.id };
   }
 
-  const expectedPassword = env.demoEmployeePassword;
+  const expectedPassword = credentials.DEMO_EMPLOYEE_PASSWORD;
 
   const employee = initialAdminDemoState.employees.find(
     (item) => item.active && item.email.toLowerCase() === email,

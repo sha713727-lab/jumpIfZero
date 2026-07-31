@@ -5,10 +5,6 @@ function trimUrl(value: string): string {
 }
 
 export const serverEnvSchema = z.object({
-  DEMO_ADMIN_EMAIL: z.string().trim().min(1).pipe(z.email()),
-  DEMO_ADMIN_PASSWORD: z.string().trim().min(8),
-  DEMO_EMPLOYEE_PASSWORD: z.string().trim().min(8),
-  DEMO_CUSTOMER_PASSWORD: z.string().trim().min(8),
   SESSION_SECRET: z.string().trim().min(32, {
     error: "SESSION_SECRET must be at least 32 characters",
   }),
@@ -17,7 +13,15 @@ export const serverEnvSchema = z.object({
   NODE_ENV: z.string().optional(),
 });
 
+export const demoCredentialsSchema = z.object({
+  DEMO_ADMIN_EMAIL: z.string().trim().min(1).pipe(z.email()),
+  DEMO_ADMIN_PASSWORD: z.string().trim().min(8),
+  DEMO_EMPLOYEE_PASSWORD: z.string().trim().min(8),
+  DEMO_CUSTOMER_PASSWORD: z.string().trim().min(8),
+});
+
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
+export type DemoCredentials = z.infer<typeof demoCredentialsSchema>;
 
 export function resolveSiteUrl(input: {
   readonly siteUrl?: string;
@@ -44,4 +48,19 @@ export function resolveSiteUrl(input: {
   throw new Error(
     "Missing required environment variable: NEXT_PUBLIC_SITE_URL",
   );
+}
+
+export function readDemoCredentials(): DemoCredentials | null {
+  const parsed = demoCredentialsSchema.safeParse({
+    DEMO_ADMIN_EMAIL: process.env.DEMO_ADMIN_EMAIL,
+    DEMO_ADMIN_PASSWORD: process.env.DEMO_ADMIN_PASSWORD,
+    DEMO_EMPLOYEE_PASSWORD: process.env.DEMO_EMPLOYEE_PASSWORD,
+    DEMO_CUSTOMER_PASSWORD: process.env.DEMO_CUSTOMER_PASSWORD,
+  });
+
+  if (!parsed.success) {
+    return null;
+  }
+
+  return parsed.data;
 }
