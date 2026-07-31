@@ -2,11 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import {
-  useId,
-  useRef,
-  type MouseEvent as ReactMouseEvent,
-} from "react";
+import { useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { TeamMember, TeamSocialNetwork } from "@/lib/data/team";
 import { useModalFocus } from "@/lib/useModalFocus";

@@ -35,14 +35,14 @@ export function ServiceDetailModal({
   return createPortal(
     <div
       ref={containerRef}
-      role="presentation"
       className="fixed inset-0 z-[80] flex items-end justify-center bg-[rgba(13,18,11,0.72)] p-0 backdrop-blur-[6px] sm:items-center sm:p-6 md:p-10"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
     >
+      <button
+        type="button"
+        aria-label="Close service details"
+        className="absolute inset-0"
+        onClick={onClose}
+      />
       <div
         role="dialog"
         aria-modal="true"
