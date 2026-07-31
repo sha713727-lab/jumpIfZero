@@ -10,9 +10,7 @@ import {
   type EmployeeLoginFieldErrors,
   type EmployeeLoginFormValues,
 } from "@/constants/employeeAuth";
-import { initialAdminDemoState } from "@/constants/adminDemo";
 import { site } from "@/constants/site";
-import { readEmployeeSession, writeEmployeeSession } from "@/lib/employeeSession";
 import { submitEmployeeLogin } from "@/lib/submitEmployeeLogin";
 import { validateEmployeeLoginForm } from "@/lib/validateEmployeeLogin";
 
@@ -95,22 +93,6 @@ export function EmployeeLoginPageClient() {
   const [forgotOpen, setForgotOpen] = useState(false);
 
   useEffect(() => {
-    const session = readEmployeeSession();
-
-    if (!session) {
-      return;
-    }
-
-    const employee = initialAdminDemoState.employees.find(
-      (item) => item.id === session.employeeId && item.active,
-    );
-
-    if (employee) {
-      router.replace("/employee");
-    }
-  }, [router]);
-
-  useEffect(() => {
     if (Object.keys(errors).length === 0) {
       return;
     }
@@ -156,7 +138,6 @@ export function EmployeeLoginPageClient() {
       return;
     }
 
-    writeEmployeeSession(result.employeeId);
     router.replace("/employee");
   };
 

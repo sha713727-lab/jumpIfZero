@@ -1,6 +1,10 @@
 "use server";
 
-import type { AdminLoginFormValues } from "@/constants/adminAuth";
+import {
+  demoAdmin,
+  type AdminLoginFormValues,
+} from "@/constants/adminAuth";
+import { createSession } from "@/lib/session";
 
 export type AdminLoginSubmitResult =
   | { readonly ok: true }
@@ -26,5 +30,6 @@ export async function submitAdminLogin(
     return { ok: false, reason: "credentials" };
   }
 
+  await createSession("admin", demoAdmin.id);
   return { ok: true };
 }

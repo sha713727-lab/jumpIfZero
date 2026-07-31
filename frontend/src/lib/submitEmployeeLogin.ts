@@ -2,6 +2,7 @@
 
 import type { EmployeeLoginFormValues } from "@/constants/employeeAuth";
 import { initialAdminDemoState } from "@/constants/adminDemo";
+import { createSession } from "@/lib/session";
 
 export type EmployeeLoginSubmitResult =
   | { readonly ok: true; readonly employeeId: string }
@@ -27,5 +28,6 @@ export async function submitEmployeeLogin(
     return { ok: false, reason: "credentials" };
   }
 
+  await createSession("employee", employee.id);
   return { ok: true, employeeId: employee.id };
 }

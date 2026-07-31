@@ -7,12 +7,10 @@ import type { FormEvent } from "react";
 import { ForgotPasswordModal } from "@/components/login/ForgotPasswordModal";
 import {
   adminLoginCopy,
-  demoAdmin,
   type AdminLoginFieldErrors,
   type AdminLoginFormValues,
 } from "@/constants/adminAuth";
 import { site } from "@/constants/site";
-import { readAdminSession, writeAdminSession } from "@/lib/adminSession";
 import { submitAdminLogin } from "@/lib/submitAdminLogin";
 import { validateAdminLoginForm } from "@/lib/validateAdminLogin";
 
@@ -95,14 +93,6 @@ export function AdminLoginPageClient() {
   const [forgotOpen, setForgotOpen] = useState(false);
 
   useEffect(() => {
-    const session = readAdminSession();
-
-    if (session?.adminId === demoAdmin.id) {
-      router.replace("/admin");
-    }
-  }, [router]);
-
-  useEffect(() => {
     if (Object.keys(errors).length === 0) {
       return;
     }
@@ -148,7 +138,6 @@ export function AdminLoginPageClient() {
       return;
     }
 
-    writeAdminSession(demoAdmin.id);
     router.replace("/admin");
   };
 

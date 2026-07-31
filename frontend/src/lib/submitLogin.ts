@@ -2,6 +2,7 @@
 
 import { demoCustomer } from "@/constants/demoCustomer";
 import type { LoginFormValues } from "@/constants/login";
+import { createSession } from "@/lib/session";
 
 export type LoginSubmitResult =
   | { readonly ok: true }
@@ -26,5 +27,6 @@ export async function submitLogin(
     return { ok: false, reason: "credentials" };
   }
 
+  await createSession("customer", demoCustomer.id);
   return { ok: true };
 }

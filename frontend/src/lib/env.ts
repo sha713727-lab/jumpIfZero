@@ -12,6 +12,18 @@ function requireEnv(name: string): string {
   return value;
 }
 
+function requireSessionSecret(): string {
+  const value = requireEnv("SESSION_SECRET");
+
+  if (value.length < 32) {
+    throw new Error(
+      "SESSION_SECRET must be at least 32 characters",
+    );
+  }
+
+  return value;
+}
+
 function resolveSiteUrl(): string {
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
 
@@ -46,4 +58,5 @@ requireEnv("DEMO_CUSTOMER_PASSWORD");
 export const env = {
   siteUrl: resolveSiteUrl(),
   nodeEnv: process.env.NODE_ENV ?? "development",
+  sessionSecret: requireSessionSecret(),
 } as const;

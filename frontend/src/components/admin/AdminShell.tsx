@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { adminIcons } from "@/components/admin/AdminIcons";
 import { AdminDemoProvider } from "@/components/admin/AdminDemoProvider";
 import {
@@ -13,7 +13,7 @@ import {
 } from "@/constants/admin";
 import { demoAdmin } from "@/constants/adminAuth";
 import { site } from "@/constants/site";
-import { clearAdminSession, readAdminSession } from "@/lib/adminSession";
+import { submitSignOut } from "@/lib/submitSignOut";
 
 function navIdFromPath(pathname: string): AdminNavId {
   if (pathname === "/admin") {
@@ -39,15 +39,6 @@ function navIdFromPath(pathname: string): AdminNavId {
   return "overview";
 }
 
-function subscribeAdminSession() {
-  return () => undefined;
-}
-
-function getAdminAuthed(): boolean {
-  const session = readAdminSession();
-  return Boolean(session && session.adminId === demoAdmin.id);
-}
-
 function AdminShellInner({
   children,
 }: Readonly<{
@@ -56,36 +47,25 @@ function AdminShellInner({
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const ready = useSyncExternalStore(
-    subscribeAdminSession,
-    getAdminAuthed,
-    () => false,
-  );
+  const [signingOut, setSigningOut] = useState(false);
   const activeId = navIdFromPath(pathname);
   const SignOutIcon = adminIcons.signOut;
   const MenuIcon = adminIcons.menu;
   const CloseIcon = adminIcons.close;
 
   useEffect(() => {
-    if (!ready) {
-      router.replace("/admin/login");
-    }
-  }, [ready, router]);
+    setOpen(false);
+  }, [pathname]);
 
-  const onSignOut = () => {
-    clearAdminSession();
+  const onSignOut = async () => {
+    if (signingOut) {
+      return;
+    }
+
+    setSigningOut(true);
+    await submitSignOut("admin");
     router.replace("/admin/login");
   };
-
-  if (!ready) {
-    return (
-      <div className="flex min-h-[100svh] items-center justify-center bg-[#f3f5ef] text-[#0d120b]">
-        <p className="text-sm font-semibold tracking-[0.14em] text-black/45 uppercase">
-          Loading…
-        </p>
-      </div>
-    );
-  }
 
   const nav = (
     <nav aria-label="Admin" className="flex flex-1 flex-col gap-5 overflow-y-auto px-3 pb-6">

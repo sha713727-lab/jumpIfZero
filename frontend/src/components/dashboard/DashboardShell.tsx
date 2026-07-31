@@ -11,7 +11,7 @@ import {
   type DashboardNavId,
 } from "@/constants/dashboard";
 import { site } from "@/constants/site";
-import { clearDemoSession, readDemoSession } from "@/lib/demoSession";
+import { submitSignOut } from "@/lib/submitSignOut";
 import { dashboardIcons } from "@/components/dashboard/DashboardIcons";
 
 function navIdFromPath(pathname: string): DashboardNavId {
@@ -31,42 +31,26 @@ export function DashboardShell({
 }>) {
   const pathname = usePathname();
   const router = useRouter();
-  const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const activeId = navIdFromPath(pathname);
   const SignOutIcon = dashboardIcons.signOut;
   const MenuIcon = dashboardIcons.menu;
   const CloseIcon = dashboardIcons.close;
 
   useEffect(() => {
-    const session = readDemoSession();
-
-    if (!session || session.customerId !== demoCustomer.id) {
-      router.replace("/login");
-      return;
-    }
-
-    setReady(true);
-  }, [router]);
-
-  useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
-  const onSignOut = () => {
-    clearDemoSession();
+  const onSignOut = async () => {
+    if (signingOut) {
+      return;
+    }
+
+    setSigningOut(true);
+    await submitSignOut("customer");
     router.replace("/login");
   };
-
-  if (!ready) {
-    return (
-      <div className="flex min-h-[100svh] items-center justify-center bg-[#f3f5ef] text-[#0d120b]">
-        <p className="text-sm font-semibold tracking-[0.14em] text-black/45 uppercase">
-          Loading…
-        </p>
-      </div>
-    );
-  }
 
   const nav = (
     <nav aria-label="Customer" className="flex flex-1 flex-col gap-1 px-3 pb-6">

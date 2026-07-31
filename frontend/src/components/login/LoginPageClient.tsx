@@ -4,11 +4,9 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { demoCustomer } from "@/constants/demoCustomer";
+import { ForgotPasswordModal } from "@/components/login/ForgotPasswordModal";
 import { loginCopy, type LoginFieldErrors, type LoginFormValues } from "@/constants/login";
 import { site } from "@/constants/site";
-import { ForgotPasswordModal } from "@/components/login/ForgotPasswordModal";
-import { readDemoSession, writeDemoSession } from "@/lib/demoSession";
 import { applyHeaderTone } from "@/lib/headerTone";
 import { submitLogin } from "@/lib/submitLogin";
 import { validateLoginForm } from "@/lib/validateLogin";
@@ -97,14 +95,6 @@ export function LoginPageClient() {
   const [forgotOpen, setForgotOpen] = useState(false);
 
   useEffect(() => {
-    const session = readDemoSession();
-
-    if (session?.customerId === demoCustomer.id) {
-      router.replace("/dashboard");
-    }
-  }, [router]);
-
-  useEffect(() => {
     applyHeaderTone(true, PAGE_BG);
 
     const section = sectionRef.current;
@@ -179,7 +169,6 @@ export function LoginPageClient() {
       return;
     }
 
-    writeDemoSession(demoCustomer.id);
     router.replace("/dashboard");
   };
 

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { EmployeeDemoProvider } from "@/components/employee/EmployeeDemoProvider";
 import { employeeIcons } from "@/components/employee/EmployeeIcons";
 import {
@@ -13,10 +13,7 @@ import {
   type EmployeeNavId,
 } from "@/constants/employee";
 import { site } from "@/constants/site";
-import {
-  clearEmployeeSession,
-  readEmployeeSession,
-} from "@/lib/employeeSession";
+import { submitSignOut } from "@/lib/submitSignOut";
 import { initialAdminDemoState } from "@/constants/adminDemo";
 
 function navIdFromPath(
@@ -40,24 +37,6 @@ function navIdFromPath(
   return "overview";
 }
 
-function subscribeEmployeeSession() {
-  return () => undefined;
-}
-
-function getEmployeeSessionId(): string | null {
-  const session = readEmployeeSession();
-
-  if (!session) {
-    return null;
-  }
-
-  const employee = initialAdminDemoState.employees.find(
-    (item) => item.id === session.employeeId && item.active,
-  );
-
-  return employee ? employee.id : null;
-}
-
 function EmployeeShellInner({
   employeeId,
   children,
@@ -68,6 +47,7 @@ function EmployeeShellInner({
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const employee = initialAdminDemoState.employees.find(
     (item) => item.id === employeeId,
   );
@@ -85,8 +65,13 @@ function EmployeeShellInner({
     }
   }, [employee, pathname, router]);
 
-  const onSignOut = () => {
-    clearEmployeeSession();
+  const onSignOut = async () => {
+    if (signingOut) {
+      return;
+    }
+
+    setSigningOut(true);
+    await submitSignOut("employee");
     router.replace("/employee/login");
   };
 
@@ -250,33 +235,12 @@ function EmployeeShellInner({
 }
 
 export function EmployeeShell({
+  employeeId,
   children,
 }: Readonly<{
+  employeeId: string;
   children: React.ReactNode;
 }>) {
-  const router = useRouter();
-  const employeeId = useSyncExternalStore(
-    subscribeEmployeeSession,
-    getEmployeeSessionId,
-    () => null,
-  );
-
-  useEffect(() => {
-    if (!employeeId) {
-      router.replace("/employee/login");
-    }
-  }, [employeeId, router]);
-
-  if (!employeeId) {
-    return (
-      <div className="flex min-h-[100svh] items-center justify-center bg-[#f3f5ef] text-[#0d120b]">
-        <p className="text-sm font-semibold tracking-[0.14em] text-black/45 uppercase">
-          Loading…
-        </p>
-      </div>
-    );
-  }
-
   return (
     <EmployeeShellInner employeeId={employeeId}>{children}</EmployeeShellInner>
   );
