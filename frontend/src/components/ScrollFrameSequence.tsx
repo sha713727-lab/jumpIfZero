@@ -200,7 +200,7 @@ async function preloadFrames(
     strideIndices.push(FRAME_COUNT - 1);
   }
 
-  let loaded = await loadIndices(
+  const loaded = await loadIndices(
     frames,
     strideIndices,
     STRIDE_CONCURRENCY,
