@@ -6,13 +6,22 @@ PostgreSQL **18.x**. Roles, migrations, and seeds for JumpIfZero.
 
 ```text
 database/
-  DECISIONS.md          locked §31 + A–E
+  DECISIONS.md          locked §31 + follow-ons
+  ERD.md                approved data model (v4)
   roles/001_roles.sql   jz_owner / jz_app / jz_readonly
   migrations/           NNNN_name.up.sql + .down.sql
   seeds/dev/            development fixtures only — never production
   schema.sql            regenerated snapshot (pg_dump --schema-only)
   README.md
 ```
+
+## Roles (verified after 0001 v4)
+
+`001_roles.sql` creates `jz_owner` / `jz_app` / `jz_readonly` (scram-sha-256, no public CREATE, `search_path=public`). Object grants live in migrations:
+
+- `jz_app`: **no SELECT** on soft-delete base tables; **SELECT** on `*_active` views; INSERT/UPDATE/DELETE on bases; full DML on non-soft-delete infra tables.
+- `jz_readonly`: SELECT on bases and views.
+- `jz_owner`: owns objects; migrations only.
 
 ## Prerequisites
 
