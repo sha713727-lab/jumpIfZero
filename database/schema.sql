@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict yA2lqTxa9r08a0Z8twmfbeNeZnoKXp6FFm632N6xyAdY3jtKb4sRgYyuOOjmwZb
+\restrict NGWxpJb9BtTzdmeoekbRGLbrFF2zoi3ZalIGGgomrQ30KULa8YMdfo1fOnK4hEf
 
 -- Dumped from database version 18.4
 -- Dumped by pg_dump version 18.4
@@ -31,43 +31,6 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: admins; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.admins (
-    id uuid DEFAULT uuidv7() NOT NULL,
-    email text NOT NULL,
-    password_hash text NOT NULL,
-    name text NOT NULL,
-    version integer DEFAULT 1 NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    archived_at timestamp with time zone,
-    CONSTRAINT admins_email_len CHECK (((char_length(email) >= 3) AND (char_length(email) <= 320))),
-    CONSTRAINT admins_name_len CHECK (((char_length(name) >= 1) AND (char_length(name) <= 200))),
-    CONSTRAINT admins_password_hash_len CHECK (((char_length(password_hash) >= 20) AND (char_length(password_hash) <= 255))),
-    CONSTRAINT admins_version_pos CHECK ((version >= 1))
-);
-
-
---
--- Name: admins_active; Type: VIEW; Schema: public; Owner: -
---
-
-CREATE VIEW public.admins_active AS
- SELECT id,
-    email,
-    password_hash,
-    name,
-    version,
-    created_at,
-    updated_at,
-    archived_at
-   FROM public.admins
-  WHERE (archived_at IS NULL);
-
-
---
 -- Name: blog_posts; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -76,11 +39,18 @@ CREATE TABLE public.blog_posts (
     title text NOT NULL,
     slug text NOT NULL,
     excerpt text DEFAULT ''::text NOT NULL,
+    body text DEFAULT ''::text NOT NULL,
     image_path text DEFAULT ''::text NOT NULL,
+    category text DEFAULT ''::text NOT NULL,
+    published_at timestamp with time zone,
     version integer DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     archived_at timestamp with time zone,
+    CONSTRAINT blog_posts_body_len CHECK ((char_length(body) <= 200000)),
+    CONSTRAINT blog_posts_category_len CHECK ((char_length(category) <= 128)),
+    CONSTRAINT blog_posts_excerpt_len CHECK ((char_length(excerpt) <= 2000)),
+    CONSTRAINT blog_posts_image_path_len CHECK ((char_length(image_path) <= 1024)),
     CONSTRAINT blog_posts_slug_len CHECK (((char_length(slug) >= 1) AND (char_length(slug) <= 200))),
     CONSTRAINT blog_posts_title_len CHECK (((char_length(title) >= 1) AND (char_length(title) <= 200))),
     CONSTRAINT blog_posts_version_pos CHECK ((version >= 1))
@@ -96,13 +66,30 @@ CREATE VIEW public.blog_posts_active AS
     title,
     slug,
     excerpt,
+    body,
     image_path,
+    category,
+    published_at,
     version,
     created_at,
     updated_at,
     archived_at
    FROM public.blog_posts
   WHERE (archived_at IS NULL);
+
+
+--
+-- Name: callback_statuses; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.callback_statuses (
+    code text NOT NULL,
+    label text NOT NULL,
+    sort_order integer NOT NULL,
+    color text,
+    CONSTRAINT callback_statuses_code_len CHECK (((char_length(code) >= 1) AND (char_length(code) <= 64))),
+    CONSTRAINT callback_statuses_label_len CHECK (((char_length(label) >= 1) AND (char_length(label) <= 128)))
+);
 
 
 --
@@ -115,14 +102,15 @@ CREATE TABLE public.callbacks (
     email text NOT NULL,
     phone text DEFAULT ''::text NOT NULL,
     note text DEFAULT ''::text NOT NULL,
-    status text DEFAULT 'new'::text NOT NULL,
+    status_code text NOT NULL,
     version integer DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     archived_at timestamp with time zone,
     CONSTRAINT callbacks_email_len CHECK (((char_length(email) >= 3) AND (char_length(email) <= 320))),
     CONSTRAINT callbacks_name_len CHECK (((char_length(name) >= 1) AND (char_length(name) <= 200))),
-    CONSTRAINT callbacks_status_check CHECK ((status = ANY (ARRAY['new'::text, 'resolved'::text]))),
+    CONSTRAINT callbacks_note_len CHECK ((char_length(note) <= 5000)),
+    CONSTRAINT callbacks_phone_len CHECK ((char_length(phone) <= 64)),
     CONSTRAINT callbacks_version_pos CHECK ((version >= 1))
 );
 
@@ -137,12 +125,63 @@ CREATE VIEW public.callbacks_active AS
     email,
     phone,
     note,
-    status,
+    status_code,
     version,
     created_at,
     updated_at,
     archived_at
    FROM public.callbacks
+  WHERE (archived_at IS NULL);
+
+
+--
+-- Name: carriers; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.carriers (
+    id uuid DEFAULT uuidv7() NOT NULL,
+    us_dot text NOT NULL,
+    mc text NOT NULL,
+    legal_name text NOT NULL,
+    dba text DEFAULT ''::text NOT NULL,
+    business_address text DEFAULT ''::text NOT NULL,
+    owner_operator_driver text DEFAULT ''::text NOT NULL,
+    tax_id_ciphertext bytea NOT NULL,
+    business_telephone text DEFAULT ''::text NOT NULL,
+    version integer DEFAULT 1 NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    archived_at timestamp with time zone,
+    CONSTRAINT carriers_business_address_len CHECK ((char_length(business_address) <= 500)),
+    CONSTRAINT carriers_dba_len CHECK ((char_length(dba) <= 300)),
+    CONSTRAINT carriers_legal_name_len CHECK (((char_length(legal_name) >= 1) AND (char_length(legal_name) <= 300))),
+    CONSTRAINT carriers_mc_len CHECK (((char_length(mc) >= 1) AND (char_length(mc) <= 32))),
+    CONSTRAINT carriers_owner_len CHECK ((char_length(owner_operator_driver) <= 200)),
+    CONSTRAINT carriers_phone_len CHECK ((char_length(business_telephone) <= 64)),
+    CONSTRAINT carriers_us_dot_len CHECK (((char_length(us_dot) >= 1) AND (char_length(us_dot) <= 32))),
+    CONSTRAINT carriers_version_pos CHECK ((version >= 1))
+);
+
+
+--
+-- Name: carriers_active; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.carriers_active AS
+ SELECT id,
+    us_dot,
+    mc,
+    legal_name,
+    dba,
+    business_address,
+    owner_operator_driver,
+    tax_id_ciphertext,
+    business_telephone,
+    version,
+    created_at,
+    updated_at,
+    archived_at
+   FROM public.carriers
   WHERE (archived_at IS NULL);
 
 
@@ -153,7 +192,22 @@ CREATE VIEW public.callbacks_active AS
 CREATE TABLE public.client_employee_assignments (
     client_id uuid NOT NULL,
     employee_id uuid NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: client_statuses; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.client_statuses (
+    code text NOT NULL,
+    label text NOT NULL,
+    sort_order integer NOT NULL,
+    color text,
+    CONSTRAINT client_statuses_code_len CHECK (((char_length(code) >= 1) AND (char_length(code) <= 64))),
+    CONSTRAINT client_statuses_label_len CHECK (((char_length(label) >= 1) AND (char_length(label) <= 128)))
 );
 
 
@@ -163,22 +217,23 @@ CREATE TABLE public.client_employee_assignments (
 
 CREATE TABLE public.clients (
     id uuid DEFAULT uuidv7() NOT NULL,
-    email text NOT NULL,
-    password_hash text NOT NULL,
-    name text NOT NULL,
+    user_id uuid NOT NULL,
     company text DEFAULT ''::text NOT NULL,
     phone text DEFAULT ''::text NOT NULL,
-    status text DEFAULT 'active'::text NOT NULL,
-    initials text DEFAULT ''::text NOT NULL,
+    status_code text NOT NULL,
     member_since date DEFAULT CURRENT_DATE NOT NULL,
+    client_contact_title text DEFAULT ''::text NOT NULL,
+    location text DEFAULT ''::text NOT NULL,
+    plan text DEFAULT ''::text NOT NULL,
     version integer DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     archived_at timestamp with time zone,
-    CONSTRAINT clients_email_len CHECK (((char_length(email) >= 3) AND (char_length(email) <= 320))),
-    CONSTRAINT clients_name_len CHECK (((char_length(name) >= 1) AND (char_length(name) <= 200))),
-    CONSTRAINT clients_password_hash_len CHECK (((char_length(password_hash) >= 20) AND (char_length(password_hash) <= 255))),
-    CONSTRAINT clients_status_check CHECK ((status = ANY (ARRAY['active'::text, 'paused'::text]))),
+    CONSTRAINT clients_company_len CHECK ((char_length(company) <= 200)),
+    CONSTRAINT clients_contact_title_len CHECK ((char_length(client_contact_title) <= 200)),
+    CONSTRAINT clients_location_len CHECK ((char_length(location) <= 200)),
+    CONSTRAINT clients_phone_len CHECK ((char_length(phone) <= 64)),
+    CONSTRAINT clients_plan_len CHECK ((char_length(plan) <= 200)),
     CONSTRAINT clients_version_pos CHECK ((version >= 1))
 );
 
@@ -189,20 +244,34 @@ CREATE TABLE public.clients (
 
 CREATE VIEW public.clients_active AS
  SELECT id,
-    email,
-    password_hash,
-    name,
+    user_id,
     company,
     phone,
-    status,
-    initials,
+    status_code,
     member_since,
+    client_contact_title,
+    location,
+    plan,
     version,
     created_at,
     updated_at,
     archived_at
    FROM public.clients
   WHERE (archived_at IS NULL);
+
+
+--
+-- Name: contact_message_statuses; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.contact_message_statuses (
+    code text NOT NULL,
+    label text NOT NULL,
+    sort_order integer NOT NULL,
+    color text,
+    CONSTRAINT contact_message_statuses_code_len CHECK (((char_length(code) >= 1) AND (char_length(code) <= 64))),
+    CONSTRAINT contact_message_statuses_label_len CHECK (((char_length(label) >= 1) AND (char_length(label) <= 128)))
+);
 
 
 --
@@ -215,7 +284,7 @@ CREATE TABLE public.contact_messages (
     email text NOT NULL,
     subject text DEFAULT ''::text NOT NULL,
     body text NOT NULL,
-    status text DEFAULT 'new'::text NOT NULL,
+    status_code text NOT NULL,
     version integer DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
@@ -223,7 +292,7 @@ CREATE TABLE public.contact_messages (
     CONSTRAINT contact_messages_body_len CHECK (((char_length(body) >= 1) AND (char_length(body) <= 20000))),
     CONSTRAINT contact_messages_email_len CHECK (((char_length(email) >= 3) AND (char_length(email) <= 320))),
     CONSTRAINT contact_messages_name_len CHECK (((char_length(name) >= 1) AND (char_length(name) <= 200))),
-    CONSTRAINT contact_messages_status_check CHECK ((status = ANY (ARRAY['new'::text, 'read'::text]))),
+    CONSTRAINT contact_messages_subject_len CHECK ((char_length(subject) <= 300)),
     CONSTRAINT contact_messages_version_pos CHECK ((version >= 1))
 );
 
@@ -238,7 +307,7 @@ CREATE VIEW public.contact_messages_active AS
     email,
     subject,
     body,
-    status,
+    status_code,
     version,
     created_at,
     updated_at,
@@ -253,22 +322,19 @@ CREATE VIEW public.contact_messages_active AS
 
 CREATE TABLE public.employees (
     id uuid DEFAULT uuidv7() NOT NULL,
-    email text NOT NULL,
-    password_hash text NOT NULL,
-    name text NOT NULL,
+    user_id uuid NOT NULL,
     title text DEFAULT ''::text NOT NULL,
     department text DEFAULT ''::text NOT NULL,
     kind text NOT NULL,
     image_path text DEFAULT ''::text NOT NULL,
-    team_member_id uuid,
     version integer DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     archived_at timestamp with time zone,
-    CONSTRAINT employees_email_len CHECK (((char_length(email) >= 3) AND (char_length(email) <= 320))),
+    CONSTRAINT employees_department_len CHECK ((char_length(department) <= 200)),
+    CONSTRAINT employees_image_path_len CHECK ((char_length(image_path) <= 1024)),
     CONSTRAINT employees_kind_check CHECK ((kind = ANY (ARRAY['delivery'::text, 'sales'::text]))),
-    CONSTRAINT employees_name_len CHECK (((char_length(name) >= 1) AND (char_length(name) <= 200))),
-    CONSTRAINT employees_password_hash_len CHECK (((char_length(password_hash) >= 20) AND (char_length(password_hash) <= 255))),
+    CONSTRAINT employees_title_len CHECK ((char_length(title) <= 200)),
     CONSTRAINT employees_version_pos CHECK ((version >= 1))
 );
 
@@ -279,14 +345,11 @@ CREATE TABLE public.employees (
 
 CREATE VIEW public.employees_active AS
  SELECT id,
-    email,
-    password_hash,
-    name,
+    user_id,
     title,
     department,
     kind,
     image_path,
-    team_member_id,
     version,
     created_at,
     updated_at,
@@ -303,6 +366,7 @@ CREATE TABLE public.faqs (
     id uuid DEFAULT uuidv7() NOT NULL,
     question text NOT NULL,
     answer text NOT NULL,
+    published_at timestamp with time zone,
     version integer DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
@@ -321,6 +385,7 @@ CREATE VIEW public.faqs_active AS
  SELECT id,
     question,
     answer,
+    published_at,
     version,
     created_at,
     updated_at,
@@ -341,13 +406,15 @@ CREATE TABLE public.files (
     content_type text NOT NULL,
     size_bytes bigint NOT NULL,
     checksum_sha256 text NOT NULL,
-    uploaded_by_subject_id uuid NOT NULL,
+    kind text DEFAULT ''::text NOT NULL,
+    uploaded_by_user_id uuid NOT NULL,
     uploaded_by_role text NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     archived_at timestamp with time zone,
     CONSTRAINT files_checksum_sha256_len CHECK ((char_length(checksum_sha256) = 64)),
     CONSTRAINT files_content_type_len CHECK (((char_length(content_type) >= 1) AND (char_length(content_type) <= 255))),
+    CONSTRAINT files_kind_len CHECK ((char_length(kind) <= 64)),
     CONSTRAINT files_original_name_len CHECK (((char_length(original_name) >= 1) AND (char_length(original_name) <= 500))),
     CONSTRAINT files_size_bytes_nonneg CHECK ((size_bytes >= 0)),
     CONSTRAINT files_storage_key_len CHECK (((char_length(storage_key) >= 1) AND (char_length(storage_key) <= 1024))),
@@ -367,7 +434,8 @@ CREATE VIEW public.files_active AS
     content_type,
     size_bytes,
     checksum_sha256,
-    uploaded_by_subject_id,
+    kind,
+    uploaded_by_user_id,
     uploaded_by_role,
     created_at,
     updated_at,
@@ -384,6 +452,7 @@ CREATE TABLE public.hmac_nonces (
     nonce text NOT NULL,
     expires_at timestamp with time zone NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT hmac_nonces_nonce_len CHECK (((char_length(nonce) >= 16) AND (char_length(nonce) <= 128)))
 );
 
@@ -401,6 +470,7 @@ CREATE TABLE public.idempotency_keys (
     response_status integer NOT NULL,
     response_body jsonb NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     expires_at timestamp with time zone NOT NULL,
     CONSTRAINT idempotency_keys_key_len CHECK (((char_length(idempotency_key) >= 1) AND (char_length(idempotency_key) <= 128))),
     CONSTRAINT idempotency_keys_method_len CHECK (((char_length(method) >= 1) AND (char_length(method) <= 16))),
@@ -434,8 +504,9 @@ CREATE TABLE public.invoices (
     title text NOT NULL,
     amount numeric(14,2) NOT NULL,
     currency character(3) NOT NULL,
-    status text NOT NULL,
+    status_code text NOT NULL,
     due_date date,
+    issued_on date,
     version integer DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
@@ -459,13 +530,95 @@ CREATE VIEW public.invoices_active AS
     title,
     amount,
     currency,
-    status,
+    status_code,
     due_date,
+    issued_on,
     version,
     created_at,
     updated_at,
     archived_at
    FROM public.invoices
+  WHERE (archived_at IS NULL);
+
+
+--
+-- Name: lead_follow_ups; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.lead_follow_ups (
+    id uuid DEFAULT uuidv7() NOT NULL,
+    lead_id uuid NOT NULL,
+    occurred_at timestamp with time zone NOT NULL,
+    note text DEFAULT ''::text NOT NULL,
+    outcome text DEFAULT ''::text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT lead_follow_ups_note_len CHECK ((char_length(note) <= 10000)),
+    CONSTRAINT lead_follow_ups_outcome_len CHECK ((char_length(outcome) <= 500))
+);
+
+
+--
+-- Name: lead_statuses; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.lead_statuses (
+    code text NOT NULL,
+    label text NOT NULL,
+    sort_order integer NOT NULL,
+    color text,
+    CONSTRAINT lead_statuses_code_len CHECK (((char_length(code) >= 1) AND (char_length(code) <= 64))),
+    CONSTRAINT lead_statuses_label_len CHECK (((char_length(label) >= 1) AND (char_length(label) <= 128)))
+);
+
+
+--
+-- Name: leads; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.leads (
+    id uuid DEFAULT uuidv7() NOT NULL,
+    rep_id uuid NOT NULL,
+    company text NOT NULL,
+    contact_name text DEFAULT ''::text NOT NULL,
+    phone text DEFAULT ''::text NOT NULL,
+    email text DEFAULT ''::text NOT NULL,
+    source text DEFAULT ''::text NOT NULL,
+    status_code text NOT NULL,
+    notes text DEFAULT ''::text NOT NULL,
+    version integer DEFAULT 1 NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    archived_at timestamp with time zone,
+    CONSTRAINT leads_company_len CHECK (((char_length(company) >= 1) AND (char_length(company) <= 300))),
+    CONSTRAINT leads_contact_name_len CHECK ((char_length(contact_name) <= 200)),
+    CONSTRAINT leads_email_len CHECK ((char_length(email) <= 320)),
+    CONSTRAINT leads_notes_len CHECK ((char_length(notes) <= 10000)),
+    CONSTRAINT leads_phone_len CHECK ((char_length(phone) <= 64)),
+    CONSTRAINT leads_source_len CHECK ((char_length(source) <= 128)),
+    CONSTRAINT leads_version_pos CHECK ((version >= 1))
+);
+
+
+--
+-- Name: leads_active; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.leads_active AS
+ SELECT id,
+    rep_id,
+    company,
+    contact_name,
+    phone,
+    email,
+    source,
+    status_code,
+    notes,
+    version,
+    created_at,
+    updated_at,
+    archived_at
+   FROM public.leads
   WHERE (archived_at IS NULL);
 
 
@@ -477,6 +630,7 @@ CREATE TABLE public.messages (
     id uuid DEFAULT uuidv7() NOT NULL,
     client_id uuid NOT NULL,
     sender_role text NOT NULL,
+    sender_user_id uuid NOT NULL,
     body text NOT NULL,
     read_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
@@ -495,12 +649,59 @@ CREATE VIEW public.messages_active AS
  SELECT id,
     client_id,
     sender_role,
+    sender_user_id,
     body,
     read_at,
     created_at,
     updated_at,
     archived_at
    FROM public.messages
+  WHERE (archived_at IS NULL);
+
+
+--
+-- Name: parties; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.parties (
+    id uuid DEFAULT uuidv7() NOT NULL,
+    kind text NOT NULL,
+    name text NOT NULL,
+    phone text DEFAULT ''::text NOT NULL,
+    street text DEFAULT ''::text NOT NULL,
+    city_state_zip text DEFAULT ''::text NOT NULL,
+    email text DEFAULT ''::text NOT NULL,
+    version integer DEFAULT 1 NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    archived_at timestamp with time zone,
+    CONSTRAINT parties_city_state_zip_len CHECK ((char_length(city_state_zip) <= 200)),
+    CONSTRAINT parties_email_len CHECK ((char_length(email) <= 320)),
+    CONSTRAINT parties_kind_check CHECK ((kind = ANY (ARRAY['insurance'::text, 'factoring'::text]))),
+    CONSTRAINT parties_name_len CHECK (((char_length(name) >= 1) AND (char_length(name) <= 300))),
+    CONSTRAINT parties_phone_len CHECK ((char_length(phone) <= 64)),
+    CONSTRAINT parties_street_len CHECK ((char_length(street) <= 300)),
+    CONSTRAINT parties_version_pos CHECK ((version >= 1))
+);
+
+
+--
+-- Name: parties_active; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.parties_active AS
+ SELECT id,
+    kind,
+    name,
+    phone,
+    street,
+    city_state_zip,
+    email,
+    version,
+    created_at,
+    updated_at,
+    archived_at
+   FROM public.parties
   WHERE (archived_at IS NULL);
 
 
@@ -514,10 +715,14 @@ CREATE TABLE public.portfolio_items (
     category text DEFAULT ''::text NOT NULL,
     summary text DEFAULT ''::text NOT NULL,
     image_path text DEFAULT ''::text NOT NULL,
+    published_at timestamp with time zone,
     version integer DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     archived_at timestamp with time zone,
+    CONSTRAINT portfolio_items_category_len CHECK ((char_length(category) <= 128)),
+    CONSTRAINT portfolio_items_image_path_len CHECK ((char_length(image_path) <= 1024)),
+    CONSTRAINT portfolio_items_summary_len CHECK ((char_length(summary) <= 5000)),
     CONSTRAINT portfolio_items_title_len CHECK (((char_length(title) >= 1) AND (char_length(title) <= 200))),
     CONSTRAINT portfolio_items_version_pos CHECK ((version >= 1))
 );
@@ -533,6 +738,7 @@ CREATE VIEW public.portfolio_items_active AS
     category,
     summary,
     image_path,
+    published_at,
     version,
     created_at,
     updated_at,
@@ -562,14 +768,21 @@ CREATE TABLE public.project_statuses (
 CREATE TABLE public.projects (
     id uuid DEFAULT uuidv7() NOT NULL,
     client_id uuid NOT NULL,
+    service_id uuid NOT NULL,
     title text NOT NULL,
-    service text DEFAULT ''::text NOT NULL,
-    status text NOT NULL,
+    status_code text NOT NULL,
     notes text DEFAULT ''::text NOT NULL,
+    manager_employee_id uuid,
+    next_milestone text DEFAULT ''::text NOT NULL,
+    next_milestone_date date,
+    progress smallint DEFAULT 0 NOT NULL,
     version integer DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     archived_at timestamp with time zone,
+    CONSTRAINT projects_next_milestone_len CHECK ((char_length(next_milestone) <= 500)),
+    CONSTRAINT projects_notes_len CHECK ((char_length(notes) <= 10000)),
+    CONSTRAINT projects_progress_check CHECK (((progress >= 0) AND (progress <= 100))),
     CONSTRAINT projects_title_len CHECK (((char_length(title) >= 1) AND (char_length(title) <= 200))),
     CONSTRAINT projects_version_pos CHECK ((version >= 1))
 );
@@ -582,10 +795,14 @@ CREATE TABLE public.projects (
 CREATE VIEW public.projects_active AS
  SELECT id,
     client_id,
+    service_id,
     title,
-    service,
-    status,
+    status_code,
     notes,
+    manager_employee_id,
+    next_milestone,
+    next_milestone_date,
+    progress,
     version,
     created_at,
     updated_at,
@@ -610,13 +827,110 @@ CREATE TABLE public.rate_limit_buckets (
 
 
 --
+-- Name: sale_statuses; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sale_statuses (
+    code text NOT NULL,
+    label text NOT NULL,
+    sort_order integer NOT NULL,
+    color text,
+    CONSTRAINT sale_statuses_code_len CHECK (((char_length(code) >= 1) AND (char_length(code) <= 64))),
+    CONSTRAINT sale_statuses_label_len CHECK (((char_length(label) >= 1) AND (char_length(label) <= 128)))
+);
+
+
+--
+-- Name: sales; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sales (
+    id uuid DEFAULT uuidv7() NOT NULL,
+    carrier_id uuid NOT NULL,
+    rep_id uuid NOT NULL,
+    status_code text NOT NULL,
+    amount numeric(14,2) NOT NULL,
+    currency character(3) NOT NULL,
+    truck_type text DEFAULT ''::text NOT NULL,
+    contact_name text DEFAULT ''::text NOT NULL,
+    contact_phone text DEFAULT ''::text NOT NULL,
+    contact_email text DEFAULT ''::text NOT NULL,
+    truck text DEFAULT ''::text NOT NULL,
+    trailer text DEFAULT ''::text NOT NULL,
+    insurance_party_id uuid,
+    factoring_party_id uuid,
+    approved_by_user_id uuid,
+    version integer DEFAULT 1 NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    archived_at timestamp with time zone,
+    CONSTRAINT sales_amount_nonneg CHECK ((amount >= (0)::numeric)),
+    CONSTRAINT sales_contact_email_len CHECK ((char_length(contact_email) <= 320)),
+    CONSTRAINT sales_contact_name_len CHECK ((char_length(contact_name) <= 200)),
+    CONSTRAINT sales_contact_phone_len CHECK ((char_length(contact_phone) <= 64)),
+    CONSTRAINT sales_currency_check CHECK ((currency ~ '^[A-Z]{3}$'::text)),
+    CONSTRAINT sales_trailer_len CHECK ((char_length(trailer) <= 200)),
+    CONSTRAINT sales_truck_len CHECK ((char_length(truck) <= 200)),
+    CONSTRAINT sales_truck_type_len CHECK ((char_length(truck_type) <= 128)),
+    CONSTRAINT sales_version_pos CHECK ((version >= 1))
+);
+
+
+--
+-- Name: sales_active; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.sales_active AS
+ SELECT id,
+    carrier_id,
+    rep_id,
+    status_code,
+    amount,
+    currency,
+    truck_type,
+    contact_name,
+    contact_phone,
+    contact_email,
+    truck,
+    trailer,
+    insurance_party_id,
+    factoring_party_id,
+    approved_by_user_id,
+    version,
+    created_at,
+    updated_at,
+    archived_at
+   FROM public.sales
+  WHERE (archived_at IS NULL);
+
+
+--
+-- Name: sales_messages; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sales_messages (
+    id uuid DEFAULT uuidv7() NOT NULL,
+    from_rep_id uuid NOT NULL,
+    to_rep_id uuid NOT NULL,
+    body text NOT NULL,
+    sent_at timestamp with time zone DEFAULT now() NOT NULL,
+    read_at timestamp with time zone,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT sales_messages_body_len CHECK (((char_length(body) >= 1) AND (char_length(body) <= 20000)))
+);
+
+
+--
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.schema_migrations (
     version text NOT NULL,
     checksum text NOT NULL,
-    applied_at timestamp with time zone DEFAULT now() NOT NULL
+    applied_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT schema_migrations_checksum_len CHECK ((char_length(checksum) = 64)),
+    CONSTRAINT schema_migrations_version_len CHECK (((char_length(version) >= 1) AND (char_length(version) <= 128)))
 );
 
 
@@ -631,10 +945,14 @@ CREATE TABLE public.services (
     description text DEFAULT ''::text NOT NULL,
     path text DEFAULT ''::text NOT NULL,
     image_path text DEFAULT ''::text NOT NULL,
+    published_at timestamp with time zone,
     version integer DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     archived_at timestamp with time zone,
+    CONSTRAINT services_description_len CHECK ((char_length(description) <= 10000)),
+    CONSTRAINT services_image_path_len CHECK ((char_length(image_path) <= 1024)),
+    CONSTRAINT services_path_len CHECK ((char_length(path) <= 512)),
     CONSTRAINT services_slug_len CHECK (((char_length(slug) >= 1) AND (char_length(slug) <= 200))),
     CONSTRAINT services_title_len CHECK (((char_length(title) >= 1) AND (char_length(title) <= 200))),
     CONSTRAINT services_version_pos CHECK ((version >= 1))
@@ -652,6 +970,7 @@ CREATE VIEW public.services_active AS
     description,
     path,
     image_path,
+    published_at,
     version,
     created_at,
     updated_at,
@@ -667,15 +986,54 @@ CREATE VIEW public.services_active AS
 CREATE TABLE public.sessions (
     id uuid DEFAULT uuidv7() NOT NULL,
     subject_id uuid NOT NULL,
-    role text NOT NULL,
-    employee_kind text,
     token_hash text NOT NULL,
     expires_at timestamp with time zone NOT NULL,
     revoked_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT sessions_employee_kind_check CHECK ((((role = 'employee'::text) AND (employee_kind = ANY (ARRAY['delivery'::text, 'sales'::text]))) OR ((role <> 'employee'::text) AND (employee_kind IS NULL)))),
-    CONSTRAINT sessions_role_check CHECK ((role = ANY (ARRAY['admin'::text, 'client'::text, 'employee'::text])))
+    CONSTRAINT sessions_token_hash_len CHECK (((char_length(token_hash) >= 32) AND (char_length(token_hash) <= 128)))
+);
+
+
+--
+-- Name: tax_id_access_audit; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.tax_id_access_audit (
+    id uuid DEFAULT uuidv7() NOT NULL,
+    carrier_id uuid,
+    carrier_us_dot text NOT NULL,
+    carrier_mc text NOT NULL,
+    carrier_legal_name text NOT NULL,
+    viewer_user_id uuid NOT NULL,
+    viewer_role text NOT NULL,
+    viewer_email text NOT NULL,
+    viewed_at timestamp with time zone DEFAULT now() NOT NULL,
+    correlation_id text NOT NULL,
+    CONSTRAINT tax_id_access_audit_correlation_id_len CHECK (((char_length(correlation_id) >= 1) AND (char_length(correlation_id) <= 128))),
+    CONSTRAINT tax_id_access_audit_legal_name_len CHECK (((char_length(carrier_legal_name) >= 1) AND (char_length(carrier_legal_name) <= 300))),
+    CONSTRAINT tax_id_access_audit_mc_len CHECK (((char_length(carrier_mc) >= 1) AND (char_length(carrier_mc) <= 32))),
+    CONSTRAINT tax_id_access_audit_us_dot_len CHECK (((char_length(carrier_us_dot) >= 1) AND (char_length(carrier_us_dot) <= 32))),
+    CONSTRAINT tax_id_access_audit_viewer_email_len CHECK (((char_length(viewer_email) >= 3) AND (char_length(viewer_email) <= 320))),
+    CONSTRAINT tax_id_access_audit_viewer_role_check CHECK ((viewer_role = ANY (ARRAY['admin'::text, 'client'::text, 'employee'::text])))
+);
+
+
+--
+-- Name: team_member_socials; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.team_member_socials (
+    id uuid DEFAULT uuidv7() NOT NULL,
+    team_member_id uuid NOT NULL,
+    network text NOT NULL,
+    label text NOT NULL,
+    href text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT team_member_socials_href_len CHECK (((char_length(href) >= 1) AND (char_length(href) <= 2048))),
+    CONSTRAINT team_member_socials_label_len CHECK (((char_length(label) >= 1) AND (char_length(label) <= 64))),
+    CONSTRAINT team_member_socials_network_check CHECK ((network = ANY (ARRAY['linkedin'::text, 'instagram'::text, 'x'::text])))
 );
 
 
@@ -690,11 +1048,15 @@ CREATE TABLE public.team_members (
     bio text DEFAULT ''::text NOT NULL,
     image_path text DEFAULT ''::text NOT NULL,
     employee_id uuid,
+    published_at timestamp with time zone,
     version integer DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     archived_at timestamp with time zone,
+    CONSTRAINT team_members_bio_len CHECK ((char_length(bio) <= 10000)),
+    CONSTRAINT team_members_image_path_len CHECK ((char_length(image_path) <= 1024)),
     CONSTRAINT team_members_name_len CHECK (((char_length(name) >= 1) AND (char_length(name) <= 200))),
+    CONSTRAINT team_members_role_title_len CHECK ((char_length(role_title) <= 200)),
     CONSTRAINT team_members_version_pos CHECK ((version >= 1))
 );
 
@@ -710,6 +1072,7 @@ CREATE VIEW public.team_members_active AS
     bio,
     image_path,
     employee_id,
+    published_at,
     version,
     created_at,
     updated_at,
@@ -719,11 +1082,46 @@ CREATE VIEW public.team_members_active AS
 
 
 --
--- Name: admins admins_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.admins
-    ADD CONSTRAINT admins_pkey PRIMARY KEY (id);
+CREATE TABLE public.users (
+    id uuid DEFAULT uuidv7() NOT NULL,
+    email text NOT NULL,
+    password_hash text NOT NULL,
+    name text NOT NULL,
+    title text,
+    role text NOT NULL,
+    version integer DEFAULT 1 NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    archived_at timestamp with time zone,
+    CONSTRAINT users_email_len CHECK (((char_length(email) >= 3) AND (char_length(email) <= 320))),
+    CONSTRAINT users_name_len CHECK (((char_length(name) >= 1) AND (char_length(name) <= 200))),
+    CONSTRAINT users_password_hash_len CHECK (((char_length(password_hash) >= 20) AND (char_length(password_hash) <= 255))),
+    CONSTRAINT users_role_check CHECK ((role = ANY (ARRAY['admin'::text, 'client'::text, 'employee'::text]))),
+    CONSTRAINT users_title_len CHECK (((title IS NULL) OR ((char_length(title) >= 1) AND (char_length(title) <= 200)))),
+    CONSTRAINT users_version_pos CHECK ((version >= 1))
+);
+
+
+--
+-- Name: users_active; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.users_active AS
+ SELECT id,
+    email,
+    password_hash,
+    name,
+    title,
+    role,
+    version,
+    created_at,
+    updated_at,
+    archived_at
+   FROM public.users
+  WHERE (archived_at IS NULL);
 
 
 --
@@ -735,11 +1133,27 @@ ALTER TABLE ONLY public.blog_posts
 
 
 --
+-- Name: callback_statuses callback_statuses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.callback_statuses
+    ADD CONSTRAINT callback_statuses_pkey PRIMARY KEY (code);
+
+
+--
 -- Name: callbacks callbacks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.callbacks
     ADD CONSTRAINT callbacks_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: carriers carriers_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.carriers
+    ADD CONSTRAINT carriers_pkey PRIMARY KEY (id);
 
 
 --
@@ -751,11 +1165,35 @@ ALTER TABLE ONLY public.client_employee_assignments
 
 
 --
+-- Name: client_statuses client_statuses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.client_statuses
+    ADD CONSTRAINT client_statuses_pkey PRIMARY KEY (code);
+
+
+--
 -- Name: clients clients_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.clients
     ADD CONSTRAINT clients_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: clients clients_user_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.clients
+    ADD CONSTRAINT clients_user_id_key UNIQUE (user_id);
+
+
+--
+-- Name: contact_message_statuses contact_message_statuses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.contact_message_statuses
+    ADD CONSTRAINT contact_message_statuses_pkey PRIMARY KEY (code);
 
 
 --
@@ -772,6 +1210,14 @@ ALTER TABLE ONLY public.contact_messages
 
 ALTER TABLE ONLY public.employees
     ADD CONSTRAINT employees_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: employees employees_user_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.employees
+    ADD CONSTRAINT employees_user_id_key UNIQUE (user_id);
 
 
 --
@@ -831,11 +1277,43 @@ ALTER TABLE ONLY public.invoices
 
 
 --
+-- Name: lead_follow_ups lead_follow_ups_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lead_follow_ups
+    ADD CONSTRAINT lead_follow_ups_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: lead_statuses lead_statuses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lead_statuses
+    ADD CONSTRAINT lead_statuses_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: leads leads_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.leads
+    ADD CONSTRAINT leads_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: messages messages_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.messages
     ADD CONSTRAINT messages_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: parties parties_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.parties
+    ADD CONSTRAINT parties_pkey PRIMARY KEY (id);
 
 
 --
@@ -871,6 +1349,30 @@ ALTER TABLE ONLY public.rate_limit_buckets
 
 
 --
+-- Name: sale_statuses sale_statuses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sale_statuses
+    ADD CONSTRAINT sale_statuses_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: sales_messages sales_messages_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales_messages
+    ADD CONSTRAINT sales_messages_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sales sales_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales
+    ADD CONSTRAINT sales_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: schema_migrations schema_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -903,6 +1405,22 @@ ALTER TABLE ONLY public.sessions
 
 
 --
+-- Name: tax_id_access_audit tax_id_access_audit_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tax_id_access_audit
+    ADD CONSTRAINT tax_id_access_audit_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: team_member_socials team_member_socials_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.team_member_socials
+    ADD CONSTRAINT team_member_socials_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: team_members team_members_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -911,10 +1429,11 @@ ALTER TABLE ONLY public.team_members
 
 
 --
--- Name: admins_email_active_key; Type: INDEX; Schema: public; Owner: -
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX admins_email_active_key ON public.admins USING btree (email) WHERE (archived_at IS NULL);
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
 
 
 --
@@ -925,6 +1444,20 @@ CREATE UNIQUE INDEX blog_posts_slug_active_key ON public.blog_posts USING btree 
 
 
 --
+-- Name: carriers_mc_active_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX carriers_mc_active_key ON public.carriers USING btree (mc) WHERE (archived_at IS NULL);
+
+
+--
+-- Name: carriers_us_dot_active_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX carriers_us_dot_active_key ON public.carriers USING btree (us_dot) WHERE (archived_at IS NULL);
+
+
+--
 -- Name: client_employee_assignments_employee_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -932,31 +1465,17 @@ CREATE INDEX client_employee_assignments_employee_id_idx ON public.client_employ
 
 
 --
--- Name: clients_email_active_key; Type: INDEX; Schema: public; Owner: -
+-- Name: employees_kind_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX clients_email_active_key ON public.clients USING btree (email) WHERE (archived_at IS NULL);
-
-
---
--- Name: employees_email_active_key; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX employees_email_active_key ON public.employees USING btree (email) WHERE (archived_at IS NULL);
+CREATE INDEX employees_kind_active_idx ON public.employees USING btree (kind) WHERE (archived_at IS NULL);
 
 
 --
--- Name: employees_kind_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: files_client_id_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX employees_kind_idx ON public.employees USING btree (kind) WHERE (archived_at IS NULL);
-
-
---
--- Name: files_client_id_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX files_client_id_idx ON public.files USING btree (client_id) WHERE (archived_at IS NULL);
+CREATE INDEX files_client_id_active_idx ON public.files USING btree (client_id) WHERE (archived_at IS NULL);
 
 
 --
@@ -984,14 +1503,14 @@ CREATE INDEX idempotency_keys_expires_at_idx ON public.idempotency_keys USING bt
 -- Name: idempotency_keys_lookup_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idempotency_keys_lookup_idx ON public.idempotency_keys USING btree (idempotency_key, method, path, subject_id);
+CREATE UNIQUE INDEX idempotency_keys_lookup_idx ON public.idempotency_keys USING btree (idempotency_key, method, path, subject_id) NULLS NOT DISTINCT;
 
 
 --
--- Name: invoices_client_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: invoices_client_id_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX invoices_client_id_idx ON public.invoices USING btree (client_id) WHERE (archived_at IS NULL);
+CREATE INDEX invoices_client_id_active_idx ON public.invoices USING btree (client_id) WHERE (archived_at IS NULL);
 
 
 --
@@ -1002,24 +1521,80 @@ CREATE UNIQUE INDEX invoices_number_active_key ON public.invoices USING btree (n
 
 
 --
--- Name: messages_client_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: lead_follow_ups_lead_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX messages_client_id_idx ON public.messages USING btree (client_id) WHERE (archived_at IS NULL);
-
-
---
--- Name: projects_client_id_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX projects_client_id_idx ON public.projects USING btree (client_id) WHERE (archived_at IS NULL);
+CREATE INDEX lead_follow_ups_lead_id_idx ON public.lead_follow_ups USING btree (lead_id, occurred_at);
 
 
 --
--- Name: projects_status_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: leads_rep_id_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX projects_status_idx ON public.projects USING btree (status) WHERE (archived_at IS NULL);
+CREATE INDEX leads_rep_id_active_idx ON public.leads USING btree (rep_id, id) WHERE (archived_at IS NULL);
+
+
+--
+-- Name: messages_client_id_created_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX messages_client_id_created_at_idx ON public.messages USING btree (client_id, created_at, id) WHERE (archived_at IS NULL);
+
+
+--
+-- Name: projects_client_id_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projects_client_id_active_idx ON public.projects USING btree (client_id) WHERE (archived_at IS NULL);
+
+
+--
+-- Name: projects_service_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projects_service_id_idx ON public.projects USING btree (service_id);
+
+
+--
+-- Name: projects_status_code_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projects_status_code_active_idx ON public.projects USING btree (status_code) WHERE (archived_at IS NULL);
+
+
+--
+-- Name: rate_limit_buckets_last_refill_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX rate_limit_buckets_last_refill_at_idx ON public.rate_limit_buckets USING btree (last_refill_at);
+
+
+--
+-- Name: sales_carrier_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX sales_carrier_id_idx ON public.sales USING btree (carrier_id);
+
+
+--
+-- Name: sales_messages_to_rep_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX sales_messages_to_rep_id_idx ON public.sales_messages USING btree (to_rep_id, sent_at);
+
+
+--
+-- Name: sales_rep_id_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX sales_rep_id_active_idx ON public.sales USING btree (rep_id, id) WHERE (archived_at IS NULL);
+
+
+--
+-- Name: sales_status_code_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX sales_status_code_active_idx ON public.sales USING btree (status_code) WHERE (archived_at IS NULL);
 
 
 --
@@ -1044,6 +1619,42 @@ CREATE INDEX sessions_subject_id_idx ON public.sessions USING btree (subject_id)
 
 
 --
+-- Name: tax_id_access_audit_viewed_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX tax_id_access_audit_viewed_at_idx ON public.tax_id_access_audit USING btree (viewed_at);
+
+
+--
+-- Name: tax_id_access_audit_viewer_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX tax_id_access_audit_viewer_user_id_idx ON public.tax_id_access_audit USING btree (viewer_user_id);
+
+
+--
+-- Name: team_member_socials_team_member_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX team_member_socials_team_member_id_idx ON public.team_member_socials USING btree (team_member_id);
+
+
+--
+-- Name: users_email_active_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX users_email_active_key ON public.users USING btree (email) WHERE (archived_at IS NULL);
+
+
+--
+-- Name: callbacks callbacks_status_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.callbacks
+    ADD CONSTRAINT callbacks_status_code_fkey FOREIGN KEY (status_code) REFERENCES public.callback_statuses(code) ON DELETE RESTRICT;
+
+
+--
 -- Name: client_employee_assignments client_employee_assignments_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1060,11 +1671,35 @@ ALTER TABLE ONLY public.client_employee_assignments
 
 
 --
--- Name: employees employees_team_member_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: clients clients_status_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.clients
+    ADD CONSTRAINT clients_status_code_fkey FOREIGN KEY (status_code) REFERENCES public.client_statuses(code) ON DELETE RESTRICT;
+
+
+--
+-- Name: clients clients_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.clients
+    ADD CONSTRAINT clients_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: contact_messages contact_messages_status_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.contact_messages
+    ADD CONSTRAINT contact_messages_status_code_fkey FOREIGN KEY (status_code) REFERENCES public.contact_message_statuses(code) ON DELETE RESTRICT;
+
+
+--
+-- Name: employees employees_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.employees
-    ADD CONSTRAINT employees_team_member_id_fkey FOREIGN KEY (team_member_id) REFERENCES public.team_members(id) ON DELETE SET NULL;
+    ADD CONSTRAINT employees_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE RESTRICT;
 
 
 --
@@ -1076,6 +1711,14 @@ ALTER TABLE ONLY public.files
 
 
 --
+-- Name: files files_uploaded_by_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.files
+    ADD CONSTRAINT files_uploaded_by_user_id_fkey FOREIGN KEY (uploaded_by_user_id) REFERENCES public.users(id) ON DELETE RESTRICT;
+
+
+--
 -- Name: invoices invoices_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1084,11 +1727,35 @@ ALTER TABLE ONLY public.invoices
 
 
 --
--- Name: invoices invoices_status_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: invoices invoices_status_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.invoices
-    ADD CONSTRAINT invoices_status_fkey FOREIGN KEY (status) REFERENCES public.invoice_statuses(code) ON DELETE RESTRICT;
+    ADD CONSTRAINT invoices_status_code_fkey FOREIGN KEY (status_code) REFERENCES public.invoice_statuses(code) ON DELETE RESTRICT;
+
+
+--
+-- Name: lead_follow_ups lead_follow_ups_lead_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lead_follow_ups
+    ADD CONSTRAINT lead_follow_ups_lead_id_fkey FOREIGN KEY (lead_id) REFERENCES public.leads(id) ON DELETE CASCADE;
+
+
+--
+-- Name: leads leads_rep_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.leads
+    ADD CONSTRAINT leads_rep_id_fkey FOREIGN KEY (rep_id) REFERENCES public.employees(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: leads leads_status_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.leads
+    ADD CONSTRAINT leads_status_code_fkey FOREIGN KEY (status_code) REFERENCES public.lead_statuses(code) ON DELETE RESTRICT;
 
 
 --
@@ -1100,6 +1767,14 @@ ALTER TABLE ONLY public.messages
 
 
 --
+-- Name: messages messages_sender_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.messages
+    ADD CONSTRAINT messages_sender_user_id_fkey FOREIGN KEY (sender_user_id) REFERENCES public.users(id) ON DELETE RESTRICT;
+
+
+--
 -- Name: projects projects_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1108,11 +1783,107 @@ ALTER TABLE ONLY public.projects
 
 
 --
--- Name: projects projects_status_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: projects projects_manager_employee_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.projects
-    ADD CONSTRAINT projects_status_fkey FOREIGN KEY (status) REFERENCES public.project_statuses(code) ON DELETE RESTRICT;
+    ADD CONSTRAINT projects_manager_employee_id_fkey FOREIGN KEY (manager_employee_id) REFERENCES public.employees(id) ON DELETE SET NULL;
+
+
+--
+-- Name: projects projects_service_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.services(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: projects projects_status_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_status_code_fkey FOREIGN KEY (status_code) REFERENCES public.project_statuses(code) ON DELETE RESTRICT;
+
+
+--
+-- Name: sales sales_approved_by_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales
+    ADD CONSTRAINT sales_approved_by_user_id_fkey FOREIGN KEY (approved_by_user_id) REFERENCES public.users(id) ON DELETE SET NULL;
+
+
+--
+-- Name: sales sales_carrier_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales
+    ADD CONSTRAINT sales_carrier_id_fkey FOREIGN KEY (carrier_id) REFERENCES public.carriers(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: sales sales_factoring_party_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales
+    ADD CONSTRAINT sales_factoring_party_id_fkey FOREIGN KEY (factoring_party_id) REFERENCES public.parties(id) ON DELETE SET NULL;
+
+
+--
+-- Name: sales sales_insurance_party_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales
+    ADD CONSTRAINT sales_insurance_party_id_fkey FOREIGN KEY (insurance_party_id) REFERENCES public.parties(id) ON DELETE SET NULL;
+
+
+--
+-- Name: sales_messages sales_messages_from_rep_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales_messages
+    ADD CONSTRAINT sales_messages_from_rep_id_fkey FOREIGN KEY (from_rep_id) REFERENCES public.employees(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: sales_messages sales_messages_to_rep_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales_messages
+    ADD CONSTRAINT sales_messages_to_rep_id_fkey FOREIGN KEY (to_rep_id) REFERENCES public.employees(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: sales sales_rep_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales
+    ADD CONSTRAINT sales_rep_id_fkey FOREIGN KEY (rep_id) REFERENCES public.employees(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: sales sales_status_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales
+    ADD CONSTRAINT sales_status_code_fkey FOREIGN KEY (status_code) REFERENCES public.sale_statuses(code) ON DELETE RESTRICT;
+
+
+--
+-- Name: sessions sessions_subject_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT sessions_subject_id_fkey FOREIGN KEY (subject_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: team_member_socials team_member_socials_team_member_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.team_member_socials
+    ADD CONSTRAINT team_member_socials_team_member_id_fkey FOREIGN KEY (team_member_id) REFERENCES public.team_members(id) ON DELETE CASCADE;
 
 
 --
@@ -1127,5 +1898,5 @@ ALTER TABLE ONLY public.team_members
 -- PostgreSQL database dump complete
 --
 
-\unrestrict yA2lqTxa9r08a0Z8twmfbeNeZnoKXp6FFm632N6xyAdY3jtKb4sRgYyuOOjmwZb
+\unrestrict NGWxpJb9BtTzdmeoekbRGLbrFF2zoi3ZalIGGgomrQ30KULa8YMdfo1fOnK4hEf
 
