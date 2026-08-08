@@ -196,7 +196,7 @@ export function TeamMemberCard({
           whileInView={{ opacity: 1, scale: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-          className={`relative h-[min(22rem,70vw)] w-full max-w-[min(22.5rem,92vw)] shrink-0 overflow-hidden rounded-[1.75rem] bg-[#e2e4de] shadow-[0_18px_40px_rgba(47,58,40,0.12)] md:h-[31.25rem] md:w-[22.5rem] md:max-w-none ${theme.frame}`}
+          className={`relative h-[22rem] w-full max-w-[22.5rem] shrink-0 overflow-hidden rounded-[1.75rem] bg-[#e2e4de] shadow-[0_18px_40px_rgba(47,58,40,0.12)] md:h-[31.25rem] md:w-[22.5rem] ${theme.frame}`}
         >
           <div
             aria-hidden="true"
@@ -222,8 +222,8 @@ export function TeamMemberCard({
           transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
           className={
             isRight
-              ? "relative z-[2] mt-6 flex w-full min-w-0 flex-col items-end gap-8 md:mt-0 md:-mr-8 md:w-[calc(100%-20rem)] md:max-w-none md:gap-12 lg:w-[calc(100%-22.5rem)]"
-              : "relative z-[2] mt-6 flex w-full min-w-0 flex-col gap-8 md:mt-0 md:-ml-8 md:w-[calc(100%-20rem)] md:max-w-none md:gap-12 lg:w-[calc(100%-22.5rem)]"
+              ? "relative z-[2] mt-6 flex w-full flex-col items-end gap-8 md:mt-0 md:-mr-8 md:w-[calc(100%-20rem)] md:gap-12 lg:w-[calc(100%-22.5rem)]"
+              : "relative z-[2] mt-6 flex w-full flex-col gap-8 md:mt-0 md:-ml-8 md:w-[calc(100%-20rem)] md:gap-12 lg:w-[calc(100%-22.5rem)]"
           }
         >
           <div className={isRight ? "text-right" : undefined}>

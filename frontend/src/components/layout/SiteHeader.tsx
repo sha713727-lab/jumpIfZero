@@ -10,10 +10,10 @@ export function SiteHeader() {
       className={styles.header}
       style={{ backgroundColor: "var(--header-bg, #5c6849)" }}
     >
-      <div className="mx-auto flex h-16 w-full max-w-[1360px] items-center justify-between gap-3 px-4 sm:px-5 md:h-[4.25rem] md:px-8 lg:px-10">
+      <div className="mx-auto flex h-16 w-full max-w-[1360px] items-center justify-between px-5 md:h-[4.25rem] md:px-8 lg:px-10">
         <Link
           href="/"
-          className={`relative z-10 flex min-w-0 shrink-0 items-center gap-2.5 sm:gap-3 ${styles.ring} ${styles.readable}`}
+          className={`relative z-10 flex shrink-0 items-center gap-3 ${styles.ring} ${styles.readable}`}
         >
           <Image
             src="/images/jumpIfZeroLogo.png"
@@ -40,7 +40,7 @@ export function SiteHeader() {
 
         <nav
           aria-label="Primary"
-          className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 lg:flex lg:gap-11"
+          className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-9 md:flex lg:gap-11"
         >
           {navLinks.map((link) => (
             <Link
@@ -53,7 +53,7 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="relative z-10 flex shrink-0 items-center gap-2">
+        <div className="relative z-10 flex items-center gap-2">
           <HeaderMobileNav />
         </div>
       </div>

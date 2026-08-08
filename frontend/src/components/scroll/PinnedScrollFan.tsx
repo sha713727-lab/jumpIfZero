@@ -212,7 +212,7 @@ export function PinnedScrollFan({
 
             <div
               ref={circlesRef}
-              className="relative mt-[24svh] ml-[-60%] aspect-square w-[220%] max-w-none sm:mt-[28svh] sm:ml-[-40%] md:mt-[32svh] md:ml-[-100%] md:w-[300%]"
+              className="relative mt-[28svh] ml-0 aspect-square w-[220%] max-w-none md:mt-[32svh] md:ml-[-100%] md:w-[300%]"
             >
               {cards.map((card, index) => (
                 <div
@@ -222,7 +222,7 @@ export function PinnedScrollFan({
                   }}
                   className="absolute inset-0 flex items-start justify-center"
                 >
-                  <article className="relative aspect-[3/4] w-[min(42vw,16rem)] min-w-[10.5rem] max-w-[18rem] -translate-y-1/2 overflow-hidden rounded-[1.75rem] border border-black/10 bg-[#e2e4de] shadow-[0_22px_50px_rgba(47,58,40,0.16)] md:w-[20vw] md:min-w-[12rem] md:max-w-[20rem]">
+                  <article className="relative aspect-[3/4] w-[42vw] min-w-[12rem] max-w-[18rem] -translate-y-1/2 overflow-hidden rounded-[1.75rem] border border-black/10 bg-[#e2e4de] shadow-[0_22px_50px_rgba(47,58,40,0.16)] md:w-[20vw] md:max-w-[20rem]">
                     <Image
                       src={card.image}
                       alt={card.title}

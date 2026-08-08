@@ -7,8 +7,7 @@ import { applyHeaderTone } from "@/lib/headerTone";
 const FRAME_DIR = "/images/JZ_Frames_30FPS";
 const FRAME_COUNT = 239;
 const FRAME_PAD = 4;
-const SCROLL_DISTANCE_DESKTOP = 4800;
-const SCROLL_DISTANCE_MOBILE = 2800;
+const SCROLL_DISTANCE = 4800;
 const STRIDE_DESKTOP = 4;
 const STRIDE_MOBILE = 8;
 const STRIDE_SAVEDATA = 12;
@@ -386,13 +385,8 @@ export function ScrollFrameSequence() {
         window.devicePixelRatio || 1,
         mobile ? MAX_DPR_MOBILE : MAX_DPR_DESKTOP,
       );
-      const viewportHeight = Math.floor(
-        window.visualViewport?.height ??
-          document.documentElement.clientHeight ??
-          window.innerHeight,
-      );
       size.width = Math.max(1, Math.floor(rect.width));
-      size.height = Math.max(1, viewportHeight);
+      size.height = Math.max(1, Math.floor(window.innerHeight));
       canvas.width = Math.floor(size.width * dpr);
       canvas.height = Math.floor(size.height * dpr);
       canvas.style.width = `${size.width}px`;
@@ -439,35 +433,15 @@ export function ScrollFrameSequence() {
           if (washRef.current) {
             gsap.set(washRef.current, { opacity: 0 });
           }
-          if (veilRef.current) {
-            gsap.set(veilRef.current, { opacity: 1 });
-          }
           syncHeader(false);
           return;
         }
-
-        const scrollDistance = window.matchMedia("(max-width: 767px)").matches
-          ? SCROLL_DISTANCE_MOBILE
-          : SCROLL_DISTANCE_DESKTOP;
-
-        if (washRef.current) {
-          gsap.set(washRef.current, { opacity: 0 });
-        }
-        for (const line of lines) {
-          if (line) {
-            gsap.set(line, { opacity: 0, y: 24 });
-          }
-        }
-        if (glowRef.current) {
-          gsap.set(glowRef.current, { opacity: 0, scale: 0.92 });
-        }
-        paint(0);
 
         const timeline = gsap.timeline({
           scrollTrigger: {
             trigger: section,
             start: "top top",
-            end: `+=${scrollDistance}`,
+            end: `+=${SCROLL_DISTANCE}`,
             pin: true,
             scrub: 0.45,
             anticipatePin: 1,
@@ -611,7 +585,7 @@ export function ScrollFrameSequence() {
       ref={sectionRef}
       id="home"
       aria-label="JZ Enterprises"
-      className="relative h-[100svh] min-h-[100svh] w-full overflow-hidden"
+      className="relative h-screen w-full overflow-hidden"
       style={{ backgroundColor: STAGE_BG }}
     >
       <canvas
@@ -653,7 +627,7 @@ export function ScrollFrameSequence() {
       <div className="pointer-events-none absolute inset-0 z-10 flex h-full flex-col items-center justify-center px-6 pt-24 pb-24 text-center">
         <p
           ref={welcomeRef}
-          className="text-[clamp(1.2rem,4.3vw,3.25rem)] font-semibold tracking-[0.22em] text-[#f7f5f0]/75 uppercase opacity-0 sm:tracking-[0.44em]"
+          className="text-[clamp(1.2rem,4.3vw,3.25rem)] font-semibold tracking-[0.44em] text-[#f7f5f0]/75 uppercase opacity-0"
         >
           {heroCopy.welcome}
         </p>

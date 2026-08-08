@@ -324,7 +324,7 @@ export function AltWhy() {
                   onPointerMove={handleDragMove}
                   onPointerUp={handleDragEnd}
                   onPointerCancel={handleDragEnd}
-                  className={`absolute top-1/2 left-1/2 h-[min(22rem,68vw)] w-[min(16.25rem,78vw)] cursor-grab overflow-hidden rounded-[1.75rem] border p-5 shadow-[0_28px_60px_rgba(47,58,40,0.22)] select-none active:cursor-grabbing sm:p-7 ${theme.surface} ${styles.deckCard}`}
+                  className={`absolute top-1/2 left-1/2 h-[22rem] w-[16.25rem] cursor-grab overflow-hidden rounded-[1.75rem] border p-7 shadow-[0_28px_60px_rgba(47,58,40,0.22)] select-none active:cursor-grabbing ${theme.surface} ${styles.deckCard}`}
                 >
                   <span
                     aria-hidden="true"
@@ -406,7 +406,7 @@ export function AltWhy() {
           </div>
         </div>
 
-        <div className="mt-20 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+        <div className="mt-20 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-5">
           {whyChoose.stats.map((stat, index) => {
             const tone = index % 2 === 0 ? "brand" : "secondary";
             const surface =
