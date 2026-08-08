@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@types/busboy": "1.5.4",
-    "@types/node": "24.13.3",
+    "@types/node": "26.1.2",
     "@types/pg": "8.20.3",
     "typescript": "5.9.3"
   }
