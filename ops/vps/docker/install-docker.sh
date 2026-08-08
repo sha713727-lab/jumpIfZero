@@ -136,9 +136,6 @@ cd "$COMPOSE_DIR"
 export JZ_POSTGRES_SUPER_PASSWORD
 
 echo "=== docker compose up postgres ==="
-# Reset JZ postgres volume if a previous empty-password init left it broken
-docker compose --env-file "$SECRETS_FILE" down
-docker volume rm jumpifzero_jz_pgdata 2>/dev/null || true
 docker compose --env-file "$SECRETS_FILE" up -d postgres
 
 echo "=== wait for postgres healthy ==="
