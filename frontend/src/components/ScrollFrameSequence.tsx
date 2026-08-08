@@ -260,8 +260,7 @@ function drawFrame(
     : Math.max(width / image.naturalWidth, height / image.naturalHeight);
   const drawWidth = image.naturalWidth * scale;
   const drawHeight = image.naturalHeight * scale;
-  const xBias = canvasAspect < 1 ? 0.42 : 0.5;
-  const x = (width - drawWidth) * xBias;
+  const x = (width - drawWidth) / 2;
   const y = (height - drawHeight) / 2;
 
   context.clearRect(0, 0, width, height);
@@ -629,7 +628,7 @@ export function ScrollFrameSequence() {
         style={{ backgroundColor: STORY_BG }}
       />
 
-      <div className="pointer-events-none absolute inset-0 z-10 flex h-full flex-col items-center justify-center px-4 pt-20 pb-20 text-center sm:px-6 sm:pt-24 sm:pb-24 md:items-end md:pr-[min(12vw,7rem)] md:pl-8 md:text-right">
+      <div className="pointer-events-none absolute inset-0 z-10 flex h-full flex-col items-center justify-center px-4 pt-20 pb-20 text-center sm:px-6 sm:pt-24 sm:pb-24">
         <p
           ref={welcomeRef}
           className="max-w-full text-[clamp(1rem,3.8vw,3.25rem)] font-semibold tracking-[0.16em] text-[#f7f5f0]/75 uppercase opacity-0 sm:tracking-[0.28em] md:tracking-[0.44em]"
@@ -643,14 +642,11 @@ export function ScrollFrameSequence() {
             className="bg-clip-text text-[clamp(1.85rem,7vw,6.5rem)] leading-[0.98] font-extrabold tracking-[0.01em] text-transparent uppercase opacity-0"
             style={{ backgroundImage: LOGO_GRADIENT }}
           >
-            <span className="block sm:inline">{heroCopy.headlineLead}</span>
-            <span className="block sm:ml-2 sm:inline">
-              {heroCopy.headlineRest}
-            </span>
+            {`${heroCopy.headlineLead} ${heroCopy.headlineRest}`}
           </h1>
           <p
             ref={taglineRef}
-            className="mt-2 text-center text-[clamp(0.68rem,1.8vw,1.15rem)] font-semibold tracking-[0.16em] text-white uppercase opacity-0 sm:tracking-[0.24em] md:text-right md:tracking-[0.3em]"
+            className="mt-2 text-right text-[clamp(0.68rem,1.8vw,1.15rem)] font-semibold tracking-[0.16em] text-white uppercase opacity-0 sm:tracking-[0.24em] md:tracking-[0.3em]"
           >
             {site.tagline}
           </p>
@@ -658,7 +654,7 @@ export function ScrollFrameSequence() {
 
         <p
           ref={signatureRef}
-          className="absolute inset-x-0 bottom-8 px-4 text-center text-[clamp(0.78rem,1.7vw,1.15rem)] font-medium tracking-[0.08em] text-[#f7f5f0]/80 italic opacity-0 sm:bottom-12 sm:px-6 sm:tracking-[0.12em] md:text-right md:pr-[min(12vw,7rem)]"
+          className="absolute inset-x-0 bottom-8 px-4 text-center text-[clamp(0.78rem,1.7vw,1.15rem)] font-medium tracking-[0.08em] text-[#f7f5f0]/80 italic opacity-0 sm:bottom-12 sm:px-6 sm:tracking-[0.12em]"
         >
           {heroCopy.signature}
         </p>
