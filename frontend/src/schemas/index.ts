@@ -15,6 +15,7 @@ export {
   adminSalesMessageSchema,
   adminClientSchema,
   adminProjectSchema,
+  adminMessageAttachmentSchema,
   adminMessageSchema,
   adminInvoiceSchema,
   adminFileSchema,
@@ -43,7 +44,7 @@ export {
   type AdminCallback,
   type AdminContactMessage,
   type AdminDemoState,
-} from "@/schemas/admin";
+} from "@jumpifzero/contracts/admin";
 
 export {
   loginFormSchema,
@@ -51,15 +52,15 @@ export {
   type LoginFormValues,
   type LoginFormParsed,
   type LoginFieldErrors,
-} from "@/schemas/login";
+} from "@jumpifzero/contracts/login";
 
 export {
   demoCustomerSchema,
   type DemoCustomer,
-} from "@/schemas/customer";
+} from "@jumpifzero/contracts/customer";
 
 export {
   serverEnvSchema,
   resolveSiteUrl,
   type ServerEnv,
-} from "@/schemas/env";
+} from "@jumpifzero/contracts/env";

@@ -1,12 +1,9 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { EmployeePageHeader } from "@/components/employee/EmployeePageHeader";
-import {
-  employeeTodayLabel,
-  useEmployeeDemo,
-} from "@/components/employee/EmployeeDemoProvider";
+import { useEmployee } from "@/components/employee/EmployeeProvider";
 import { CarrierSalesSheetFields } from "@/components/sales/CarrierSalesSheetFields";
 import {
   adminFieldClass,
@@ -15,11 +12,17 @@ import {
 import { ConfirmDeleteModal } from "@/components/admin/ConfirmDeleteModal";
 import {
   emptyCarrierSaleFields,
+  saleSheetValidationMessage,
   saleStatuses,
   saleStatusLabel,
   type CarrierSaleFields,
 } from "@/constants/sales";
 import type { AdminSale, SaleStatus } from "@/lib/data/admin";
+import {
+  archiveSaleAction,
+  createSaleSheetAction,
+  updateSaleSheetAction,
+} from "@/lib/submitCrm";
 
 const cardClass =
   "rounded-2xl border border-black/8 bg-white p-5 shadow-[0_8px_24px_rgba(47,58,40,0.04)] md:p-6";
@@ -36,7 +39,8 @@ function fieldsFromSale(sale: AdminSale): CarrierSaleFields {
     salesAgent: sale.salesAgent,
     businessTelephone: sale.businessTelephone,
     truckType: sale.truckType,
-    type: sale.type,
+    amount: sale.amount,
+    currency: sale.currency,
     contactName: sale.contactName,
     contactPhone: sale.contactPhone,
     contactEmail: sale.contactEmail,
@@ -56,11 +60,25 @@ function fieldsFromSale(sale: AdminSale): CarrierSaleFields {
   };
 }
 
+function actionErrorMessage(
+  reason: "unauthorized" | "conflict" | "validation" | "server",
+): string {
+  if (reason === "unauthorized") {
+    return "Session expired. Sign in again and retry.";
+  }
+  if (reason === "conflict") {
+    return "This sheet was updated elsewhere. Refresh and try again.";
+  }
+  if (reason === "validation") {
+    return "Check required fields and try again.";
+  }
+  return "Could not save. Try again.";
+}
+
 function SaleFormFields({
   initialFields,
   initialStatus,
   existing,
-  employeeId,
   employeeName,
   sales,
   setSales,
@@ -68,7 +86,6 @@ function SaleFormFields({
   initialFields: CarrierSaleFields;
   initialStatus: SaleStatus;
   existing: AdminSale | undefined;
-  employeeId: string;
   employeeName: string;
   sales: AdminSale[];
   setSales: (items: AdminSale[]) => void;
@@ -77,31 +94,55 @@ function SaleFormFields({
   const [fields, setFields] = useState(initialFields);
   const [status, setStatus] = useState(initialStatus);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
   const isNew = !existing;
 
   const save = () => {
-    const legalName = fields.legalName.trim();
-    if (!legalName) {
+    const validationError = saleSheetValidationMessage(fields, isNew);
+    if (validationError !== null) {
+      setError(validationError);
       return;
     }
 
-    const payload: AdminSale = {
-      id: existing?.id ?? crypto.randomUUID(),
-      repId: employeeId,
-      status,
+    const payload: CarrierSaleFields = {
       ...fields,
-      legalName,
+      legalName: fields.legalName.trim(),
       salesAgent: employeeName,
-      updatedAt: employeeTodayLabel(),
     };
 
-    if (existing) {
-      setSales(sales.map((item) => (item.id === existing.id ? payload : item)));
-    } else {
-      setSales([...sales, payload]);
-    }
+    setError(null);
+    startTransition(async () => {
+      if (existing) {
+        const result = await updateSaleSheetAction({
+          id: existing.id,
+          version: existing.version,
+          fields: payload,
+          status,
+          taxIdMasked: existing.taxId,
+        });
+        if (result.ok && "data" in result) {
+          setSales(
+            sales.map((item) => (item.id === existing.id ? result.data : item)),
+          );
+          router.push("/employee/sales");
+          return;
+        }
+        setError(actionErrorMessage(result.reason));
+        return;
+      }
 
-    router.push("/employee/sales");
+      const result = await createSaleSheetAction({
+        fields: payload,
+        status,
+      });
+      if (result.ok && "data" in result) {
+        setSales([...sales, result.data]);
+        router.push("/employee/sales");
+        return;
+      }
+      setError(actionErrorMessage(result.reason));
+    });
   };
 
   const confirmDelete = () => {
@@ -109,9 +150,20 @@ function SaleFormFields({
       return;
     }
 
-    setSales(sales.filter((item) => item.id !== existing.id));
-    setDeleteOpen(false);
-    router.push("/employee/sales");
+    setError(null);
+    startTransition(async () => {
+      const result = await archiveSaleAction({
+        id: existing.id,
+        version: existing.version,
+      });
+      if (result.ok) {
+        setSales(sales.filter((item) => item.id !== existing.id));
+        setDeleteOpen(false);
+        router.push("/employee/sales");
+        return;
+      }
+      setError(actionErrorMessage(result.reason));
+    });
   };
 
   return (
@@ -130,29 +182,43 @@ function SaleFormFields({
           <label className="block">
             <span className={adminLabelClass}>Pipeline status</span>
             <select
-            className={adminFieldClass}
-            value={status}
-            onChange={(event) => setStatus(event.target.value as SaleStatus)}
-          >
-            {saleStatuses.map((item) => (
-              <option key={item} value={item}>
-                {saleStatusLabel[item]}
-              </option>
-            ))}
-          </select>
+              className={adminFieldClass}
+              value={status}
+              onChange={(event) => setStatus(event.target.value as SaleStatus)}
+            >
+              {saleStatuses.map((item) => (
+                <option key={item} value={item}>
+                  {saleStatusLabel[item]}
+                </option>
+              ))}
+            </select>
           </label>
         </div>
 
         <CarrierSalesSheetFields
           value={{ ...fields, salesAgent: employeeName }}
           salesAgentLocked
-          onChange={setFields}
+          taxIdEditMode={!isNew}
+          carrierId={existing?.carrierId}
+          onChange={(next) => {
+            setFields(next);
+            if (error !== null) {
+              setError(null);
+            }
+          }}
         />
+
+        {error ? (
+          <p className="text-[0.88rem] font-semibold text-[#a33]" role="alert">
+            {error}
+          </p>
+        ) : null}
 
         <div className="flex flex-wrap justify-end gap-2 pt-2">
           {!isNew ? (
             <button
               type="button"
+              disabled={pending}
               onClick={() => setDeleteOpen(true)}
               className="rounded-xl border border-black/12 bg-white px-4 py-2.5 text-[0.88rem] font-semibold text-[#0d120b]"
             >
@@ -168,10 +234,11 @@ function SaleFormFields({
           </button>
           <button
             type="button"
+            disabled={pending}
             onClick={save}
-            className="rounded-xl bg-brand px-4 py-2.5 text-[0.88rem] font-bold text-cream"
+            className="rounded-xl bg-brand px-4 py-2.5 text-[0.88rem] font-bold text-cream disabled:opacity-60"
           >
-            Save
+            {pending ? "Saving…" : "Save"}
           </button>
         </div>
       </section>
@@ -190,7 +257,7 @@ function SaleFormFields({
 export function SaleFormPage() {
   const params = useParams();
   const router = useRouter();
-  const { state, setSales } = useEmployeeDemo();
+  const { state, setSales } = useEmployee();
 
   const saleId = typeof params.id === "string" ? params.id : "";
   const isNew = !saleId;
@@ -221,7 +288,6 @@ export function SaleFormPage() {
       initialFields={initialFields}
       initialStatus={existing?.status ?? "draft"}
       existing={existing}
-      employeeId={state.employee.id}
       employeeName={state.employee.name}
       sales={state.sales}
       setSales={setSales}

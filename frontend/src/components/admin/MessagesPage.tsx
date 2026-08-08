@@ -1,18 +1,21 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { useAdminDemo } from "@/components/admin/AdminDemoProvider";
+import { useAdmin } from "@/components/admin/AdminProvider";
 
 const cardClass =
   "overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";
 
 export function MessagesPage() {
-  const { state } = useAdminDemo();
+  const { state } = useAdmin();
 
   const threads = state.clients
     .map((client) => {
-      const messages = state.messages.filter((m) => m.clientId === client.id);
+      const messages = state.messages
+        .filter((m) => m.clientId === client.id)
+        .slice()
+        .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
       const latest = messages[messages.length - 1];
       const unread = messages.filter(
         (m) => !m.read && m.from === "client",

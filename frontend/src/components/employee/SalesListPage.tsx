@@ -2,11 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { ConfirmDeleteModal } from "@/components/admin/ConfirmDeleteModal";
+import { employeeIcons } from "@/components/employee/EmployeeIcons";
 import { EmployeePageHeader } from "@/components/employee/EmployeePageHeader";
-import { useEmployeeDemo } from "@/components/employee/EmployeeDemoProvider";
+import { useEmployee } from "@/components/employee/EmployeeProvider";
 import { employeeEmptyCopy } from "@/constants/employee";
 import { maskTaxId, saleStatusLabel } from "@/constants/sales";
 import type { SaleStatus } from "@/lib/data/admin";
+import { archiveSaleAction } from "@/lib/submitCrm";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 const cardClass =
@@ -15,17 +19,39 @@ const cardClass =
 const statusPillClass: Record<SaleStatus, string> = {
   draft: "bg-black/8 text-black/50",
   quoted: "bg-[rgba(249,161,55,0.18)] text-[#e8891a]",
-  won: "bg-[rgba(116,129,95,0.12)] text-brand",
+  won: "bg-[rgba(92,104,73,0.12)] text-brand",
   lost: "bg-[rgba(47,58,40,0.12)] text-[#2f3a28]",
 };
 
 export function SalesListPage() {
   const router = useRouter();
-  const { state } = useEmployeeDemo();
+  const { state, setSales } = useEmployee();
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const TrashIcon = employeeIcons.trash;
 
   const sales = [...state.sales].sort((a, b) =>
     b.updatedAt.localeCompare(a.updatedAt),
   );
+  const deleteTarget = sales.find((item) => item.id === deleteId);
+
+  const confirmDelete = () => {
+    if (!deleteTarget) {
+      return;
+    }
+    startTransition(async () => {
+      const result = await archiveSaleAction({
+        id: deleteTarget.id,
+        version: deleteTarget.version,
+      });
+      if (result.ok) {
+        setSales(state.sales.filter((item) => item.id !== deleteTarget.id));
+        setDeleteOpen(false);
+        setDeleteId(null);
+      }
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -42,18 +68,21 @@ export function SalesListPage() {
         ) : (
           <ul className="divide-y divide-black/8">
             {sales.map((sale) => (
-              <li key={sale.id}>
+              <li
+                key={sale.id}
+                className="flex items-stretch gap-2 px-3 py-2 sm:px-4"
+              >
                 <Link
                   href={`/employee/sales/${sale.id}`}
-                  className="flex flex-col gap-2 px-5 py-4 transition-colors hover:bg-[#f3f5ef]/70 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex min-w-0 flex-1 flex-col gap-2 rounded-xl px-2 py-2 transition-colors hover:bg-[#f3f5ef]/70 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-[0.92rem] font-semibold text-[#0d120b]">
                       {sale.legalName}
                     </p>
                     <p className="text-[0.82rem] font-medium text-black/45">
                       DOT {sale.usDot || "—"} · MC {sale.mc || "—"} ·{" "}
-                      {sale.truckType || sale.type || "Carrier"}
+                      {sale.truckType || "Carrier"}
                     </p>
                     {sale.taxId ? (
                       <p className="mt-1 text-[0.78rem] font-medium text-black/35">
@@ -61,7 +90,7 @@ export function SalesListPage() {
                       </p>
                     ) : null}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-2">
                     <span
                       className={`rounded-full px-2.5 py-1 text-[0.72rem] font-bold ${statusPillClass[sale.status]}`}
                     >
@@ -72,11 +101,36 @@ export function SalesListPage() {
                     </span>
                   </div>
                 </Link>
+                <button
+                  type="button"
+                  aria-label={`Delete ${sale.legalName}`}
+                  disabled={pending}
+                  onClick={() => {
+                    setDeleteId(sale.id);
+                    setDeleteOpen(true);
+                  }}
+                  className="my-auto inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-black/10 bg-white text-[#0d120b] transition-colors hover:border-black/20 hover:bg-[#f3f5ef] disabled:opacity-50"
+                >
+                  <TrashIcon className="size-4" />
+                </button>
               </li>
             ))}
           </ul>
         )}
       </div>
+
+      <ConfirmDeleteModal
+        open={deleteOpen}
+        title="Delete sales sheet"
+        lede={`Remove "${deleteTarget?.legalName ?? "this sheet"}" from your records?`}
+        onClose={() => {
+          if (!pending) {
+            setDeleteOpen(false);
+            setDeleteId(null);
+          }
+        }}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

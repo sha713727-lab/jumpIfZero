@@ -1,15 +1,18 @@
-import { createHash, timingSafeEqual } from "node:crypto";
-import { demoAdmin } from "@/constants/adminAuth";
-import { initialAdminDemoState } from "@/lib/data/admin";
-import { demoCustomer } from "@/lib/data/customer";
-import { readDemoCredentials } from "@/schemas/env";
+import {
+  loginResponseSchema,
+  type AuthSubject,
+} from "@jumpifzero/contracts/auth";
+import { gatewayBackendRequest } from "@/lib/backend/gatewayClient";
 import type { SessionRole } from "@/lib/session";
 
 export type CredentialLookupResult =
   | {
       readonly ok: true;
       readonly role: SessionRole;
-      readonly subjectId: string;
+      readonly subject: AuthSubject;
+      readonly sessionToken: string;
+      readonly expiresAt: string;
+      readonly maxAge: number;
     }
   | { readonly ok: false; readonly reason: "credentials" | "server" };
 
@@ -19,71 +22,48 @@ export type CredentialLookupInput = {
   readonly password: string;
 };
 
-function digestUtf8(value: string): Buffer {
-  return createHash("sha256").update(value, "utf8").digest();
-}
-
-function secretsEqual(left: string, right: string): boolean {
-  return timingSafeEqual(digestUtf8(left), digestUtf8(right));
-}
-
-async function verifyPassword(
-  candidate: string,
-  storedSecret: string,
-): Promise<boolean> {
-  return secretsEqual(candidate, storedSecret);
+function toSessionRole(role: AuthSubject["role"]): SessionRole {
+  if (role === "client") {
+    return "customer";
+  }
+  return role;
 }
 
 export async function lookupCredentials(
   input: CredentialLookupInput,
 ): Promise<CredentialLookupResult> {
-  const credentials = readDemoCredentials();
+  try {
+    const data = await gatewayBackendRequest({
+      method: "POST",
+      path: "/auth/login",
+      body: {
+        email: input.email.trim().toLowerCase(),
+        password: input.password,
+      },
+      outputSchema: loginResponseSchema,
+    });
 
-  if (!credentials) {
+    const sessionRole = toSessionRole(data.subject.role);
+    if (sessionRole !== input.role) {
+      return { ok: false, reason: "credentials" };
+    }
+
+    return {
+      ok: true,
+      role: sessionRole,
+      subject: data.subject,
+      sessionToken: data.sessionToken,
+      expiresAt: data.expiresAt,
+      maxAge: data.cookie.maxAge,
+    };
+  } catch (err) {
+    if (
+      err instanceof Error &&
+      "status" in err &&
+      (err as { status: number }).status === 401
+    ) {
+      return { ok: false, reason: "credentials" };
+    }
     return { ok: false, reason: "server" };
   }
-
-  const email = input.email.trim().toLowerCase();
-  const password = input.password;
-
-  if (input.role === "admin") {
-    const expectedEmail = credentials.DEMO_ADMIN_EMAIL.toLowerCase();
-    const expectedPassword = credentials.DEMO_ADMIN_PASSWORD;
-
-    const emailOk = secretsEqual(email, expectedEmail);
-    const passwordOk = await verifyPassword(password, expectedPassword);
-
-    if (!emailOk || !passwordOk) {
-      return { ok: false, reason: "credentials" };
-    }
-
-    return { ok: true, role: "admin", subjectId: demoAdmin.id };
-  }
-
-  if (input.role === "customer") {
-    const expectedPassword = credentials.DEMO_CUSTOMER_PASSWORD;
-
-    const emailOk = secretsEqual(email, demoCustomer.email.toLowerCase());
-    const passwordOk = await verifyPassword(password, expectedPassword);
-
-    if (!emailOk || !passwordOk) {
-      return { ok: false, reason: "credentials" };
-    }
-
-    return { ok: true, role: "customer", subjectId: demoCustomer.id };
-  }
-
-  const expectedPassword = credentials.DEMO_EMPLOYEE_PASSWORD;
-
-  const employee = initialAdminDemoState.employees.find(
-    (item) => item.active && item.email.toLowerCase() === email,
-  );
-
-  const passwordOk = await verifyPassword(password, expectedPassword);
-
-  if (!employee || !passwordOk) {
-    return { ok: false, reason: "credentials" };
-  }
-
-  return { ok: true, role: "employee", subjectId: employee.id };
 }

@@ -43,14 +43,27 @@ Ensure `password_encryption = scram-sha-256`.
 
 ## Migrate
 
-Apply as `jz_owner`, in order. Record version + checksum in `schema_migrations`.
+Apply as `jz_owner`, in order. After each file, record version + SHA-256 checksum in `schema_migrations`:
 
-```bash
-psql -U jz_owner -d jumpifzero -f database/migrations/0001_init.up.sql
-# then insert schema_migrations row (see scripts when backend lands)
+```sql
+INSERT INTO schema_migrations (version, checksum)
+VALUES (
+  '0005_site_sections',
+  encode(digest(pg_read_binary_file('...'), 'sha256'), 'hex')
+);
 ```
 
-After each migration: regenerate `schema.sql` and commit it.
+Operationally, compute the checksum of the `.up.sql` file offline and insert that hex digest. After each migration: regenerate `schema.sql` (`pg_dump --schema-only`) and commit it.
+
+  Down migrations exist for `0001`–`0006`. Apply downs in reverse order only when rolling back a release.
+
+## Cleanup (runtime tables)
+
+Application auth paths prune some expired rows opportunistically. For production, also schedule:
+
+```bash
+npm run cleanup:expired -w @jumpifzero/backend
+```
 
 ## Seeds
 

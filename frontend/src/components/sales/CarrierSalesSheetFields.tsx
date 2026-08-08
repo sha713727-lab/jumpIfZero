@@ -1,15 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import {
   adminFieldClass,
   adminLabelClass,
 } from "@/components/admin/AdminFormModal";
 import type { CarrierSaleFields } from "@/constants/sales";
+import { saleCurrencies } from "@/constants/sales";
+import { revealCarrierTaxIdAction } from "@/lib/submitCrm";
 
 type CarrierSalesSheetFieldsProps = {
   readonly value: CarrierSaleFields;
   readonly onChange: (next: CarrierSaleFields) => void;
   readonly salesAgentLocked?: boolean;
+  readonly taxIdEditMode?: boolean;
+  readonly carrierId?: string | undefined;
 };
 
 function setField<K extends keyof CarrierSaleFields>(
@@ -20,10 +25,78 @@ function setField<K extends keyof CarrierSaleFields>(
   return { ...value, [key]: fieldValue };
 }
 
+function TaxIdRevealControls({
+  carrierId,
+}: Readonly<{ carrierId: string }>) {
+  const [revealedTaxId, setRevealedTaxId] = useState<string | null>(null);
+  const [revealLoading, setRevealLoading] = useState(false);
+  const [revealError, setRevealError] = useState<string | null>(null);
+
+  const onReveal = async () => {
+    if (revealLoading) {
+      return;
+    }
+    setRevealLoading(true);
+    setRevealError(null);
+    const result = await revealCarrierTaxIdAction({ carrierId });
+    setRevealLoading(false);
+    if (!result.ok) {
+      setRevealedTaxId(null);
+      setRevealError(
+        result.reason === "unauthorized"
+          ? "Not authorized to reveal Tax ID."
+          : "Unable to reveal Tax ID.",
+      );
+      return;
+    }
+    setRevealedTaxId(result.data);
+  };
+
+  return (
+    <div className="mt-2 space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
+        {revealedTaxId === null ? (
+          <button
+            type="button"
+            onClick={() => {
+              void onReveal();
+            }}
+            disabled={revealLoading}
+            className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[0.78rem] font-semibold text-[#0d120b] disabled:opacity-50"
+          >
+            {revealLoading ? "Revealing…" : "Reveal Tax ID"}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setRevealedTaxId(null);
+              setRevealError(null);
+            }}
+            className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[0.78rem] font-semibold text-[#0d120b]"
+          >
+            Hide Tax ID
+          </button>
+        )}
+      </div>
+      {revealedTaxId !== null ? (
+        <p className="text-[0.84rem] font-medium text-[#0d120b]">
+          Full Tax ID: {revealedTaxId}
+        </p>
+      ) : null}
+      {revealError ? (
+        <p className="text-[0.82rem] font-medium text-[#a33]">{revealError}</p>
+      ) : null}
+    </div>
+  );
+}
+
 export function CarrierSalesSheetFields({
   value,
   onChange,
   salesAgentLocked = false,
+  taxIdEditMode = false,
+  carrierId,
 }: CarrierSalesSheetFieldsProps) {
   return (
     <div className="space-y-8">
@@ -36,7 +109,7 @@ export function CarrierSalesSheetFields({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="block">
-            <span className={adminLabelClass}>US DOT</span>
+            <span className={adminLabelClass}>US DOT *</span>
             <input
             className={adminFieldClass}
             value={value.usDot}
@@ -48,7 +121,7 @@ export function CarrierSalesSheetFields({
         </div>
         <div>
           <label className="block">
-            <span className={adminLabelClass}>MC</span>
+            <span className={adminLabelClass}>MC *</span>
             <input
             className={adminFieldClass}
             value={value.mc}
@@ -62,7 +135,7 @@ export function CarrierSalesSheetFields({
 
       <div>
         <label className="block">
-          <span className={adminLabelClass}>Legal name</span>
+          <span className={adminLabelClass}>Legal name *</span>
           <input
           className={adminFieldClass}
           value={value.legalName}
@@ -115,16 +188,22 @@ export function CarrierSalesSheetFields({
           </div>
           <div>
             <label className="block">
-              <span className={adminLabelClass}>Tax ID</span>
+              <span className={adminLabelClass}>
+                Tax ID{taxIdEditMode ? "" : " *"}
+              </span>
               <input
               className={adminFieldClass}
               value={value.taxId}
               autoComplete="off"
+              placeholder={taxIdEditMode ? "Leave unchanged or enter new" : undefined}
               onChange={(event) =>
                 onChange(setField(value, "taxId", event.target.value))
               }
             />
             </label>
+            {taxIdEditMode && carrierId ? (
+              <TaxIdRevealControls key={carrierId} carrierId={carrierId} />
+            ) : null}
           </div>
         </div>
         <div className="space-y-4">
@@ -169,14 +248,36 @@ export function CarrierSalesSheetFields({
           </div>
           <div>
             <label className="block">
-              <span className={adminLabelClass}>Type</span>
+              <span className={adminLabelClass}>Amount *</span>
               <input
               className={adminFieldClass}
-              value={value.type}
+              inputMode="decimal"
+              required
+              value={value.amount}
               onChange={(event) =>
-                onChange(setField(value, "type", event.target.value))
+                onChange(setField(value, "amount", event.target.value))
               }
             />
+            </label>
+          </div>
+          <div>
+            <label className="block">
+              <span className={adminLabelClass}>Currency *</span>
+              <select
+              className={adminFieldClass}
+              required
+              value={value.currency}
+              onChange={(event) =>
+                onChange(setField(value, "currency", event.target.value))
+              }
+            >
+              <option value="">Select currency</option>
+              {saleCurrencies.map((currency) => (
+                <option key={currency} value={currency}>
+                  {currency}
+                </option>
+              ))}
+            </select>
             </label>
           </div>
         </div>

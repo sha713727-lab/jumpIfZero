@@ -5,15 +5,20 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { adminIcons } from "@/components/admin/AdminIcons";
-import { AdminDemoProvider } from "@/components/admin/AdminDemoProvider";
+import {
+  AdminProvider,
+  useAdmin,
+  type AdminIdentity,
+} from "@/components/admin/AdminProvider";
 import {
   adminNavGroups,
   adminOverviewCopy,
   type AdminNavId,
 } from "@/constants/admin";
-import { demoAdmin } from "@/constants/adminAuth";
 import { site } from "@/constants/site";
 import { submitSignOut } from "@/lib/submitSignOut";
+
+const logoStyle = { width: 32, height: 31 } as const;
 
 function navIdFromPath(pathname: string): AdminNavId {
   if (pathname === "/admin") {
@@ -46,6 +51,7 @@ function AdminShellInner({
 }>) {
   const pathname = usePathname();
   const router = useRouter();
+  const { identity } = useAdmin();
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const activeId = navIdFromPath(pathname);
@@ -64,7 +70,10 @@ function AdminShellInner({
   };
 
   const nav = (
-    <nav aria-label="Admin" className="flex flex-1 flex-col gap-5 overflow-y-auto px-3 pb-6">
+    <nav
+      aria-label="Admin"
+      className="flex flex-1 flex-col gap-5 overflow-y-auto px-3 pb-6"
+    >
       {adminNavGroups.map((group) => (
         <div key={group.id}>
           {group.label ? (
@@ -81,10 +90,11 @@ function AdminShellInner({
                 <Link
                   key={item.id}
                   href={item.href}
+                  prefetch
                   onClick={() => setOpen(false)}
                   className={`inline-flex items-center gap-3 rounded-xl px-3 py-2.5 text-[0.92rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary ${
                     active
-                      ? "bg-[rgba(116,129,95,0.16)] text-brand"
+                      ? "bg-[rgba(92,104,73,0.16)] text-brand"
                       : "text-[#0d120b]/70 hover:bg-black/[0.04] hover:text-[#0d120b]"
                   }`}
                 >
@@ -110,8 +120,7 @@ function AdminShellInner({
               aria-hidden="true"
               width={32}
               height={31}
-              className="h-8 w-auto"
-              style={{ width: "auto" }}
+              style={logoStyle}
               priority
             />
             <div className="min-w-0">
@@ -127,13 +136,13 @@ function AdminShellInner({
           <div className="mt-auto border-t border-black/8 px-4 py-4">
             <div className="flex items-center gap-3">
               <span className="inline-flex size-9 items-center justify-center rounded-full bg-logo-gradient text-[0.72rem] font-extrabold text-[#0d120b]">
-                {demoAdmin.initials}
+                {identity.initials}
               </span>
               <div className="min-w-0">
-                <p className="truncate text-[0.84rem] font-bold">{demoAdmin.name}</p>
-                <p className="truncate text-[0.72rem] text-black/45">
-                  {demoAdmin.role}
+                <p className="truncate text-[0.84rem] font-bold">
+                  {identity.name}
                 </p>
+                <p className="truncate text-[0.72rem] text-black/45">Admin</p>
               </div>
             </div>
           </div>
@@ -193,8 +202,7 @@ function AdminShellInner({
               aria-hidden="true"
               width={32}
               height={31}
-              className="h-8 w-auto"
-              style={{ width: "auto" }}
+              style={logoStyle}
             />
             <div className="min-w-0">
               <p className="truncate text-[0.82rem] font-extrabold">
@@ -214,12 +222,14 @@ function AdminShellInner({
 
 export function AdminShell({
   children,
+  identity,
 }: Readonly<{
   children: React.ReactNode;
+  identity: AdminIdentity;
 }>) {
   return (
-    <AdminDemoProvider>
+    <AdminProvider identity={identity}>
       <AdminShellInner>{children}</AdminShellInner>
-    </AdminDemoProvider>
+    </AdminProvider>
   );
 }

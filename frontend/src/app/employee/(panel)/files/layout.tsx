@@ -1,3 +1,4 @@
+import { EmployeeDomainGate } from "@/components/employee/EmployeeDomainGate";
 import { requireEmployeeKind } from "@/lib/auth/requireEmployeeAccess";
 
 export default async function EmployeeFilesLayout({
@@ -6,5 +7,7 @@ export default async function EmployeeFilesLayout({
   children: React.ReactNode;
 }>) {
   await requireEmployeeKind("delivery");
-  return children;
+  return (
+    <EmployeeDomainGate domain="delivery">{children}</EmployeeDomainGate>
+  );
 }

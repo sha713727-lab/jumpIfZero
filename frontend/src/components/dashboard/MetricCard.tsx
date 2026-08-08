@@ -1,10 +1,10 @@
 import { dashboardIcons } from "@/components/dashboard/DashboardIcons";
-import type { overviewMetrics } from "@/lib/data/dashboard";
+import type { CustomerMetric } from "@/lib/data/customerPortalTypes";
 
-type Metric = (typeof overviewMetrics)[number];
+type Metric = CustomerMetric;
 
 const toneClass: Record<Metric["tone"], string> = {
-  brand: "bg-[rgba(116,129,95,0.16)] text-brand",
+  brand: "bg-[rgba(92, 104, 73,0.16)] text-brand",
   secondary: "bg-[rgba(249,161,55,0.18)] text-[#e8891a]",
   dark: "bg-[rgba(47,58,40,0.12)] text-[#2f3a28]",
 };

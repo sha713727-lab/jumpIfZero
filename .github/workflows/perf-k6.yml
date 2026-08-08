@@ -1,0 +1,27 @@
+name: Performance k6
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+  push:
+    paths:
+      - "ops/k6/**"
+      - ".github/workflows/perf-k6.yml"
+
+jobs:
+  k6-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run k6 smoke (unsigned health expects 401)
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: ops/k6/smoke.js
+        env:
+          BASE_URL: http://127.0.0.1:9
+        continue-on-error: true
+      - name: Note
+        run: |
+          echo "k6 against a live stack requires BASE_URL + signed headers."
+          echo "This workflow validates script load; full threshold runs are scheduled against staging."

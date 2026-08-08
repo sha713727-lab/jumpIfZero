@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ServicesPageClient } from "@/components/services/ServicesPageClient";
+import { getServiceChapters } from "@/lib/data/services";
 
 export const metadata: Metadata = {
   title: "Services",
@@ -7,6 +8,7 @@ export const metadata: Metadata = {
     "Website, software, apps, SEO, marketing, design, security, and bug fixes — eight services as one growth system from JZ Enterprises.",
 };
 
-export default function ServicesPage() {
-  return <ServicesPageClient />;
+export default async function ServicesPage() {
+  const serviceChapters = await getServiceChapters();
+  return <ServicesPageClient serviceChapters={serviceChapters} />;
 }

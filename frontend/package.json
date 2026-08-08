@@ -12,25 +12,31 @@
     "start": "next start --port 3000",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/**/*.test.mts",
+    "test:e2e": "playwright test",
+    "check:bundle": "node scripts/check-bundle-budget.mjs",
     "optimize:images": "node scripts/optimize-images.cjs",
     "optimize:images:dry": "node scripts/optimize-images.cjs --dry-run",
     "optimize:frames": "node scripts/convert-jz-frames-webp.cjs"
   },
   "dependencies": {
+    "@jumpifzero/contracts": "*",
+    "@sentry/nextjs": "^10.69.0",
     "framer-motion": "^12.42.2",
     "gsap": "^3.15.0",
-    "next": "16.2.11",
+    "next": "^16.3.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "zod": "^4.4.3"
+    "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "@playwright/test": "^1.51.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.11",
+    "eslint-config-next": "^16.3.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

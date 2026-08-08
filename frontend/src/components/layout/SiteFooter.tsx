@@ -3,7 +3,7 @@ import Link from "next/link";
 import { FooterToneSync } from "@/components/layout/FooterToneSync";
 import { navLinks, site } from "@/constants/site";
 
-const SECTION_BG = "#74815f";
+const SECTION_BG = "#5c6849";
 
 const footerLinks = [
   { name: "Home", href: "/" },
@@ -67,7 +67,7 @@ export function SiteFooter() {
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-[0.92rem] font-medium tracking-[-0.01em] text-cream/90 transition-colors hover:text-cream focus-visible:ring-2 focus-visible:ring-cream/50 focus-visible:outline-none"
+                className="text-[0.92rem] font-medium tracking-[-0.01em] text-cream transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-cream/50 focus-visible:outline-none"
               >
                 {link.name}
               </Link>
@@ -96,7 +96,7 @@ export function SiteFooter() {
           {site.name}
         </p>
 
-        <p className="mt-8 text-center text-[0.68rem] font-medium tracking-[0.08em] text-cream/55">
+        <p className="mt-8 text-center text-[0.68rem] font-medium tracking-[0.08em] text-cream">
           © {year} All rights reserved by {site.name}.
         </p>
       </div>

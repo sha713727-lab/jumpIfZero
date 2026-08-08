@@ -4,22 +4,21 @@ import Link from "next/link";
 import { AreaChart } from "@/components/dashboard/AreaChart";
 import { DonutChart } from "@/components/dashboard/DonutChart";
 import { adminIcons } from "@/components/admin/AdminIcons";
-import { adminTodayLabel, useAdminDemo } from "@/components/admin/AdminDemoProvider";
+import { adminTodayLabel, useAdmin } from "@/components/admin/AdminProvider";
 import {
   adminOverviewCopy,
   projectStatusLabel,
   projectStatuses,
 } from "@/constants/admin";
-import { demoAdmin } from "@/constants/adminAuth";
 
 const cardClass =
   "rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";
 
-const mixColors = ["#74815f", "#2f3a28", "#f9a137", "#e8891a"] as const;
+const mixColors = ["#5c6849", "#2f3a28", "#f9a137", "#e8891a"] as const;
 
 export function OverviewPage() {
-  const { state } = useAdminDemo();
-  const firstName = demoAdmin.name.split(" ")[0];
+  const { identity, state } = useAdmin();
+  const firstName = identity.name.trim().split(/\s+/)[0] ?? identity.name;
 
   const activeServices = state.services.filter((item) => item.active).length;
   const openCallbacks = state.callbacks.filter((item) => item.status === "new").length;
@@ -32,7 +31,7 @@ export function OverviewPage() {
       value: activeServices,
       detail: `${state.services.length} total in catalog`,
       Icon: adminIcons.services,
-      tone: "bg-[rgba(116,129,95,0.16)] text-brand",
+      tone: "bg-[rgba(92, 104, 73,0.16)] text-brand",
     },
     {
       id: "clients",
@@ -56,7 +55,7 @@ export function OverviewPage() {
       value: openCallbacks,
       detail: `${state.callbacks.length} total requests`,
       Icon: adminIcons.callbacks,
-      tone: "bg-[rgba(116,129,95,0.16)] text-brand",
+      tone: "bg-[rgba(92, 104, 73,0.16)] text-brand",
     },
     {
       id: "faqs",
@@ -91,7 +90,7 @@ export function OverviewPage() {
     label: item.label,
     value: item.value,
     percent: mixTotal === 0 ? 0 : Math.round((item.value / mixTotal) * 100),
-    color: mixColors[index % mixColors.length] ?? "#74815f",
+    color: mixColors[index % mixColors.length] ?? "#5c6849",
   }));
 
   return (
@@ -240,7 +239,7 @@ export function OverviewPage() {
                 <span
                   className={`rounded-full px-2.5 py-1 text-[0.72rem] font-bold ${
                     service.active
-                      ? "bg-[rgba(116,129,95,0.16)] text-brand"
+                      ? "bg-[rgba(92, 104, 73,0.16)] text-brand"
                       : "bg-black/8 text-black/45"
                   }`}
                 >

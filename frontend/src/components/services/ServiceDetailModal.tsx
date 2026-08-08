@@ -51,7 +51,7 @@ export function ServiceDetailModal({
       >
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_40%_at_0%_0%,rgba(249,161,55,0.14)_0%,transparent_55%),radial-gradient(ellipse_45%_50%_at_100%_0%,rgba(116,129,95,0.18)_0%,transparent_50%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_40%_at_0%_0%,rgba(249,161,55,0.14)_0%,transparent_55%),radial-gradient(ellipse_45%_50%_at_100%_0%,rgba(92, 104, 73,0.18)_0%,transparent_50%)]"
         />
 
         <button

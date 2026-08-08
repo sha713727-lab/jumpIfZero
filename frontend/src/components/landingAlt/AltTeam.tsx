@@ -6,8 +6,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { teamIntro, teamMembers } from "@/lib/data/team";
-import type { TeamSocialNetwork } from "@/lib/data/team";
+import { teamIntro } from "@/constants/team";
+import type { TeamMember, TeamSocialNetwork } from "@/lib/data/team";
 import { applyHeaderTone } from "@/lib/headerTone";
 import styles from "./landingAlt.module.css";
 
@@ -96,7 +96,7 @@ function TeamCardBody({
   readonly role: string;
   readonly image: string;
   readonly bloom: string;
-  readonly socials: (typeof teamMembers)[number]["socials"];
+  readonly socials: TeamMember["socials"];
 }) {
   return (
     <>
@@ -132,7 +132,9 @@ function TeamCardBody({
               href={social.href}
               aria-label={`${name} on ${social.label}`}
               className="flex size-9 items-center justify-center rounded-full border border-cream/25 text-cream transition-all duration-300 hover:border-secondary hover:bg-logo-gradient hover:text-black focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
-              onPointerDown={(event) => event.stopPropagation()}
+              onPointerDown={(event: ReactPointerEvent<HTMLAnchorElement>) =>
+                event.stopPropagation()
+              }
             >
               <SocialIcon network={social.network} />
             </Link>
@@ -143,7 +145,11 @@ function TeamCardBody({
   );
 }
 
-export function AltTeam() {
+export function AltTeam({
+  members,
+}: Readonly<{
+  members: readonly TeamMember[];
+}>) {
   const sectionRef = useRef<HTMLElement | null>(null);
   const deckRef = useRef<HTMLDivElement | null>(null);
   const deckCardsRef = useRef<Array<HTMLElement | null>>([]);
@@ -166,16 +172,16 @@ export function AltTeam() {
       node.style.transform = stackTransform(depth, dragX);
       node.style.opacity = depth > STACK_DEPTH ? "0" : depth < 0 ? "0" : "1";
       node.style.pointerEvents = depth === 0 ? "auto" : "none";
-      node.style.zIndex = String(teamMembers.length - Math.max(depth, -1));
+      node.style.zIndex = String(members.length - Math.max(depth, -1));
     });
-  }, []);
+  }, [members.length]);
 
   const goTo = useCallback((index: number) => {
-    const total = teamMembers.length;
+    const total = members.length;
     const next = ((index % total) + total) % total;
     activeRef.current = next;
     setActive(next);
-  }, []);
+  }, [members.length]);
 
   useEffect(() => {
     applyLayout(active, 0);
@@ -393,6 +399,10 @@ export function AltTeam() {
     });
   };
 
+  if (members.length === 0) {
+    return null;
+  }
+
   return (
     <section
       ref={sectionRef}
@@ -453,7 +463,7 @@ export function AltTeam() {
           <div
             className={`relative h-[30rem] w-[min(100%,19.5rem)] ${styles.deckStage}`}
           >
-            {teamMembers.map((member, index) => {
+            {members.map((member, index) => {
               const theme = CARD_THEMES[member.accent];
 
               return (
@@ -492,7 +502,7 @@ export function AltTeam() {
             </button>
 
             <div className="flex items-center gap-2">
-              {teamMembers.map((member, index) => (
+              {members.map((member, index) => (
                 <button
                   key={member.name}
                   type="button"
@@ -522,7 +532,7 @@ export function AltTeam() {
 
         {isDesktop === true ? (
         <div className="mt-16 grid gap-6 lg:grid-cols-3">
-          {teamMembers.map((member, index) => {
+          {members.map((member, index) => {
             const theme = CARD_THEMES[member.accent];
 
             return (

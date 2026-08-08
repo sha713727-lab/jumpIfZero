@@ -1,12 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { EmployeePageHeader } from "@/components/employee/EmployeePageHeader";
-import {
-  employeeTodayLabel,
-  useEmployeeDemo,
-} from "@/components/employee/EmployeeDemoProvider";
+import { useEmployee } from "@/components/employee/EmployeeProvider";
 import {
   adminFieldClass,
   adminLabelClass,
@@ -18,6 +15,12 @@ import type {
   AdminLeadFollowUp,
   LeadStatus,
 } from "@/lib/data/admin";
+import {
+  archiveLeadAction,
+  changeLeadStatusAction,
+  createLeadFollowUpAction,
+  updateLeadAction,
+} from "@/lib/submitCrm";
 
 const cardClass =
   "rounded-2xl border border-black/8 bg-white p-5 shadow-[0_8px_24px_rgba(47,58,40,0.04)] md:p-6";
@@ -31,15 +34,6 @@ type LeadForm = {
   status: LeadStatus;
   notes: string;
 };
-
-function followUpTimestamp(): string {
-  const time = new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date());
-
-  return `${employeeTodayLabel()} · ${time}`;
-}
 
 function formFromLead(lead: AdminLead): LeadForm {
   return {
@@ -73,6 +67,7 @@ function LeadDetailFields({
   const [followUpNote, setFollowUpNote] = useState("");
   const [followUpOutcome, setFollowUpOutcome] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [pending, startTransition] = useTransition();
 
   const save = () => {
     const company = form.company.trim();
@@ -80,19 +75,36 @@ function LeadDetailFields({
       return;
     }
 
-    const payload: AdminLead = {
-      ...lead,
-      company,
-      contactName: form.contactName.trim(),
-      phone: form.phone.trim(),
-      email: form.email.trim(),
-      source: form.source.trim(),
-      status: form.status,
-      notes: form.notes.trim(),
-      updatedAt: employeeTodayLabel(),
-    };
+    startTransition(async () => {
+      const updateResult = await updateLeadAction({
+        id: lead.id,
+        version: lead.version,
+        company,
+        contactName: form.contactName.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim(),
+        source: form.source.trim(),
+        notes: form.notes.trim(),
+      });
 
-    setLeads(leads.map((item) => (item.id === lead.id ? payload : item)));
+      if (!updateResult.ok || !("data" in updateResult)) {
+        return;
+      }
+
+      let saved = updateResult.data;
+      if (form.status !== lead.status) {
+        const statusResult = await changeLeadStatusAction({
+          id: lead.id,
+          version: saved.version,
+          statusCode: form.status,
+        });
+        if (statusResult.ok && "data" in statusResult) {
+          saved = statusResult.data;
+        }
+      }
+
+      setLeads(leads.map((item) => (item.id === lead.id ? saved : item)));
+    });
   };
 
   const addFollowUp = () => {
@@ -101,24 +113,33 @@ function LeadDetailFields({
       return;
     }
 
-    const payload: AdminLeadFollowUp = {
-      id: crypto.randomUUID(),
-      leadId: lead.id,
-      at: followUpTimestamp(),
-      note,
-      outcome: followUpOutcome.trim(),
-    };
-
-    setLeadFollowUps([...allFollowUps, payload]);
-    setFollowUpNote("");
-    setFollowUpOutcome("");
+    startTransition(async () => {
+      const result = await createLeadFollowUpAction({
+        leadId: lead.id,
+        note,
+        outcome: followUpOutcome.trim(),
+      });
+      if (result.ok && "data" in result) {
+        setLeadFollowUps([...allFollowUps, result.data]);
+        setFollowUpNote("");
+        setFollowUpOutcome("");
+      }
+    });
   };
 
   const confirmDelete = () => {
-    setLeads(leads.filter((item) => item.id !== lead.id));
-    setLeadFollowUps(allFollowUps.filter((item) => item.leadId !== lead.id));
-    setDeleteOpen(false);
-    router.push("/employee/leads");
+    startTransition(async () => {
+      const result = await archiveLeadAction({
+        id: lead.id,
+        version: lead.version,
+      });
+      if (result.ok) {
+        setLeads(leads.filter((item) => item.id !== lead.id));
+        setLeadFollowUps(allFollowUps.filter((item) => item.leadId !== lead.id));
+        setDeleteOpen(false);
+        router.push("/employee/leads");
+      }
+    });
   };
 
   return (
@@ -229,6 +250,7 @@ function LeadDetailFields({
         <div className="flex flex-wrap justify-end gap-2 pt-2">
           <button
             type="button"
+            disabled={pending}
             onClick={() => setDeleteOpen(true)}
             className="rounded-xl border border-black/12 bg-white px-4 py-2.5 text-[0.88rem] font-semibold text-[#0d120b]"
           >
@@ -243,6 +265,7 @@ function LeadDetailFields({
           </button>
           <button
             type="button"
+            disabled={pending}
             onClick={save}
             className="rounded-xl bg-brand px-4 py-2.5 text-[0.88rem] font-bold text-cream"
           >
@@ -296,6 +319,7 @@ function LeadDetailFields({
           <div className="flex justify-end">
             <button
               type="button"
+              disabled={pending}
               onClick={addFollowUp}
               className="rounded-xl bg-brand px-4 py-2.5 text-[0.88rem] font-bold text-cream"
             >
@@ -319,7 +343,7 @@ function LeadDetailFields({
 export function LeadDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { state, setLeads, setLeadFollowUps } = useEmployeeDemo();
+  const { state, setLeads, setLeadFollowUps } = useEmployee();
 
   const leadId = typeof params.id === "string" ? params.id : "";
   const lead = state.leads.find((item) => item.id === leadId);

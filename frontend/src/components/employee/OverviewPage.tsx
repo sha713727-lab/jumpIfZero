@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { employeeIcons } from "@/components/employee/EmployeeIcons";
+import { EmployeeDomainGate } from "@/components/employee/EmployeeDomainGate";
 import {
   employeeTodayLabel,
-  useEmployeeDemo,
-} from "@/components/employee/EmployeeDemoProvider";
+  useEmployee,
+} from "@/components/employee/EmployeeProvider";
 import { employeeOverviewCopy } from "@/constants/employee";
 import { projectStatusLabel } from "@/constants/admin";
 import { leadStatusLabel, saleStatusLabel } from "@/constants/sales";
@@ -14,7 +15,7 @@ const cardClass =
   "rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";
 
 function DeliveryOverview() {
-  const { state } = useEmployeeDemo();
+  const { state } = useEmployee();
   const firstName = state.employee.name.split(" ")[0];
 
   const unreadCount = state.messages.filter(
@@ -28,7 +29,7 @@ function DeliveryOverview() {
       value: state.clients.length,
       detail: "Accounts you support",
       Icon: employeeIcons.clients,
-      tone: "bg-[rgba(116,129,95,0.16)] text-brand",
+      tone: "bg-[rgba(92,104,73,0.16)] text-brand",
     },
     {
       id: "projects",
@@ -52,7 +53,7 @@ function DeliveryOverview() {
       value: state.files.length,
       detail: "Shared deliverables",
       Icon: employeeIcons.files,
-      tone: "bg-[rgba(116,129,95,0.16)] text-brand",
+      tone: "bg-[rgba(92,104,73,0.16)] text-brand",
     },
   ] as const;
 
@@ -179,7 +180,7 @@ function DeliveryOverview() {
 }
 
 function SalesOverview() {
-  const { state } = useEmployeeDemo();
+  const { state } = useEmployee();
   const firstName = state.employee.name.split(" ")[0];
   const selfId = state.employee.id;
 
@@ -198,7 +199,7 @@ function SalesOverview() {
       value: state.sales.length,
       detail: "Records you own",
       Icon: employeeIcons.sales,
-      tone: "bg-[rgba(116,129,95,0.16)] text-brand",
+      tone: "bg-[rgba(92,104,73,0.16)] text-brand",
     },
     {
       id: "leads",
@@ -222,7 +223,7 @@ function SalesOverview() {
       value: unreadSalesMessages.length,
       detail: "From sales team chat",
       Icon: employeeIcons.messages,
-      tone: "bg-[rgba(116,129,95,0.16)] text-brand",
+      tone: "bg-[rgba(92,104,73,0.16)] text-brand",
     },
   ] as const;
 
@@ -342,11 +343,19 @@ function SalesOverview() {
 }
 
 export function OverviewPage() {
-  const { state } = useEmployeeDemo();
+  const { state } = useEmployee();
 
   if (state.employee.kind === "sales") {
-    return <SalesOverview />;
+    return (
+      <EmployeeDomainGate domain="crm">
+        <SalesOverview />
+      </EmployeeDomainGate>
+    );
   }
 
-  return <DeliveryOverview />;
+  return (
+    <EmployeeDomainGate domain="delivery">
+      <DeliveryOverview />
+    </EmployeeDomainGate>
+  );
 }

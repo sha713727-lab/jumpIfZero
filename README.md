@@ -1,157 +1,88 @@
-# JZ Enterprises — Jump If Zero
+# Jump If Zero
 
-Official marketing site for **JZ Enterprises** — strategy, design, development, and growth systems under one brand.
+JZ Enterprises platform monorepo: public marketing site, admin CMS, customer dashboard, employee portals, and a private HMAC-gated API.
 
-Live product stack: **Next.js 16**, **React 19**, **Tailwind CSS 4**, **GSAP**.
+## Repository layout
 
-Repository: [sha713727-lab/jumpIfZero](https://github.com/sha713727-lab/jumpIfZero)
-
----
-
-## Project structure
-
-```text
-jumpIfZero/
-└── frontend/          ← Next.js app (set this as Vercel Root Directory)
-    ├── public/        ← images, logos, scroll frames
-    ├── scripts/       ← image optimize helpers
-    ├── src/
-    │   ├── app/       ← App Router pages
-    │   ├── components/
-    │   ├── constants/
-    │   ├── hooks/
-    │   ├── lib/
-    │   └── styles/
-    ├── .env.example
-    ├── next.config.ts
-    └── package.json
-```
-
----
+| Path | Description |
+| --- | --- |
+| `frontend/` | Next.js 16 application (public site and authenticated portals) |
+| `backend/` | Node.js HTTP API (`node:http`) |
+| `packages/contracts/` | Shared Zod contracts and environment schemas |
+| `database/` | PostgreSQL 18 roles, migrations, and development seeds |
 
 ## Requirements
 
-- Node.js **20+** (recommended for Next.js 16)
-- npm **10+**
-
----
+- Node.js 24+
+- npm 10+
+- PostgreSQL 18.x
 
 ## Local setup
 
 ```bash
 git clone https://github.com/sha713727-lab/jumpIfZero.git
-cd jumpIfZero/frontend
-cp .env.example .env.local
-npm install
-npm run dev
+cd jumpIfZero
+npm ci
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
-
-### Environment variables
-
-| Variable | Required | Description |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | Recommended | Absolute site URL (no trailing slash). Local: `http://localhost:3000`. Production: your custom domain. On Vercel builds, if unset, the app falls back to `https://$VERCEL_URL`. |
-
-Copy from `.env.example`:
+### Environment
 
 ```bash
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env.local
 ```
 
----
+Edit both files with real local secrets. Do not commit `.env` or `.env.local`.
 
-## Scripts
+On Windows, set `FILE_STORAGE_ROOT` in `backend/.env` to a writable local path (for example `C:/Users/<you>/jz-files`).
+
+HMAC values must match between `backend/.env` and `frontend/.env.local`.
+
+### Database
+
+Create the database and roles, then apply migrations and development seeds. See [`database/README.md`](./database/README.md) and [`database/DECISIONS.md`](./database/DECISIONS.md).
+
+Development login accounts are listed in [`database/seeds/dev/README.md`](./database/seeds/dev/README.md).
+
+### Run
+
+Terminal 1 — API:
+
+```bash
+npm run start -w @jumpifzero/backend
+```
+
+Terminal 2 — web app:
+
+```bash
+npm run dev -w frontend
+```
+
+| Service | URL |
+| --- | --- |
+| Web app | http://localhost:3000 |
+| API | http://127.0.0.1:3001 (HMAC required; unsigned calls return 401) |
+| API docs (dev/test only) | http://127.0.0.1:3001/docs (`/openapi.json`) |
+
+## Common scripts
 
 | Command | Purpose |
 | --- | --- |
-| `npm run dev` | Dev server on port 3000 |
-| `npm run build` | Production build (runs image optimize prebuild) |
-| `npm run start` | Serve production build |
-| `npm run lint` | ESLint |
-| `npm run typecheck` | TypeScript check |
+| `npm run typecheck -w @jumpifzero/contracts` | Typecheck contracts |
+| `npm run typecheck -w @jumpifzero/backend` | Typecheck backend |
+| `npm run typecheck -w frontend` | Typecheck frontend |
+| `npm run lint -w frontend` | Lint frontend |
+| `npm run test:unit -w @jumpifzero/backend` | Backend unit tests |
+| `npm run test:integration -w @jumpifzero/backend` | Backend integration and journey tests |
+| `npm run test -w frontend` | Frontend unit tests |
+| `npm run build -w frontend` | Production frontend build |
+| `npm run cleanup:expired -w @jumpifzero/backend` | Remove expired sessions, nonces, and related rows |
 
----
+## Deployment
 
-## Homepage sections
-
-1. Scroll frame hero  
-2. Brand scroll story  
-3. Services carousel  
-4. Why Us deck  
-5. About / floating gallery  
-6. Marquee  
-7. Testimonials  
-8. Team  
-9. FAQ  
-10. Closing CTA + site footer  
-
----
-
-## Deploy on Vercel
-
-The app lives in **`frontend/`**. On Vercel you must set **Root Directory** to `frontend`.
-
-### 1. Import the repo
-
-1. Go to [vercel.com/new](https://vercel.com/new)
-2. Import **`sha713727-lab/jumpIfZero`**
-3. Configure the project:
-
-| Setting | Value |
-| --- | --- |
-| Framework Preset | Next.js (auto) |
-| Root Directory | `frontend` |
-| Build Command | `npm run build` (default) |
-| Output Directory | leave default (Next.js) |
-| Install Command | `npm install` (default) |
-
-### 2. Add environment variables
-
-In **Project → Settings → Environment Variables**, add for Production (and Preview if you want):
-
-```text
-NEXT_PUBLIC_SITE_URL=https://YOUR_PROJECT.vercel.app
-```
-
-After you attach a custom domain, update this to that domain (for example `https://jumpifzero.com`) and redeploy.
-
-### 3. Deploy
-
-Click **Deploy**. First production build may take longer because of assets and the image optimize prebuild.
-
-### 4. Custom domain (optional)
-
-1. Vercel → Project → **Settings → Domains**
-2. Add your domain and follow DNS instructions
-3. Update `NEXT_PUBLIC_SITE_URL` to the final HTTPS URL
-4. Redeploy
-
-### 5. CLI alternative
-
-```bash
-npm i -g vercel
-cd jumpIfZero/frontend
-vercel
-```
-
-Link the project, set Root Directory to `frontend` in the dashboard if prompted via monorepo import, and add `NEXT_PUBLIC_SITE_URL` before promoting to production:
-
-```bash
-vercel --prod
-```
-
----
-
-## Production notes
-
-- Do not commit `.env.local` or secrets
-- `NEXT_PUBLIC_SITE_URL` is validated at build/runtime — missing value fails the build on purpose
-- Hero scroll uses many frame images under `public/images/JZ_Frames_30FPS/` — keep them in the repo for correct production behavior
-- Security headers (CSP, frame deny, etc.) are configured in `next.config.ts`
-
----
+- **Frontend:** deploy the `frontend/` directory (for example Vercel Root Directory `frontend`) with server env: `SESSION_SECRET`, `BACKEND_BASE_URL`, HMAC settings, and `NEXT_PUBLIC_SITE_URL`.
+- **Backend:** run as a private long-lived Node process. Only the Next.js gateway should call it.
+- Keep PostgreSQL, file storage, and secrets outside public networks.
 
 ## License
 

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand: #74815f;
+  --color-brand: #5c6849;
   --color-brand-deep: #2f3a28;
   --color-secondary: #f9a137;
   --color-secondary-deep: #e8891a;
@@ -36,6 +36,21 @@
   font-weight: 400;
   font-style: normal;
   font-display: swap;
+}
+
+@media print {
+  body {
+    background: white !important;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .invoice-document {
+    box-shadow: none !important;
+    max-width: none !important;
+  }
 }
 
 @layer base {
@@ -105,7 +120,7 @@
 }
 
 @utility hero-ambient {
-  background: #74815f;
+  background: #5c6849;
 }
 
 @utility hero-mesh {
@@ -123,7 +138,7 @@
     linear-gradient(
       145deg,
       #8b9775 0%,
-      #74815f 42%,
+      #5c6849 42%,
       #667154 78%,
       #5d684c 100%
     );
@@ -263,7 +278,7 @@
   background:
     radial-gradient(
       ellipse 55% 48% at 50% 38%,
-      rgba(116, 129, 95, 0.95) 0%,
+      rgba(92, 104, 73, 0.95) 0%,
       rgba(90, 102, 74, 0.55) 28%,
       rgba(26, 34, 22, 0.35) 52%,
       transparent 72%
@@ -282,7 +297,7 @@
       180deg,
       #0a0e09 0%,
       #1a2216 26%,
-      #74815f 48%,
+      #5c6849 48%,
       #1c2418 72%,
       #050705 100%
     );
@@ -333,7 +348,7 @@
     rgba(247, 245, 240, 0.42) 0%,
     rgba(247, 245, 240, 0.16) 12%,
     rgba(249, 161, 55, 0.1) 28%,
-    rgba(116, 129, 95, 0.08) 48%,
+    rgba(92, 104, 73, 0.08) 48%,
     transparent 78%
   );
   clip-path: polygon(44% 0%, 56% 0%, 82% 100%, 18% 100%);
@@ -345,14 +360,14 @@
     linear-gradient(
       180deg,
       transparent 48%,
-      rgba(116, 129, 95, 0.12) 66%,
+      rgba(92, 104, 73, 0.12) 66%,
       rgba(7, 10, 6, 0.45) 84%,
       rgba(0, 0, 0, 0.72) 100%
     ),
     radial-gradient(
       ellipse 58% 22% at 50% 78%,
       rgba(247, 245, 240, 0.14) 0%,
-      rgba(116, 129, 95, 0.28) 28%,
+      rgba(92, 104, 73, 0.28) 28%,
       rgba(249, 161, 55, 0.06) 48%,
       transparent 72%
     );
@@ -365,12 +380,12 @@
       rgba(247, 245, 240, 0.88) 0%,
       rgba(247, 245, 240, 0.28) 12%,
       rgba(249, 161, 55, 0.16) 22%,
-      rgba(116, 129, 95, 0.22) 38%,
+      rgba(92, 104, 73, 0.22) 38%,
       transparent 70%
     ),
     radial-gradient(
       ellipse 48% 36% at 50% 58%,
-      rgba(116, 129, 95, 0.38) 0%,
+      rgba(92, 104, 73, 0.38) 0%,
       rgba(249, 161, 55, 0.06) 35%,
       transparent 68%
     );
@@ -380,7 +395,7 @@
   background: radial-gradient(
     circle at 50% 42%,
     rgba(249, 161, 55, 0.12) 0%,
-    rgba(116, 129, 95, 0.1) 28%,
+    rgba(92, 104, 73, 0.1) 28%,
     transparent 60%
   );
   filter: blur(40px);
@@ -584,13 +599,13 @@
   background:
     repeating-conic-gradient(
       from 0deg,
-      rgba(116, 129, 95, 0.22) 0deg 4deg,
+      rgba(92, 104, 73, 0.22) 0deg 4deg,
       rgba(255, 255, 255, 0) 4deg 14deg
     ),
     radial-gradient(
       circle at center,
       rgba(255, 255, 255, 0.95) 0%,
-      rgba(116, 129, 95, 0.18) 22%,
+      rgba(92, 104, 73, 0.18) 22%,
       transparent 55%
     );
   filter: blur(12px) saturate(1.05);
@@ -601,9 +616,9 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(116, 129, 95, 0.35) 45%,
+    rgba(92, 104, 73, 0.35) 45%,
     rgba(255, 255, 255, 0.85) 50%,
-    rgba(116, 129, 95, 0.35) 55%,
+    rgba(92, 104, 73, 0.35) 55%,
     transparent 100%
   );
   filter: blur(1.5px);
@@ -663,7 +678,7 @@
 @utility services-frame-dots {
   background-image: radial-gradient(
     circle,
-    rgba(116, 129, 95, 0.35) 0 1.1px,
+    rgba(92, 104, 73, 0.35) 0 1.1px,
     transparent 1.35px
   );
   background-size: 14px 14px;

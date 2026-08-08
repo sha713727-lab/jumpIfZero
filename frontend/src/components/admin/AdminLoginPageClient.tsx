@@ -77,7 +77,7 @@ function EyeOffIcon({ className }: { readonly className?: string }) {
 
 const labelClass = "mb-2 block text-[0.9rem] font-semibold text-[#0d120b]";
 const fieldClass =
-  "w-full rounded-xl border-0 bg-[rgba(116,129,95,0.12)] px-4 py-3.5 text-[0.95rem] font-medium text-black outline-none transition-[box-shadow,background-color] duration-200 placeholder:text-black/35 hover:bg-[rgba(116,129,95,0.16)] focus-visible:bg-[rgba(116,129,95,0.16)] focus-visible:shadow-[0_0_0_2px_#f7f5f0,0_0_0_4px_#f9a137] disabled:cursor-not-allowed disabled:opacity-60";
+  "w-full rounded-xl border-0 bg-[rgba(92, 104, 73,0.12)] px-4 py-3.5 text-[0.95rem] font-medium text-black outline-none transition-[box-shadow,background-color] duration-200 placeholder:text-black/35 hover:bg-[rgba(92, 104, 73,0.16)] focus-visible:bg-[rgba(92, 104, 73,0.16)] focus-visible:shadow-[0_0_0_2px_#f7f5f0,0_0_0_4px_#f9a137] disabled:cursor-not-allowed disabled:opacity-60";
 
 export function AdminLoginPageClient() {
   const router = useRouter();
@@ -163,6 +163,7 @@ export function AdminLoginPageClient() {
                 width={108}
                 height={105}
                 className="h-24 w-auto"
+                style={{ width: "auto", height: "auto" }}
                 priority
               />
               <p className="text-[1.15rem] font-semibold tracking-[-0.01em] text-[#0d120b]">

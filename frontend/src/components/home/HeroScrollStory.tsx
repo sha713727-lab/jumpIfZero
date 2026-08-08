@@ -102,6 +102,7 @@ export function HeroScrollStory() {
       window.removeEventListener("resize", updateProgress);
       if (rafRef.current) {
         window.cancelAnimationFrame(rafRef.current);
+        rafRef.current = 0;
       }
     };
   }, [updateProgress]);
@@ -132,7 +133,7 @@ export function HeroScrollStory() {
           className="pointer-events-none absolute inset-0 z-[35]"
           style={{
             background:
-              "radial-gradient(circle at center, rgba(232, 238, 220, 0.95) 0%, rgba(116, 129, 95, 0.28) 48%, rgba(116, 129, 95, 0.18) 100%)",
+              "radial-gradient(circle at center, rgba(232, 238, 220, 0.95) 0%, rgba(92, 104, 73, 0.28) 48%, rgba(92, 104, 73, 0.18) 100%)",
             opacity: brandBg,
           }}
         />
@@ -218,7 +219,7 @@ export function HeroScrollStory() {
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "radial-gradient(circle at center, rgba(247,245,240,0.55) 0%, rgba(116,129,95,0.2) 32%, transparent 58%)",
+                "radial-gradient(circle at center, rgba(247,245,240,0.55) 0%, rgba(92, 104, 73,0.2) 32%, transparent 58%)",
               opacity: brandBurst * 0.7,
             }}
           />
@@ -278,7 +279,7 @@ export function HeroScrollStory() {
               <div
                 key={`${card.x}-${card.y}`}
                 aria-hidden="true"
-                className="pointer-events-none absolute top-1/2 left-1/2 rounded-md bg-gradient-to-br from-brand/35 via-white/40 to-brand/20 shadow-[0_12px_40px_rgba(116,129,95,0.18)]"
+                className="pointer-events-none absolute top-1/2 left-1/2 rounded-md bg-gradient-to-br from-brand/35 via-white/40 to-brand/20 shadow-[0_12px_40px_rgba(92, 104, 73,0.18)]"
                 style={{
                   width: card.w,
                   height: card.h,
@@ -303,7 +304,7 @@ export function HeroScrollStory() {
               width={180}
               height={168}
               className="logo-shadow mb-7 h-auto w-[clamp(6rem,15vw,9.5rem)]"
-              loading="lazy"
+              priority
             />
             <p className="text-[clamp(1.9rem,4.8vw,3.6rem)] font-bold tracking-[0.16em] text-brand uppercase">
               {site.name}

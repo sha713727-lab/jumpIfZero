@@ -1,46 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import {
-  dashboardEmptyCopy,
-  demoInvoices,
-  type InvoiceStatus,
-} from "@/lib/data/dashboard";
+import { useDashboard } from "@/components/dashboard/DashboardProvider";
+import type { InvoiceStatus } from "@/lib/data/customerPortalTypes";
+import { dashboardEmptyCopy } from "@/lib/data/dashboard";
 import { EmptyState } from "@/components/ui/EmptyState";
-
-type InvoiceRow = {
-  readonly id: string;
-  readonly title: string;
-  readonly amount: string;
-  readonly issued: string;
-  readonly due: string;
-  status: InvoiceStatus;
-};
 
 const statusClass: Record<InvoiceStatus, string> = {
   Due: "bg-[rgba(249,161,55,0.18)] text-[#e8891a]",
-  Open: "bg-[rgba(116,129,95,0.14)] text-brand",
+  Open: "bg-[rgba(92,104,73,0.14)] text-brand",
   Paid: "bg-[rgba(47,58,40,0.12)] text-[#2f3a28]",
 };
 
 export function InvoicesPage() {
-  const [rows, setRows] = useState<InvoiceRow[]>(
-    demoInvoices.map((invoice) => ({ ...invoice })),
-  );
-  const [notice, setNotice] = useState<string | null>(null);
-
-  const markPaid = (id: string) => {
-    setRows((current) =>
-      current.map((row) =>
-        row.id === id && row.status !== "Paid" ? { ...row, status: "Paid" } : row,
-      ),
-    );
-    setNotice(`${id} marked as paid for this demo session.`);
-  };
-
-  const download = (id: string) => {
-    setNotice(`${id} download started (demo).`);
-  };
+  const { state } = useDashboard();
+  const rows = state.invoices;
 
   return (
     <div className="space-y-6">
@@ -49,18 +22,9 @@ export function InvoicesPage() {
           Invoices
         </h1>
         <p className="mt-2 text-[0.95rem] font-medium text-black/50">
-          Review billing, download PDFs, and pay open balances.
+          Review billing and download invoice PDFs.
         </p>
       </div>
-
-      {notice ? (
-        <p
-          role="status"
-          className="rounded-xl border border-brand/25 bg-[rgba(116,129,95,0.1)] px-4 py-3 text-[0.88rem] font-semibold text-[#2f3a28]"
-        >
-          {notice}
-        </p>
-      ) : null}
 
       <div className="overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]">
         {rows.length === 0 ? (
@@ -75,7 +39,7 @@ export function InvoicesPage() {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-[0.82rem] font-extrabold tracking-[0.08em] text-brand uppercase">
-                      {invoice.id}
+                      {invoice.number}
                     </p>
                     <span
                       className={`rounded-full px-2.5 py-0.5 text-[0.68rem] font-extrabold tracking-[0.08em] uppercase ${statusClass[invoice.status]}`}
@@ -95,22 +59,12 @@ export function InvoicesPage() {
                   <p className="mr-2 text-[1.05rem] font-extrabold tracking-[-0.02em]">
                     {invoice.amount}
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => download(invoice.id)}
-                    className="rounded-xl border border-black/12 px-3.5 py-2 text-[0.8rem] font-bold text-[#0d120b] transition-colors hover:border-brand/40 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+                  <a
+                    href={`/api/invoices/${invoice.id}/pdf`}
+                    className="rounded-xl border border-black/10 bg-white px-4 py-2 text-[0.82rem] font-bold text-brand transition-colors hover:bg-[#f3f5ef]"
                   >
                     Download
-                  </button>
-                  {invoice.status !== "Paid" ? (
-                    <button
-                      type="button"
-                      onClick={() => markPaid(invoice.id)}
-                      className="rounded-xl bg-logo-gradient px-3.5 py-2 text-[0.8rem] font-extrabold text-[#0d120b] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
-                    >
-                      Pay
-                    </button>
-                  ) : null}
+                  </a>
                 </div>
               </li>
             ))}

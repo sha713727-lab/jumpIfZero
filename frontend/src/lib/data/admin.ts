@@ -18,6 +18,9 @@ import type {
   AdminSalesMessage,
   AdminService,
   AdminTeamMember,
+  AdminSiteGalleryImage,
+  AdminSiteTestimonial,
+  AdminSitePrinciple,
   EmployeeKind,
   LeadStatus,
   SaleStatus,
@@ -42,45 +45,12 @@ export type {
   AdminSalesMessage,
   AdminService,
   AdminTeamMember,
+  AdminSiteGalleryImage,
+  AdminSiteTestimonial,
+  AdminSitePrinciple,
   EmployeeKind,
   LeadStatus,
   SaleStatus,
 };
-
-export async function getAdminDemoState(): Promise<AdminDemoState> {
-  return initialAdminDemoState;
-}
-
-export async function getClients(): Promise<readonly AdminClient[]> {
-  return initialAdminDemoState.clients;
-}
-
-export async function getProjects(): Promise<readonly AdminProject[]> {
-  return initialAdminDemoState.projects;
-}
-
-export async function getInvoices(): Promise<readonly AdminInvoice[]> {
-  return initialAdminDemoState.invoices;
-}
-
-export async function getMessages(): Promise<readonly AdminMessage[]> {
-  return initialAdminDemoState.messages;
-}
-
-export async function getFiles(): Promise<readonly AdminFile[]> {
-  return initialAdminDemoState.files;
-}
-
-export async function getSales(): Promise<readonly AdminSale[]> {
-  return initialAdminDemoState.sales;
-}
-
-export async function getLeads(): Promise<readonly AdminLead[]> {
-  return initialAdminDemoState.leads;
-}
-
-export async function getEmployees(): Promise<readonly AdminEmployee[]> {
-  return initialAdminDemoState.employees;
-}
 
 export { initialAdminDemoState };

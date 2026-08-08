@@ -1,3 +1,4 @@
+import { EmployeeDomainGate } from "@/components/employee/EmployeeDomainGate";
 import { requireEmployeeKind } from "@/lib/auth/requireEmployeeAccess";
 
 export default async function EmployeeLeadsLayout({
@@ -6,5 +7,5 @@ export default async function EmployeeLeadsLayout({
   children: React.ReactNode;
 }>) {
   await requireEmployeeKind("sales");
-  return children;
+  return <EmployeeDomainGate domain="crm">{children}</EmployeeDomainGate>;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type RefObject } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 
 const FOCUSABLE_SELECTOR = [
   "a[href]",
@@ -24,6 +24,8 @@ export function useModalFocus(options: {
   readonly onClose: () => void;
 }): void {
   const { open, containerRef, initialFocusRef, onClose } = options;
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (!open) {
@@ -49,7 +51,7 @@ export function useModalFocus(options: {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
 
@@ -92,5 +94,5 @@ export function useModalFocus(options: {
       window.removeEventListener("keydown", onKeyDown);
       previousFocus?.focus();
     };
-  }, [open, onClose, containerRef, initialFocusRef]);
+  }, [open, containerRef, initialFocusRef]);
 }

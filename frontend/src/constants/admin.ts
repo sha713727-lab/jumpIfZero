@@ -9,6 +9,7 @@ export type AdminNavId =
   | "portfolio"
   | "blog"
   | "team"
+  | "siteSections"
   | "faqs"
   | "contact"
   | "callbacks"
@@ -53,6 +54,7 @@ export const adminNavGroups: readonly AdminNavGroup[] = [
       { id: "portfolio", name: "Portfolio", href: "/admin/portfolio" },
       { id: "blog", name: "Blog", href: "/admin/blog" },
       { id: "team", name: "Team", href: "/admin/team" },
+      { id: "siteSections", name: "Site sections", href: "/admin/site-sections" },
       { id: "faqs", name: "FAQs", href: "/admin/faqs" },
       { id: "contact", name: "Contact", href: "/admin/contact" },
       { id: "callbacks", name: "Callbacks", href: "/admin/callbacks" },
@@ -84,7 +86,7 @@ export const adminOverviewCopy = {
   statusTitle: "System status",
   statusLabel: "DATABASE",
   statusValue: "Up",
-  statusLede: "Demo catalog and client records are loaded in this session.",
+  statusLede: "Catalog and client records are loaded from the database.",
   servicesLive: "Live from database",
   faqsLive: "Live from database",
 } as const;

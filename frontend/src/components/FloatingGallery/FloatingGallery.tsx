@@ -24,6 +24,7 @@ export function FloatingGallery({
   sectionId = "about",
   ariaLabel = "About JZ Enterprises",
   copy = aboutCopy,
+  imagePaths,
 }: FloatingGalleryProps) {
   const itemRefs = useRef<Array<HTMLElement | null>>([]);
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -102,8 +103,13 @@ export function FloatingGallery({
       return [];
     }
 
-    return buildGalleryItems(config, viewportWidth, viewportHeight);
-  }, [config, nearView, ready, viewportHeight, viewportWidth]);
+    return buildGalleryItems(
+      config,
+      viewportWidth,
+      viewportHeight,
+      imagePaths ?? [],
+    );
+  }, [config, imagePaths, nearView, ready, viewportHeight, viewportWidth]);
 
   const setItemRef = useCallback((index: number, node: HTMLElement | null) => {
     itemRefs.current[index] = node;

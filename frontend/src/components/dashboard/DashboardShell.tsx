@@ -3,16 +3,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-import { demoCustomer } from "@/lib/data/customer";
+import { useEffect, useState } from "react";
+import { site } from "@/constants/site";
+import { submitSignOut } from "@/lib/submitSignOut";
+import { dashboardIcons } from "@/components/dashboard/DashboardIcons";
+import { useDashboard } from "@/components/dashboard/DashboardProvider";
 import {
   dashboardNav,
   overviewCopy,
   type DashboardNavId,
 } from "@/lib/data/dashboard";
-import { site } from "@/constants/site";
-import { submitSignOut } from "@/lib/submitSignOut";
-import { dashboardIcons } from "@/components/dashboard/DashboardIcons";
 
 function navIdFromPath(pathname: string): DashboardNavId {
   const match = dashboardNav.find((item) =>
@@ -31,12 +31,20 @@ export function DashboardShell({
 }>) {
   const pathname = usePathname();
   const router = useRouter();
+  const { state } = useDashboard();
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const activeId = navIdFromPath(pathname);
   const SignOutIcon = dashboardIcons.signOut;
   const MenuIcon = dashboardIcons.menu;
   const CloseIcon = dashboardIcons.close;
+
+  useEffect(() => {
+    const root = window as Window & { __jzMounts?: Record<string, number> };
+    const counts = root.__jzMounts ?? {};
+    counts.dashboardShell = (counts.dashboardShell ?? 0) + 1;
+    root.__jzMounts = counts;
+  }, []);
 
   const onSignOut = async () => {
     if (signingOut) {
@@ -58,10 +66,11 @@ export function DashboardShell({
           <Link
             key={item.id}
             href={item.href}
+            prefetch
             onClick={() => setOpen(false)}
             className={`inline-flex items-center gap-3 rounded-xl px-3 py-2.5 text-[0.92rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary ${
               active
-                ? "bg-[rgba(116,129,95,0.16)] text-brand"
+                ? "bg-[rgba(92, 104, 73,0.16)] text-brand"
                 : "text-[#0d120b]/70 hover:bg-black/[0.04] hover:text-[#0d120b]"
             }`}
           >
@@ -85,7 +94,6 @@ export function DashboardShell({
               width={32}
               height={31}
               className="h-8 w-auto"
-              style={{ width: "auto" }}
               priority
             />
             <div className="min-w-0">
@@ -101,14 +109,14 @@ export function DashboardShell({
           <div className="mt-auto border-t border-black/8 px-4 py-4">
             <div className="flex items-center gap-3">
               <span className="inline-flex size-9 items-center justify-center rounded-full bg-logo-gradient text-[0.72rem] font-extrabold text-[#0d120b]">
-                {demoCustomer.initials}
+                {state.shell.initials}
               </span>
               <div className="min-w-0">
                 <p className="truncate text-[0.84rem] font-bold">
-                  {demoCustomer.name}
+                  {state.shell.name}
                 </p>
                 <p className="truncate text-[0.72rem] text-black/45">
-                  {demoCustomer.company}
+                  {state.shell.company}
                 </p>
               </div>
             </div>
@@ -170,7 +178,6 @@ export function DashboardShell({
               width={32}
               height={31}
               className="h-8 w-auto"
-              style={{ width: "auto" }}
             />
             <p className="text-[0.82rem] font-extrabold">{site.name}</p>
           </div>

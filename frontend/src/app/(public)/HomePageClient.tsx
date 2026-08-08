@@ -151,7 +151,24 @@ const ScrollFrameSequence = dynamic(
   },
 );
 
-export function HomePageClient() {
+import type { FaqItem } from "@/lib/data/faqs";
+import type { ServiceChapter } from "@/lib/data/services";
+import type { SiteTestimonial } from "@/lib/data/siteSections";
+import type { TeamMember } from "@/lib/data/team";
+
+export function HomePageClient({
+  serviceChapters,
+  teamMembers,
+  faqItems,
+  aboutGalleryImages,
+  testimonials,
+}: Readonly<{
+  serviceChapters: readonly ServiceChapter[];
+  teamMembers: readonly TeamMember[];
+  faqItems: readonly FaqItem[];
+  aboutGalleryImages: readonly string[];
+  testimonials: readonly SiteTestimonial[];
+}>) {
   return (
     <main>
       <ScrollFrameSequence />
@@ -165,7 +182,7 @@ export function HomePageClient() {
           />
         }
       >
-        <AltServices />
+        <AltServices chapters={serviceChapters} />
       </DeferredMount>
       <DeferredMount
         fallback={
@@ -183,7 +200,7 @@ export function HomePageClient() {
           />
         }
       >
-        <FloatingGallery />
+        <FloatingGallery imagePaths={aboutGalleryImages} />
       </DeferredMount>
       <DeferredMount
         fallback={
@@ -201,7 +218,7 @@ export function HomePageClient() {
           />
         }
       >
-        <AltTestimonials />
+        <AltTestimonials items={testimonials} />
       </DeferredMount>
       <DeferredMount
         fallback={
@@ -212,7 +229,7 @@ export function HomePageClient() {
           />
         }
       >
-        <AltTeam />
+        <AltTeam members={teamMembers} />
       </DeferredMount>
       <DeferredMount
         fallback={
@@ -223,7 +240,7 @@ export function HomePageClient() {
           />
         }
       >
-        <AltFaq />
+        <AltFaq items={faqItems} />
       </DeferredMount>
       <DeferredMount
         fallback={

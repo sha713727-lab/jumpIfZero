@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { AdminImageField } from "@/components/admin/AdminImageField";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { adminTodayLabel, useAdminDemo } from "@/components/admin/AdminDemoProvider";
+import { useAdmin } from "@/components/admin/AdminProvider";
 import {
   AdminFormModal,
   adminFieldClass,
@@ -13,6 +13,12 @@ import {
 import { ConfirmDeleteModal } from "@/components/admin/ConfirmDeleteModal";
 import { adminIcons } from "@/components/admin/AdminIcons";
 import type { AdminService } from "@/lib/data/admin";
+import { cmsMediaSrc } from "@/lib/cmsMedia";
+import {
+  archiveAdminServiceAction,
+  createAdminServiceAction,
+  updateAdminServiceAction,
+} from "@/lib/submitAdminService";
 
 const cardClass =
   "overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";
@@ -21,7 +27,6 @@ type ServiceForm = {
   title: string;
   slug: string;
   description: string;
-  path: string;
   image: string;
   active: boolean;
 };
@@ -30,27 +35,32 @@ const emptyForm: ServiceForm = {
   title: "",
   slug: "",
   description: "",
-  path: "/services",
   image: "",
   active: true,
 };
 
+function servicePathFromSlug(slug: string): string {
+  const trimmed = slug.trim();
+  return trimmed.length > 0 ? `/services/${trimmed}` : "/services";
+}
+
 export function ServicesPage() {
-  const { state, setServices } = useAdminDemo();
+  const { state, setServices } = useAdmin();
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<ServiceForm>(emptyForm);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
 
   const EditIcon = adminIcons.edit;
   const TrashIcon = adminIcons.trash;
-  const ChevronUpIcon = adminIcons.chevronUp;
-  const ChevronDownIcon = adminIcons.chevronDown;
 
   const openAdd = () => {
     setEditingId(null);
     setForm(emptyForm);
+    setError(null);
     setModalOpen(true);
   };
 
@@ -60,15 +70,16 @@ export function ServicesPage() {
       title: service.title,
       slug: service.slug,
       description: service.description,
-      path: service.path,
       image: service.image,
       active: service.active,
     });
+    setError(null);
     setModalOpen(true);
   };
 
   const openDelete = (id: string) => {
     setDeleteId(id);
+    setError(null);
     setDeleteOpen(true);
   };
 
@@ -79,51 +90,98 @@ export function ServicesPage() {
       return;
     }
 
-    const payload: AdminService = {
-      id: editingId ?? `svc_${Date.now()}`,
-      title,
-      slug,
-      description: form.description.trim(),
-      path: form.path.trim(),
-      image: form.image,
-      active: form.active,
-      updatedAt: adminTodayLabel(),
-    };
+    const path = servicePathFromSlug(slug);
 
-    if (editingId) {
-      setServices(
-        state.services.map((item) => (item.id === editingId ? payload : item)),
-      );
-    } else {
-      setServices([...state.services, payload]);
-    }
+    startTransition(async () => {
+      setError(null);
 
-    setModalOpen(false);
+      if (editingId) {
+        const existing = state.services.find((item) => item.id === editingId);
+        if (!existing) {
+          setError("Service not found.");
+          return;
+        }
+
+        const result = await updateAdminServiceAction({
+          id: existing.id,
+          version: existing.version,
+          title,
+          slug,
+          description: form.description.trim(),
+          path,
+          image: form.image,
+          active: form.active,
+          publishedAt: existing.publishedAt,
+        });
+
+        if (!result.ok || !("service" in result)) {
+          setError(
+            result.ok
+              ? "Save failed."
+              : result.reason === "conflict"
+                ? "This service was updated elsewhere. Refresh and try again."
+                : "Could not save service.",
+          );
+          return;
+        }
+
+        setServices(
+          state.services.map((item) =>
+            item.id === editingId ? result.service : item,
+          ),
+        );
+      } else {
+        const result = await createAdminServiceAction({
+          title,
+          slug,
+          description: form.description.trim(),
+          path,
+          image: form.image,
+          active: form.active,
+        });
+
+        if (!result.ok || !("service" in result)) {
+          setError("Could not create service.");
+          return;
+        }
+
+        setServices([...state.services, result.service]);
+      }
+
+      setModalOpen(false);
+    });
   };
 
   const confirmDelete = () => {
     if (!deleteId) {
       return;
     }
-    setServices(state.services.filter((item) => item.id !== deleteId));
-    setDeleteOpen(false);
-    setDeleteId(null);
-  };
 
-  const move = (index: number, direction: -1 | 1) => {
-    const nextIndex = index + direction;
-    if (nextIndex < 0 || nextIndex >= state.services.length) {
+    const existing = state.services.find((item) => item.id === deleteId);
+    if (!existing) {
       return;
     }
-    const items = [...state.services];
-    const current = items[index];
-    const swap = items[nextIndex];
-    if (!current || !swap) {
-      return;
-    }
-    items[index] = swap;
-    items[nextIndex] = current;
-    setServices(items);
+
+    startTransition(async () => {
+      setError(null);
+      const result = await archiveAdminServiceAction({
+        id: existing.id,
+        version: existing.version,
+      });
+
+      if (!result.ok) {
+        setError(
+          result.reason === "conflict"
+            ? "This service was updated elsewhere. Refresh and try again."
+            : "Could not delete service.",
+        );
+        return;
+      }
+
+      setServices(state.services.filter((item) => item.id !== deleteId));
+      setDeleteOpen(false);
+      setDeleteId(null);
+    });
   };
 
   const deleteTarget = state.services.find((item) => item.id === deleteId);
@@ -136,6 +194,12 @@ export function ServicesPage() {
         actionLabel="Add service"
         onAction={openAdd}
       />
+
+      {error ? (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[0.88rem] font-semibold text-red-700">
+          {error}
+        </p>
+      ) : null}
 
       <div className={cardClass}>
         <div className="overflow-x-auto">
@@ -173,7 +237,7 @@ export function ServicesPage() {
                       {service.image ? (
                         <div className="relative size-12 shrink-0 overflow-hidden rounded-lg border border-black/8">
                           <Image
-                            src={service.image}
+                            src={cmsMediaSrc(service.image)}
                             alt={service.title}
                             fill
                             unoptimized
@@ -191,7 +255,7 @@ export function ServicesPage() {
                     <span
                       className={`inline-flex rounded-full px-2.5 py-1 text-[0.72rem] font-bold ${
                         service.active
-                          ? "bg-[rgba(116,129,95,0.16)] text-brand"
+                          ? "bg-[rgba(92, 104, 73,0.16)] text-brand"
                           : "bg-black/8 text-black/45"
                       }`}
                     >
@@ -208,35 +272,19 @@ export function ServicesPage() {
                     <div className="flex items-center gap-1">
                       <button
                         type="button"
-                        aria-label="Move up"
-                        disabled={index === 0}
-                        onClick={() => move(index, -1)}
-                        className="inline-flex size-8 items-center justify-center rounded-lg border border-black/10 bg-white disabled:opacity-40"
-                      >
-                        <ChevronUpIcon className="size-4" />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label="Move down"
-                        disabled={index === state.services.length - 1}
-                        onClick={() => move(index, 1)}
-                        className="inline-flex size-8 items-center justify-center rounded-lg border border-black/10 bg-white disabled:opacity-40"
-                      >
-                        <ChevronDownIcon className="size-4" />
-                      </button>
-                      <button
-                        type="button"
                         aria-label="Edit"
+                        disabled={pending}
                         onClick={() => openEdit(service)}
-                        className="inline-flex size-8 items-center justify-center rounded-lg border border-black/10 bg-white"
+                        className="inline-flex size-8 items-center justify-center rounded-lg border border-black/10 bg-white disabled:opacity-40"
                       >
                         <EditIcon className="size-4" />
                       </button>
                       <button
                         type="button"
                         aria-label="Delete"
+                        disabled={pending}
                         onClick={() => openDelete(service.id)}
-                        className="inline-flex size-8 items-center justify-center rounded-lg border border-black/10 bg-white"
+                        className="inline-flex size-8 items-center justify-center rounded-lg border border-black/10 bg-white disabled:opacity-40"
                       >
                         <TrashIcon className="size-4" />
                       </button>
@@ -260,39 +308,39 @@ export function ServicesPage() {
           <label className="block">
             <span className={adminLabelClass}>Title</span>
             <input
-            className={adminFieldClass}
-            value={form.title}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, title: event.target.value }))
-            }
-          />
+              className={adminFieldClass}
+              value={form.title}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, title: event.target.value }))
+              }
+            />
           </label>
         </div>
         <div>
           <label className="block">
             <span className={adminLabelClass}>Slug</span>
             <input
-            className={adminFieldClass}
-            value={form.slug}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, slug: event.target.value }))
-            }
-          />
+              className={adminFieldClass}
+              value={form.slug}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, slug: event.target.value }))
+              }
+            />
           </label>
         </div>
         <div>
           <label className="block">
             <span className={adminLabelClass}>Description</span>
             <textarea
-            className={`${adminFieldClass} min-h-[5rem] resize-y`}
-            value={form.description}
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                description: event.target.value,
-              }))
-            }
-          />
+              className={`${adminFieldClass} min-h-[5rem] resize-y`}
+              value={form.description}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  description: event.target.value,
+                }))
+              }
+            />
           </label>
         </div>
         <AdminImageField
@@ -301,16 +349,13 @@ export function ServicesPage() {
           onChange={(image) => setForm((current) => ({ ...current, image }))}
         />
         <div>
-          <label className="block">
-            <span className={adminLabelClass}>Path</span>
-            <input
-            className={adminFieldClass}
-            value={form.path}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, path: event.target.value }))
-            }
-          />
-          </label>
+          <span className={adminLabelClass}>Path</span>
+          <p
+            className={`${adminFieldClass} bg-[#f3f5ef]/70 text-black/55`}
+            aria-live="polite"
+          >
+            {servicePathFromSlug(form.slug)}
+          </p>
         </div>
         <label className="inline-flex items-center gap-2 text-[0.88rem] font-semibold">
           <input

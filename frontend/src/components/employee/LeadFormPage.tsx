@@ -1,18 +1,16 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { EmployeePageHeader } from "@/components/employee/EmployeePageHeader";
-import {
-  employeeTodayLabel,
-  useEmployeeDemo,
-} from "@/components/employee/EmployeeDemoProvider";
+import { useEmployee } from "@/components/employee/EmployeeProvider";
 import {
   adminFieldClass,
   adminLabelClass,
 } from "@/components/admin/AdminFormModal";
 import { leadStatuses, leadStatusLabel } from "@/constants/sales";
-import type { AdminLead, LeadStatus } from "@/lib/data/admin";
+import type { LeadStatus } from "@/lib/data/admin";
+import { createLeadAction } from "@/lib/submitCrm";
 
 const cardClass =
   "rounded-2xl border border-black/8 bg-white p-5 shadow-[0_8px_24px_rgba(47,58,40,0.04)] md:p-6";
@@ -39,8 +37,9 @@ const emptyForm: LeadForm = {
 
 export function LeadFormPage() {
   const router = useRouter();
-  const { state, setLeads } = useEmployeeDemo();
+  const { state, setLeads } = useEmployee();
   const [form, setForm] = useState<LeadForm>(emptyForm);
+  const [pending, startTransition] = useTransition();
 
   const save = () => {
     const company = form.company.trim();
@@ -48,21 +47,22 @@ export function LeadFormPage() {
       return;
     }
 
-    const payload: AdminLead = {
-      id: crypto.randomUUID(),
-      repId: state.employee.id,
-      company,
-      contactName: form.contactName.trim(),
-      phone: form.phone.trim(),
-      email: form.email.trim(),
-      source: form.source.trim(),
-      status: form.status,
-      notes: form.notes.trim(),
-      updatedAt: employeeTodayLabel(),
-    };
+    startTransition(async () => {
+      const result = await createLeadAction({
+        company,
+        contactName: form.contactName.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim(),
+        source: form.source.trim(),
+        statusCode: form.status,
+        notes: form.notes.trim(),
+      });
 
-    setLeads([...state.leads, payload]);
-    router.push(`/employee/leads/${payload.id}`);
+      if (result.ok && "data" in result) {
+        setLeads([...state.leads, result.data]);
+        router.push(`/employee/leads/${result.data.id}`);
+      }
+    });
   };
 
   return (
@@ -180,6 +180,7 @@ export function LeadFormPage() {
           </button>
           <button
             type="button"
+            disabled={pending}
             onClick={save}
             className="rounded-xl bg-brand px-4 py-2.5 text-[0.88rem] font-bold text-cream"
           >

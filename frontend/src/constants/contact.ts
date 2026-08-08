@@ -15,10 +15,11 @@ export const contactCopy = {
   phoneLabel: "Phone",
   emailCta: "Email a brief",
   phoneCta: "Call",
-} as const;
-
-export const contactDetails = {
-  email: "ikram@jumpifzero.com",
-  phone: "03079222055",
-  phoneHref: "tel:+923079222055",
+  messageTitle: "Send a message",
+  messageSubmit: "Send message",
+  callbackTitle: "Request a callback",
+  callbackSubmit: "Request callback",
+  formSuccess: "Thanks — we received your message and will reply soon.",
+  formError: "Could not send your message. Try again or email us directly.",
+  formValidationError: "Check the fields and try again.",
 } as const;

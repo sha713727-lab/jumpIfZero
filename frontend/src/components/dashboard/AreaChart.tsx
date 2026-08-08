@@ -42,8 +42,8 @@ export function AreaChart({
     >
       <defs>
         <linearGradient id="jz-area" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#74815f" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="#74815f" stopOpacity="0.02" />
+          <stop offset="0%" stopColor="#5c6849" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#5c6849" stopOpacity="0.02" />
         </linearGradient>
       </defs>
 
@@ -75,7 +75,7 @@ export function AreaChart({
       <path
         d={line}
         fill="none"
-        stroke="#74815f"
+        stroke="#5c6849"
         strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"

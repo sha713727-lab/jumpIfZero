@@ -10,7 +10,7 @@ import { aboutCopy } from "@/constants/about";
 import { bindHeaderSectionSync } from "@/lib/headerSectionSync";
 import styles from "@/components/landingAlt/landingAlt.module.css";
 
-const HERO_BG = "#74815f";
+const HERO_BG = "#5c6849";
 const CREAM_BG = "#f7f5f0";
 
 const AboutBelowFold = dynamic(
@@ -28,7 +28,17 @@ const AboutBelowFold = dynamic(
   },
 );
 
-export function AboutPageClient() {
+export function AboutPageClient({
+  teamMembers,
+  studioImages,
+  principles,
+  siteContact,
+}: Readonly<{
+  teamMembers: readonly import("@/lib/data/team").TeamMember[];
+  studioImages: readonly string[];
+  principles: readonly import("@/lib/data/siteSections").SitePrinciple[];
+  siteContact: import("@/lib/data/siteContact").SiteContactDetails;
+}>) {
   const heroRef = useRef<HTMLElement | null>(null);
   const storyRef = useRef<HTMLElement | null>(null);
   const locationRef = useRef<HTMLElement | null>(null);
@@ -221,7 +231,11 @@ export function AboutPageClient() {
           />
         }
       >
-        <AboutBelowFold />
+        <AboutBelowFold
+          members={teamMembers}
+          studioImages={studioImages}
+          principles={principles}
+        />
       </DeferredMount>
 
       <section
@@ -240,7 +254,7 @@ export function AboutPageClient() {
               {aboutCopy.locationWatermark}
             </p>
             <p className="relative text-[0.7rem] font-extrabold tracking-[0.22em] text-logo-gradient uppercase">
-              {aboutCopy.location.label}
+              {siteContact.addressLabel || aboutCopy.location.label}
             </p>
             <div
               aria-hidden="true"
@@ -250,7 +264,7 @@ export function AboutPageClient() {
               {aboutCopy.locationTitle}
             </h2>
             <p className="relative mt-4 max-w-md text-[0.95rem] leading-[1.65] font-medium text-[#2f3a28]/80">
-              {aboutCopy.locationLede}
+              {siteContact.locationLede}
             </p>
           </div>
         </div>
@@ -259,7 +273,7 @@ export function AboutPageClient() {
           <div className="relative min-h-[22rem] overflow-hidden rounded-[1.75rem] shadow-[0_18px_40px_rgba(47,58,40,0.12)] ring-4 ring-brand/25 md:min-h-[28rem]">
             <iframe
               title="JZ Enterprises studio location"
-              src={aboutCopy.location.mapEmbedUrl}
+              src={siteContact.mapEmbedUrl}
               className="absolute inset-0 h-full w-full border-0"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
@@ -273,10 +287,10 @@ export function AboutPageClient() {
                 {aboutCopy.location.emailLabel}
               </p>
               <a
-                href={`mailto:${aboutCopy.location.email}`}
+                href={`mailto:${siteContact.email}`}
                 className="mt-2 inline-block text-[clamp(1.05rem,2vw,1.35rem)] font-extrabold tracking-[-0.02em] text-logo-gradient transition-colors hover:text-brand focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
               >
-                {aboutCopy.location.email}
+                {siteContact.email}
               </a>
             </div>
 
@@ -285,15 +299,15 @@ export function AboutPageClient() {
                 {aboutCopy.location.phoneLabel}
               </p>
               <a
-                href={aboutCopy.location.phoneHref}
+                href={siteContact.phoneHref}
                 className="mt-2 inline-block text-[clamp(1.05rem,2vw,1.35rem)] font-extrabold tracking-[-0.02em] text-[#2f3a28] transition-colors hover:text-logo-gradient focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
               >
-                {aboutCopy.location.phone}
+                {siteContact.phone}
               </a>
             </div>
 
             <address className="not-italic text-[0.9rem] leading-[1.65] font-medium text-brand/80">
-              {aboutCopy.location.lines.map((line) => (
+              {siteContact.addressLines.map((line) => (
                 <span key={line} className="block">
                   {line}
                 </span>

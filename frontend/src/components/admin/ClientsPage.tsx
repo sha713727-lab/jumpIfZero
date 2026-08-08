@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { useAdminDemo } from "@/components/admin/AdminDemoProvider";
+import { useAdmin } from "@/components/admin/AdminProvider";
 
 const cardClass =
   "overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";
 
 export function ClientsPage() {
-  const { state } = useAdminDemo();
+  const { state } = useAdmin();
 
   return (
     <div className="space-y-6">
@@ -50,7 +50,7 @@ export function ClientsPage() {
                     <span
                       className={`rounded-full px-2.5 py-1 text-[0.72rem] font-bold ${
                         client.status === "active"
-                          ? "bg-[rgba(116,129,95,0.16)] text-brand"
+                          ? "bg-[rgba(92,104,73,0.16)] text-brand"
                           : "bg-black/8 text-black/45"
                       }`}
                     >

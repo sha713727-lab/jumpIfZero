@@ -2,10 +2,13 @@
 
 import { useId, useState } from "react";
 import type { FormEvent } from "react";
+import { useDashboard } from "@/components/dashboard/DashboardProvider";
+import { sendMessageAction } from "@/lib/submitCustomerPortal";
 import { supportCopy } from "@/lib/data/dashboard";
 
 export function SupportPage() {
   const formId = useId();
+  const { setMessages, state } = useDashboard();
   const defaultSubject = supportCopy.subjects[0];
 
   if (defaultSubject === undefined) {
@@ -16,7 +19,9 @@ export function SupportPage() {
     defaultSubject,
   );
   const [message, setMessage] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "sent">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">(
+    "idle",
+  );
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -27,9 +32,16 @@ export function SupportPage() {
     }
 
     setStatus("loading");
-    await new Promise((resolve) => {
-      window.setTimeout(resolve, 700);
+    const result = await sendMessageAction({
+      body: `[${subject}] ${message.trim()}`,
     });
+
+    if (!result.ok) {
+      setStatus("error");
+      return;
+    }
+
+    setMessages([...state.messages, result.data]);
     setStatus("sent");
     setMessage("");
   };
@@ -53,9 +65,17 @@ export function SupportPage() {
           {status === "sent" ? (
             <p
               role="status"
-              className="mb-4 rounded-xl border border-brand/25 bg-[rgba(116,129,95,0.1)] px-4 py-3 text-[0.88rem] font-semibold text-[#2f3a28]"
+              className="mb-4 rounded-xl border border-brand/25 bg-[rgba(92, 104, 73,0.1)] px-4 py-3 text-[0.88rem] font-semibold text-[#2f3a28]"
             >
               {supportCopy.success}
+            </p>
+          ) : null}
+          {status === "error" ? (
+            <p
+              role="status"
+              className="mb-4 rounded-xl border border-[#e8891a]/30 bg-[rgba(249,161,55,0.12)] px-4 py-3 text-[0.88rem] font-semibold text-[#2f3a28]"
+            >
+              Could not send your request. Try again.
             </p>
           ) : null}
 
@@ -73,7 +93,7 @@ export function SupportPage() {
                 event.target.value as (typeof supportCopy.subjects)[number],
               )
             }
-            className="mt-2 w-full rounded-xl border-0 bg-[rgba(116,129,95,0.1)] px-4 py-3 text-[0.92rem] font-medium outline-none focus-visible:shadow-[0_0_0_2px_#f3f5ef,0_0_0_4px_#f9a137]"
+            className="mt-2 w-full rounded-xl border-0 bg-[rgba(92, 104, 73,0.1)] px-4 py-3 text-[0.92rem] font-medium outline-none focus-visible:shadow-[0_0_0_2px_#f3f5ef,0_0_0_4px_#f9a137]"
           >
             {supportCopy.subjects.map((item) => (
               <option key={item} value={item}>
@@ -94,7 +114,7 @@ export function SupportPage() {
             value={message}
             onChange={(event) => setMessage(event.target.value)}
             required
-            className="mt-2 w-full rounded-xl border-0 bg-[rgba(116,129,95,0.1)] px-4 py-3 text-[0.92rem] font-medium outline-none focus-visible:shadow-[0_0_0_2px_#f3f5ef,0_0_0_4px_#f9a137]"
+            className="mt-2 w-full rounded-xl border-0 bg-[rgba(92, 104, 73,0.1)] px-4 py-3 text-[0.92rem] font-medium outline-none focus-visible:shadow-[0_0_0_2px_#f3f5ef,0_0_0_4px_#f9a137]"
           />
 
           <button

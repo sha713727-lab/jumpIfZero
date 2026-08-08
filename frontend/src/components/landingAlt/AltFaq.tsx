@@ -5,14 +5,19 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { applyHeaderTone } from "@/lib/headerTone";
-import { faqIntro, faqItems } from "@/constants/faq";
+import { faqIntro } from "@/constants/faq";
+import type { FaqItem } from "@/lib/data/faqs";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const HEADER_HEIGHT = 72;
 const SECTION_BG = "#f7f5f0";
 
-export function AltFaq() {
+export function AltFaq({
+  items,
+}: Readonly<{
+  items: readonly FaqItem[];
+}>) {
   const sectionRef = useRef<HTMLElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const panelRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -140,7 +145,7 @@ export function AltFaq() {
           </aside>
 
           <div ref={listRef} className="border-t border-black/10">
-            {faqItems.map((item, index) => {
+            {items.map((item, index) => {
               const open = index === openIndex;
 
               return (

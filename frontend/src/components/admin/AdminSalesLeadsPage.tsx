@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { adminTodayLabel, useAdminDemo } from "@/components/admin/AdminDemoProvider";
+import { useAdmin } from "@/components/admin/AdminProvider";
 import {
   AdminFormModal,
   adminFieldClass,
@@ -14,15 +14,21 @@ import { adminEmptyCopy } from "@/constants/admin";
 import { leadStatuses, leadStatusLabel } from "@/constants/sales";
 import type { AdminLead, LeadStatus } from "@/lib/data/admin";
 import { EmptyState } from "@/components/ui/EmptyState";
+import {
+  archiveLeadAction,
+  changeLeadStatusAction,
+  createLeadAction,
+  updateLeadAction,
+} from "@/lib/submitCrm";
 
 const cardClass =
   "overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";
 
 const statusPillClass: Record<LeadStatus, string> = {
-  new: "bg-[rgba(116,129,95,0.12)] text-brand",
+  new: "bg-[rgba(92,104,73,0.12)] text-brand",
   contacted: "bg-[rgba(249,161,55,0.18)] text-[#e8891a]",
   qualified: "bg-[rgba(47,58,40,0.12)] text-[#2f3a28]",
-  converted: "bg-[rgba(116,129,95,0.16)] text-brand",
+  converted: "bg-[rgba(92,104,73,0.16)] text-brand",
   closed: "bg-black/8 text-black/50",
 };
 
@@ -49,12 +55,13 @@ const emptyForm: LeadForm = {
 };
 
 export function AdminSalesLeadsPage() {
-  const { state, setLeads } = useAdminDemo();
+  const { state, setLeads } = useAdmin();
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<LeadForm>(emptyForm);
+  const [pending, startTransition] = useTransition();
 
   const EditIcon = adminIcons.edit;
   const TrashIcon = adminIcons.trash;
@@ -90,38 +97,81 @@ export function AdminSalesLeadsPage() {
       return;
     }
 
-    const payload: AdminLead = {
-      id: editingId ?? crypto.randomUUID(),
-      repId: form.repId,
-      company,
-      contactName: form.contactName.trim(),
-      phone: form.phone.trim(),
-      email: form.email.trim(),
-      source: form.source.trim(),
-      status: form.status,
-      notes: form.notes.trim(),
-      updatedAt: adminTodayLabel(),
-    };
-
-    if (editingId) {
-      setLeads(
-        state.leads.map((item) => (item.id === editingId ? payload : item)),
-      );
-    } else {
-      setLeads([...state.leads, payload]);
-    }
-
-    setModalOpen(false);
+    startTransition(async () => {
+      if (editingId) {
+        const existing = state.leads.find((item) => item.id === editingId);
+        if (!existing) {
+          return;
+        }
+        const updated = await updateLeadAction({
+          id: existing.id,
+          version: existing.version,
+          company,
+          contactName: form.contactName.trim(),
+          phone: form.phone.trim(),
+          email: form.email.trim(),
+          source: form.source.trim(),
+          notes: form.notes.trim(),
+        });
+        if (!updated.ok || !("data" in updated)) {
+          return;
+        }
+        let next = state.leads.map((item) =>
+          item.id === updated.data.id ? updated.data : item,
+        );
+        if (form.status !== existing.status) {
+          const statused = await changeLeadStatusAction({
+            id: updated.data.id,
+            version: updated.data.version,
+            statusCode: form.status,
+          });
+          if (statused.ok && "data" in statused) {
+            next = next.map((item) =>
+              item.id === statused.data.id ? statused.data : item,
+            );
+          }
+        }
+        setLeads(next);
+      } else {
+        const created = await createLeadAction({
+          repId: form.repId,
+          company,
+          contactName: form.contactName.trim(),
+          phone: form.phone.trim(),
+          email: form.email.trim(),
+          source: form.source.trim(),
+          statusCode: form.status,
+          notes: form.notes.trim(),
+        });
+        if (!created.ok || !("data" in created)) {
+          return;
+        }
+        setLeads([...state.leads, created.data]);
+      }
+      setModalOpen(false);
+    });
   };
 
   const confirmDelete = () => {
     if (!deleteId) {
       return;
     }
-
-    setLeads(state.leads.filter((item) => item.id !== deleteId));
-    setDeleteOpen(false);
-    setDeleteId(null);
+    const existing = state.leads.find((item) => item.id === deleteId);
+    if (!existing) {
+      return;
+    }
+    startTransition(async () => {
+      const result = await archiveLeadAction({
+        id: existing.id,
+        version: existing.version,
+      });
+      if (!result.ok) {
+        return;
+      }
+      setLeads(state.leads.filter((item) => item.id !== deleteId));
+      setDeleteOpen(false);
+      setDeleteId(null);
+    });
   };
 
   const deleteTarget = state.leads.find((item) => item.id === deleteId);
@@ -222,7 +272,11 @@ export function AdminSalesLeadsPage() {
       <AdminFormModal
         open={modalOpen}
         title={editingId ? "Edit lead" : "Add lead"}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          if (!pending) {
+            setModalOpen(false);
+          }
+        }}
         onSubmit={save}
       >
         <div>

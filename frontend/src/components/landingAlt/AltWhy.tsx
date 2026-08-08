@@ -279,7 +279,7 @@ export function AltWhy() {
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_0%,rgba(116,129,95,0.12)_0%,transparent_60%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_0%,rgba(92, 104, 73,0.12)_0%,transparent_60%)]"
       />
 
       <div className="relative mx-auto w-full max-w-[1360px] px-5 md:px-8">

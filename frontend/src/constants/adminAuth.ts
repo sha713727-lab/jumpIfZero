@@ -1,9 +1,16 @@
-export const demoAdmin = {
-  id: "admin_demo_001",
-  name: "Alex Rivera",
-  role: "Founder & Admin",
-  initials: "AR",
-} as const;
+export function adminInitialsFromName(name: string): string {
+  const parts = name
+    .trim()
+    .split(/\s+/)
+    .filter((part) => part.length > 0);
+  if (parts.length === 0) {
+    return "AD";
+  }
+  if (parts.length === 1) {
+    return parts[0]!.slice(0, 2).toUpperCase();
+  }
+  return `${parts[0]!.slice(0, 1)}${parts[parts.length - 1]!.slice(0, 1)}`.toUpperCase();
+}
 
 export const adminLoginCopy = {
   watermark: "Jump If Zero",

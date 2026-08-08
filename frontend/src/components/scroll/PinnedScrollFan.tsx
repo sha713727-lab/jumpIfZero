@@ -182,7 +182,7 @@ export function PinnedScrollFan({
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_45%_at_50%_0%,rgba(249,161,55,0.16)_0%,transparent_58%),radial-gradient(ellipse_40%_50%_at_80%_20%,rgba(116,129,95,0.18)_0%,transparent_55%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_45%_at_50%_0%,rgba(249,161,55,0.16)_0%,transparent_58%),radial-gradient(ellipse_40%_50%_at_80%_20%,rgba(92, 104, 73,0.18)_0%,transparent_55%)]"
       />
 
       <div

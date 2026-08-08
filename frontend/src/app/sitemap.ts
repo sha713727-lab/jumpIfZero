@@ -1,9 +1,11 @@
 import type { MetadataRoute } from "next";
-import { blogPosts } from "@/constants/blog";
+import { getBlogSlugs } from "@/lib/data/blog";
+import { getPortfolioSlugs } from "@/lib/data/portfolio";
+import { getServiceSlugs } from "@/lib/data/services";
 import { navLinks } from "@/constants/site";
 import { env } from "@/lib/env";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = env.siteUrl;
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -19,11 +21,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
-  const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
-    url: `${base}/blog/${post.slug}`,
+  const [blogSlugs, portfolioSlugs, serviceSlugs] = await Promise.all([
+    getBlogSlugs(),
+    getPortfolioSlugs(),
+    getServiceSlugs(),
+  ]);
+
+  const blogRoutes: MetadataRoute.Sitemap = blogSlugs.map((slug) => ({
+    url: `${base}/blog/${slug}`,
     changeFrequency: "monthly",
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...blogRoutes];
+  const portfolioRoutes: MetadataRoute.Sitemap = portfolioSlugs.map((slug) => ({
+    url: `${base}/portfolio/${slug}`,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
+
+  const serviceRoutes: MetadataRoute.Sitemap = serviceSlugs.map((slug) => ({
+    url: `${base}/services#${slug}`,
+    changeFrequency: "monthly",
+    priority: 0.5,
+  }));
+
+  return [...staticRoutes, ...blogRoutes, ...portfolioRoutes, ...serviceRoutes];
 }

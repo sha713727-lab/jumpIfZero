@@ -1,10 +1,8 @@
-import { demoCustomer } from "@/constants/demoCustomer";
-import type { DemoCustomer } from "@/schemas/customer";
+export type {
+  CustomerClient,
+  CustomerPortalBootstrap,
+  CustomerShell,
+  CustomerUser,
+} from "@/lib/data/customerPortal";
 
-export type { DemoCustomer };
-
-export async function getDemoCustomer(): Promise<DemoCustomer> {
-  return demoCustomer;
-}
-
-export { demoCustomer };
+export { loadCustomerPortalBootstrap } from "@/lib/data/customerPortal";

@@ -5,8 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ServiceDetailModal } from "@/components/services/ServiceDetailModal";
-import { getServiceDetail } from "@/constants/serviceDetails";
-import { serviceChapters, servicesIntro } from "@/lib/data/services";
+import { getServiceDetailBySlug } from "@/constants/serviceDetails";
+import { servicesIntro } from "@/constants/servicesStory";
+import type { ServiceChapter } from "@/lib/data/services";
 import { applyHeaderTone } from "@/lib/headerTone";
 import styles from "./landingAlt.module.css";
 
@@ -39,7 +40,6 @@ const SECTION_BG = "#0d120b";
 const SCROLL_PER_CARD = 480;
 const FADE_PER_STEP = 0.3;
 const LAYER_STEP = 10;
-const LAST_INDEX = serviceChapters.length - 1;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
@@ -53,19 +53,24 @@ function formatIndex(index: number): string {
   return String(index + 1).padStart(2, "0");
 }
 
-export function AltServices() {
+export function AltServices({
+  chapters,
+}: Readonly<{
+  chapters: readonly ServiceChapter[];
+}>) {
   const sectionRef = useRef<HTMLElement | null>(null);
   const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
   const settingsRef = useRef<CarouselSettings>(DESKTOP_SETTINGS);
   const triggerRef = useRef<ScrollTrigger | null>(null);
   const activeRef = useRef(0);
   const [active, setActive] = useState(0);
-  const [detailCategory, setDetailCategory] = useState<string | null>(null);
+  const [detailSlug, setDetailSlug] = useState<string | null>(null);
+  const lastIndex = Math.max(chapters.length - 1, 0);
 
   useEffect(() => {
     const section = sectionRef.current;
 
-    if (!section) {
+    if (!section || chapters.length === 0) {
       return;
     }
 
@@ -102,7 +107,7 @@ export function AltServices() {
           ),
           opacity: clamp(1 - distance * FADE_PER_STEP, 0, 1),
           zIndex: Math.round(
-            serviceChapters.length * LAYER_STEP - distance * LAYER_STEP,
+            chapters.length * LAYER_STEP - distance * LAYER_STEP,
           ),
           force3D: true,
         });
@@ -115,7 +120,7 @@ export function AltServices() {
       const proxy = { position: 0 };
 
       const tween = gsap.to(proxy, {
-        position: LAST_INDEX,
+        position: lastIndex,
         ease: "none",
         onUpdate: () => {
           place(proxy.position);
@@ -129,7 +134,7 @@ export function AltServices() {
         scrollTrigger: {
           trigger: section,
           start: "top top",
-          end: `+=${SCROLL_PER_CARD * LAST_INDEX}`,
+          end: `+=${SCROLL_PER_CARD * lastIndex}`,
           pin: true,
           scrub: 0.9,
           anticipatePin: 1,
@@ -145,7 +150,7 @@ export function AltServices() {
       triggerRef.current = null;
       ctx.revert();
     };
-  }, []);
+  }, [chapters.length, lastIndex]);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -181,18 +186,16 @@ export function AltServices() {
       return;
     }
 
-    const ratio = LAST_INDEX === 0 ? 0 : index / LAST_INDEX;
+    const ratio = lastIndex === 0 ? 0 : index / lastIndex;
     window.scrollTo({
       top: trigger.start + (trigger.end - trigger.start) * ratio,
       behavior: "smooth",
     });
   };
 
-  const chapter = serviceChapters[active] ?? serviceChapters.at(0);
+  const chapter = chapters[active] ?? chapters.at(0);
   const openDetail =
-    detailCategory === null
-      ? null
-      : (getServiceDetail(detailCategory) ?? null);
+    detailSlug === null ? null : (getServiceDetailBySlug(detailSlug) ?? null);
 
   if (!chapter) {
     return null;
@@ -210,7 +213,7 @@ export function AltServices() {
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_74%_38%,rgba(116,129,95,0.26)_0%,transparent_64%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_74%_38%,rgba(92, 104, 73,0.26)_0%,transparent_64%)]"
       />
       <div
         aria-hidden="true"
@@ -266,7 +269,7 @@ export function AltServices() {
 
             <button
               type="button"
-              onClick={() => setDetailCategory(chapter.category)}
+              onClick={() => setDetailSlug(chapter.slug)}
               className="mt-9 inline-flex items-center gap-3 rounded-full bg-cream px-7 py-3.5 text-[0.68rem] font-extrabold tracking-[0.2em] text-black italic uppercase focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             >
               Explore {chapter.category}
@@ -275,7 +278,7 @@ export function AltServices() {
           </div>
 
           <div className="mt-10 flex items-center gap-2">
-            {serviceChapters.map((service, index) => (
+            {chapters.map((service, index) => (
               <button
                 key={service.category}
                 type="button"
@@ -293,7 +296,7 @@ export function AltServices() {
         </div>
 
         <div className="relative order-1 h-[44vh] min-h-[18rem] lg:order-2 lg:h-[70vh]">
-          {serviceChapters.map((service, index) => (
+          {chapters.map((service, index) => (
             <div
               key={service.category}
               ref={(node) => {
@@ -331,7 +334,7 @@ export function AltServices() {
 
     <ServiceDetailModal
       detail={openDetail ?? null}
-      onClose={() => setDetailCategory(null)}
+      onClose={() => setDetailSlug(null)}
     />
     </>
   );

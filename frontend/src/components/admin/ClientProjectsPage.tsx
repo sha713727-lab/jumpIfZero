@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useParams } from "next/navigation";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { adminTodayLabel, useAdminDemo } from "@/components/admin/AdminDemoProvider";
+import { useAdmin } from "@/components/admin/AdminProvider";
 import {
   AdminFormModal,
   adminFieldClass,
@@ -15,59 +15,60 @@ import {
   projectStatuses,
   type ProjectStatus,
 } from "@/constants/admin";
-import type { AdminProject } from "@/lib/data/admin";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { createProjectAction } from "@/lib/submitOps";
 
 const cardClass =
   "overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";
 
 const statusPillClass: Record<ProjectStatus, string> = {
   requested: "bg-black/8 text-black/50",
-  approved: "bg-[rgba(116,129,95,0.12)] text-brand",
+  approved: "bg-[rgba(92,104,73,0.12)] text-brand",
   in_progress: "bg-[rgba(249,161,55,0.18)] text-[#e8891a]",
   completed: "bg-[rgba(47,58,40,0.12)] text-[#2f3a28]",
 };
 
 type ProjectForm = {
   title: string;
-  service: string;
+  serviceId: string;
   status: ProjectStatus;
 };
 
 const emptyForm: ProjectForm = {
   title: "",
-  service: "",
+  serviceId: "",
   status: "requested",
 };
 
 export function ClientProjectsPage() {
   const params = useParams();
-  const { state, setProjects, updateProjectStatus } = useAdminDemo();
+  const { state, setProjects, updateProjectStatus } = useAdmin();
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState<ProjectForm>(emptyForm);
+  const [pending, startTransition] = useTransition();
 
   const clientId = typeof params.id === "string" ? params.id : "";
   const projects = state.projects.filter((item) => item.clientId === clientId);
 
   const save = () => {
     const title = form.title.trim();
-    if (!title) {
+    if (!title || !clientId || !form.serviceId) {
       return;
     }
 
-    const payload: AdminProject = {
-      id: crypto.randomUUID(),
-      clientId,
-      title,
-      service: form.service.trim() || "General",
-      status: form.status,
-      notes: "",
-      updatedAt: adminTodayLabel(),
-    };
-
-    setProjects([...state.projects, payload]);
-    setModalOpen(false);
-    setForm(emptyForm);
+    startTransition(async () => {
+      const result = await createProjectAction({
+        clientId,
+        serviceId: form.serviceId,
+        title,
+      });
+      if (!result.ok || !("data" in result)) {
+        return;
+      }
+      setProjects([...state.projects, result.data]);
+      setModalOpen(false);
+      setForm(emptyForm);
+    });
   };
 
   return (
@@ -128,7 +129,11 @@ export function ClientProjectsPage() {
       <AdminFormModal
         open={modalOpen}
         title="Add project"
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          if (!pending) {
+            setModalOpen(false);
+          }
+        }}
         onSubmit={save}
         submitLabel="Create project"
       >
@@ -149,14 +154,17 @@ export function ClientProjectsPage() {
             <span className={adminLabelClass}>Service</span>
             <select
             className={adminFieldClass}
-            value={form.service}
+            value={form.serviceId}
             onChange={(event) =>
-              setForm((current) => ({ ...current, service: event.target.value }))
+              setForm((current) => ({
+                ...current,
+                serviceId: event.target.value,
+              }))
             }
           >
             <option value="">Select service</option>
             {state.services.map((service) => (
-              <option key={service.id} value={service.title}>
+              <option key={service.id} value={service.id}>
                 {service.title}
               </option>
             ))}

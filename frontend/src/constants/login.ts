@@ -16,7 +16,7 @@ export const loginCopy = {
   successCta: "Open dashboard",
   validationSummary: "Check the highlighted fields and try again.",
   serverError: "Sign-in failed. Please try again.",
-  credentialsError: "Use the demo customer email and password.",
+  credentialsError: "Invalid email or password.",
 } as const;
 
 export const forgotPasswordCopy = {
@@ -28,10 +28,11 @@ export const forgotPasswordCopy = {
   close: "Close",
   successTitle: "Check your email",
   successLede:
-    "If an account exists for that email, a reset link has been sent (demo).",
+    "If an account exists for that email, a reset link has been sent.",
   done: "Back to sign in",
   validationEmail: "Enter a valid email.",
   requiredEmail: "Email is required.",
+  serverError: "Could not send a reset link. Please try again.",
 } as const;
 
 export type { LoginFormValues, LoginFieldErrors } from "@/schemas/login";

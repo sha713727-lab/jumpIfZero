@@ -1,9 +1,11 @@
-"use client";
+﻿"use client";
 
+import { useTransition } from "react";
 import { useParams } from "next/navigation";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { useAdminDemo } from "@/components/admin/AdminDemoProvider";
+import { useAdmin } from "@/components/admin/AdminProvider";
 import { adminEmptyCopy } from "@/constants/admin";
+import { putAssignmentsAction } from "@/lib/submitOps";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 const cardClass =
@@ -11,7 +13,8 @@ const cardClass =
 
 export function ClientTeamPage() {
   const params = useParams();
-  const { state, assignEmployees } = useAdminDemo();
+  const { state, assignEmployees } = useAdmin();
+  const [pending, startTransition] = useTransition();
 
   const clientId = typeof params.id === "string" ? params.id : "";
   const client = state.clients.find((item) => item.id === clientId);
@@ -25,7 +28,15 @@ export function ClientTeamPage() {
     const next = current.includes(employeeId)
       ? current.filter((id) => id !== employeeId)
       : [...current, employeeId];
-    assignEmployees(clientId, next);
+    startTransition(async () => {
+      const result = await putAssignmentsAction({
+        clientId,
+        employeeIds: next,
+      });
+      if (result.ok) {
+        assignEmployees(clientId, next);
+      }
+    });
   };
 
   const deliveryEmployees = state.employees.filter(
@@ -38,48 +49,37 @@ export function ClientTeamPage() {
         title="Team"
         lede="Assign internal employees to this client account."
       />
-
-      <section className={cardClass}>
+      <div className={cardClass} aria-busy={pending}>
         {deliveryEmployees.length === 0 ? (
           <EmptyState message={adminEmptyCopy.clientTeam} />
         ) : (
-          <ul className="divide-y divide-black/8">
+          <ul className="space-y-3">
             {deliveryEmployees.map((employee) => {
-              const checked = client.assignedEmployeeIds.includes(employee.id);
-
+              const assigned = client.assignedEmployeeIds.includes(employee.id);
               return (
                 <li key={employee.id}>
-                  <label className="flex cursor-pointer items-center gap-4 py-4">
+                  <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-black/8 px-4 py-3">
+                    <span>
+                      <span className="block text-[0.92rem] font-semibold text-[#0d120b]">
+                        {employee.name}
+                      </span>
+                      <span className="block text-[0.78rem] font-medium text-black/45">
+                        {employee.email}
+                      </span>
+                    </span>
                     <input
                       type="checkbox"
-                      checked={checked}
+                      checked={assigned}
                       onChange={() => toggle(employee.id)}
-                      className="size-4 rounded border-black/20"
+                      disabled={pending}
                     />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[0.92rem] font-semibold text-[#0d120b]">
-                        {employee.name}
-                      </p>
-                      <p className="text-[0.82rem] font-medium text-black/45">
-                        {employee.role} · {employee.department}
-                      </p>
-                    </div>
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-[0.72rem] font-bold ${
-                        employee.active
-                          ? "bg-[rgba(116,129,95,0.16)] text-brand"
-                          : "bg-black/8 text-black/45"
-                      }`}
-                    >
-                      {employee.active ? "Active" : "Inactive"}
-                    </span>
                   </label>
                 </li>
               );
             })}
           </ul>
         )}
-      </section>
+      </div>
     </div>
   );
 }

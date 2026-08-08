@@ -1,16 +1,39 @@
 import type { NextConfig } from "next";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const configDir = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  transpilePackages: ["@jumpifzero/contracts"],
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   turbopack: {
-    root: process.cwd(),
+    root: path.join(configDir, ".."),
   },
   experimental: {
     optimizePackageImports: ["gsap", "framer-motion"],
+    turbopackFileSystemCacheForDev: false,
+    serverActions: {
+      bodySizeLimit: "50mb",
+    },
+    staleTimes: {
+      dynamic: 60,
+      static: 180,
+    },
   },
   images: {
     formats: ["image/avif", "image/webp"],
     qualities: [70, 75],
+    localPatterns: [
+      {
+        pathname: "/api/cms-media",
+      },
+      {
+        pathname: "/images/**",
+        search: "",
+      },
+    ],
   },
   headers: async () => {
     const isDev = process.env.NODE_ENV === "development";

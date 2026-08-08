@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { EmployeePageHeader } from "@/components/employee/EmployeePageHeader";
-import { useEmployeeDemo } from "@/components/employee/EmployeeDemoProvider";
+import { useEmployee } from "@/components/employee/EmployeeProvider";
 import { employeeEmptyCopy } from "@/constants/employee";
 import { EmptyState } from "@/components/ui/EmptyState";
 
@@ -10,7 +10,7 @@ const cardClass =
   "overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";
 
 export function ClientsPage() {
-  const { state } = useEmployeeDemo();
+  const { state } = useEmployee();
 
   return (
     <div className="space-y-6">
@@ -55,7 +55,7 @@ export function ClientsPage() {
                       <span
                         className={`rounded-full px-2.5 py-1 text-[0.72rem] font-bold ${
                           client.status === "active"
-                            ? "bg-[rgba(116,129,95,0.16)] text-brand"
+                            ? "bg-[rgba(92,104,73,0.16)] text-brand"
                             : "bg-black/8 text-black/45"
                         }`}
                       >

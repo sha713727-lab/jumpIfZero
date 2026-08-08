@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { EmployeePageHeader } from "@/components/employee/EmployeePageHeader";
-import { useEmployeeDemo } from "@/components/employee/EmployeeDemoProvider";
+import { useEmployee } from "@/components/employee/EmployeeProvider";
 import { projectStatusLabel } from "@/constants/admin";
 
 const cardClass =
@@ -13,7 +13,7 @@ const cardClass =
 export function ClientDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { state } = useEmployeeDemo();
+  const { state } = useEmployee();
 
   const clientId = typeof params.id === "string" ? params.id : "";
   const client = state.clients.find((item) => item.id === clientId);

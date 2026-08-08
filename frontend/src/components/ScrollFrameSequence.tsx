@@ -31,7 +31,7 @@ const GLOW_SPARK_SHARE = 0.06;
 const WASH_START = 0.9;
 const STAGE_BG = "#2f3a28";
 const STORY_BG = "#f7f5f0";
-const HEADER_BG = "#74815f";
+const HEADER_BG = "#5c6849";
 const FRAME_VEIL = "rgba(47, 58, 40, 0.62)";
 const LOGO_GRADIENT =
   "linear-gradient(172deg, #ffe27a 0%, #ffc250 32%, #ffa040 64%, #ef8a1f 100%)";

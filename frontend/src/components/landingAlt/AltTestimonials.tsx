@@ -4,7 +4,8 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { testimonials, testimonialsIntro } from "@/constants/testimonials";
+import { testimonialsIntro } from "@/constants/testimonials";
+import type { SiteTestimonial } from "@/lib/data/siteSections";
 import { applyHeaderTone } from "@/lib/headerTone";
 import styles from "./landingAlt.module.css";
 
@@ -37,12 +38,15 @@ const FRAME_THEMES = {
   },
 } as const;
 
-const MARQUEE_ITEMS = [...testimonials, ...testimonials];
-
-export function AltTestimonials() {
+export function AltTestimonials({
+  items,
+}: Readonly<{
+  items: readonly SiteTestimonial[];
+}>) {
   const sectionRef = useRef<HTMLElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [paused, setPaused] = useState(true);
+  const marqueeItems = [...items, ...items];
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -120,7 +124,7 @@ export function AltTestimonials() {
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_50%_at_18%_20%,rgba(116,129,95,0.28)_0%,transparent_62%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_50%_at_18%_20%,rgba(92, 104, 73,0.28)_0%,transparent_62%)]"
       />
       <div
         aria-hidden="true"
@@ -166,7 +170,7 @@ export function AltTestimonials() {
           <div
             className={`${styles.testimonialMarqueeTrack} ${paused ? styles.marqueePaused : ""}`}
           >
-            {MARQUEE_ITEMS.map((item, index) => {
+            {marqueeItems.map((item, index) => {
               const theme = FRAME_THEMES[item.accent];
 
               return (

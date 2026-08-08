@@ -1,7 +1,5 @@
-import {
-  initialAdminDemoState,
-  type EmployeeKind,
-} from "@/lib/data/admin";
+import { cache } from "react";
+import type { EmployeeKind } from "@/lib/data/admin";
 import {
   clearSession,
   requireSession,
@@ -15,25 +13,24 @@ export type EmployeeSession = {
   readonly kind: EmployeeKind;
 };
 
-export async function requireEmployeeSession(): Promise<EmployeeSession> {
-  const session = await requireSession("employee");
-  const employee = initialAdminDemoState.employees.find(
-    (item) => item.id === session.subjectId && item.active,
-  );
+export const requireEmployeeSession = cache(
+  async function requireEmployeeSession(): Promise<EmployeeSession> {
+    const session = await requireSession("employee");
 
-  if (!employee) {
-    await clearSession();
-    redirect("/employee/login");
-  }
+    if (session.employeeId === null || session.employeeKind === null) {
+      await clearSession("employee");
+      redirect("/employee/login");
+    }
 
-  return {
-    session,
-    employeeId: employee.id,
-    kind: employee.kind,
-  };
-}
+    return {
+      session,
+      employeeId: session.employeeId,
+      kind: session.employeeKind,
+    };
+  },
+);
 
-export async function requireEmployeeKind(
+export const requireEmployeeKind = cache(async function requireEmployeeKind(
   kind: EmployeeKind,
 ): Promise<EmployeeSession> {
   const access = await requireEmployeeSession();
@@ -43,4 +40,4 @@ export async function requireEmployeeKind(
   }
 
   return access;
-}
+});

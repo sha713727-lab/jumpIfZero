@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { EmployeePageHeader } from "@/components/employee/EmployeePageHeader";
-import { useEmployeeDemo } from "@/components/employee/EmployeeDemoProvider";
+import { useEmployee } from "@/components/employee/EmployeeProvider";
 import { projectStatusLabel, type ProjectStatus } from "@/constants/admin";
 import { employeeEmptyCopy } from "@/constants/employee";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -12,13 +12,13 @@ const cardClass =
 
 const statusPillClass: Record<ProjectStatus, string> = {
   requested: "bg-black/8 text-black/50",
-  approved: "bg-[rgba(116,129,95,0.12)] text-brand",
+  approved: "bg-[rgba(92,104,73,0.12)] text-brand",
   in_progress: "bg-[rgba(249,161,55,0.18)] text-[#e8891a]",
   completed: "bg-[rgba(47,58,40,0.12)] text-[#2f3a28]",
 };
 
 export function ProjectsPage() {
-  const { state } = useEmployeeDemo();
+  const { state } = useEmployee();
 
   return (
     <div className="space-y-6">

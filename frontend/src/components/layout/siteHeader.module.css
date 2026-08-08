@@ -18,8 +18,8 @@
 }
 
 :global(html[data-hero-light="1"]) .header {
-  border-color: rgba(116, 129, 95, 0.15);
-  color: #74815f;
+  border-color: rgba(92, 104, 73, 0.15);
+  color: #5c6849;
 }
 
 .ink {
@@ -60,17 +60,46 @@
 }
 
 :global(html[data-hero-light="1"]) .ring:focus-visible {
-  box-shadow: 0 0 0 2px rgba(116, 129, 95, 0.5);
+  box-shadow: 0 0 0 2px rgba(92, 104, 73, 0.5);
 }
 
 .drawer {
-  border-color: rgba(255, 255, 255, 0.15);
-  background: #1a2117;
-  color: #ffffff;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  background: #141a12;
+  color: #f7f5f0;
+}
+
+.drawerHeader {
+  border-color: rgba(247, 245, 240, 0.12);
+  background: #141a12;
+}
+
+.drawerLink:hover {
+  background: rgba(247, 245, 240, 0.08);
+  color: #f9a137;
+}
+
+.drawerDivider {
+  height: 1px;
+  background: rgba(247, 245, 240, 0.12);
 }
 
 :global(html[data-hero-light="1"]) .drawer {
-  border-color: rgba(116, 129, 95, 0.15);
+  border-left-color: rgba(92, 104, 73, 0.14);
   background: #f7f5f0;
-  color: #74815f;
+  color: #2f3a28;
+}
+
+:global(html[data-hero-light="1"]) .drawerHeader {
+  border-color: rgba(92, 104, 73, 0.14);
+  background: #f7f5f0;
+}
+
+:global(html[data-hero-light="1"]) .drawerLink:hover {
+  background: rgba(92, 104, 73, 0.08);
+  color: #e8891a;
+}
+
+:global(html[data-hero-light="1"]) .drawerDivider {
+  background: rgba(92, 104, 73, 0.14);
 }

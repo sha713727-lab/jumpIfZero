@@ -8,7 +8,7 @@ export function SiteHeader() {
   return (
     <header
       className={styles.header}
-      style={{ backgroundColor: "var(--header-bg, #74815f)" }}
+      style={{ backgroundColor: "var(--header-bg, #5c6849)" }}
     >
       <div className="mx-auto flex h-16 w-full max-w-[1360px] items-center justify-between px-5 md:h-[4.25rem] md:px-8 lg:px-10">
         <Link
@@ -22,6 +22,7 @@ export function SiteHeader() {
             height={38}
             className="h-7 w-auto drop-shadow-[0_6px_18px_rgba(249,161,55,0.22)] md:h-8 md:w-auto"
             priority
+            loading="eager"
           />
           <span className="hidden leading-tight sm:block">
             <span

@@ -5,19 +5,23 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { MagneticLink } from "@/components/landingAlt/MagneticLink";
 import styles from "@/components/landingAlt/landingAlt.module.css";
-import { blogCopy, blogPosts } from "@/lib/data/blog";
+import { blogCopy } from "@/constants/blog";
+import type { BlogPost } from "@/lib/data/blog";
 import { applyHeaderTone } from "@/lib/headerTone";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 const HEADER_HEIGHT = 72;
-const HERO_BG = "#74815f";
+const HERO_BG = "#5c6849";
 const CREAM_BG = "#f7f5f0";
 
-export function BlogPageClient() {
+export function BlogPageClient({
+  posts,
+}: Readonly<{
+  posts: readonly BlogPost[];
+}>) {
   const heroRef = useRef<HTMLElement | null>(null);
   const gridRef = useRef<HTMLElement | null>(null);
   const ctaRef = useRef<HTMLElement | null>(null);
-  const posts: readonly (typeof blogPosts)[number][] = blogPosts;
 
   useEffect(() => {
     const zones: ReadonlyArray<{
@@ -131,7 +135,7 @@ export function BlogPageClient() {
                 const colorful =
                   index % 2 === 0
                     ? {
-                        card: "border-brand/20 bg-brand text-cream shadow-[0_22px_50px_rgba(116,129,95,0.22)] hover:border-secondary/50 hover:shadow-[0_28px_60px_rgba(249,161,55,0.22)]",
+                        card: "border-brand/20 bg-brand text-cream shadow-[0_22px_50px_rgba(92, 104, 73,0.22)] hover:border-secondary/50 hover:shadow-[0_28px_60px_rgba(249,161,55,0.22)]",
                         bloom: "bg-secondary/25",
                         meta: "text-cream/55",
                         title: "text-cream hover:text-logo-gradient",
@@ -140,7 +144,7 @@ export function BlogPageClient() {
                         bar: "bg-logo-gradient",
                       }
                     : {
-                        card: "border-secondary/25 bg-logo-gradient text-black shadow-[0_22px_50px_rgba(249,161,55,0.2)] hover:border-brand/40 hover:shadow-[0_28px_60px_rgba(116,129,95,0.2)]",
+                        card: "border-secondary/25 bg-logo-gradient text-black shadow-[0_22px_50px_rgba(249,161,55,0.2)] hover:border-brand/40 hover:shadow-[0_28px_60px_rgba(92, 104, 73,0.2)]",
                         bloom: "bg-white/30",
                         meta: "text-[#2f3a28]/65",
                         title: "text-black hover:text-brand",

@@ -1,5 +1,6 @@
 "use server";
 
+import { assertSameOrigin } from "@/lib/assertSameOrigin";
 import {
   clearSession,
   requireSession,
@@ -7,6 +8,7 @@ import {
 } from "@/lib/session";
 
 export async function submitSignOut(role: SessionRole): Promise<void> {
+  await assertSameOrigin();
   await requireSession(role);
-  await clearSession();
+  await clearSession(role);
 }

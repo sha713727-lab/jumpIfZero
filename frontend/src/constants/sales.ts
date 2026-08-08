@@ -28,6 +28,12 @@ export const employeeKindLabel = {
   sales: "Sales",
 } as const;
 
+export const saleCurrencies = ["USD", "PKR"] as const;
+
+export function normalizeSaleAmount(value: string): string {
+  return value.replace(/[^\d.]/g, "");
+}
+
 export type CarrierSaleFields = {
   usDot: string;
   mc: string;
@@ -39,7 +45,8 @@ export type CarrierSaleFields = {
   salesAgent: string;
   businessTelephone: string;
   truckType: string;
-  type: string;
+  amount: string;
+  currency: string;
   contactName: string;
   contactPhone: string;
   contactEmail: string;
@@ -69,7 +76,8 @@ export const emptyCarrierSaleFields: CarrierSaleFields = {
   salesAgent: "",
   businessTelephone: "",
   truckType: "",
-  type: "",
+  amount: "",
+  currency: "USD",
   contactName: "",
   contactPhone: "",
   contactEmail: "",
@@ -87,6 +95,35 @@ export const emptyCarrierSaleFields: CarrierSaleFields = {
   factoringEmail: "",
   approvedBy: "",
 };
+
+export function saleSheetValidationMessage(
+  fields: CarrierSaleFields,
+  isCreate: boolean,
+): string | null {
+  if (!fields.usDot.trim()) {
+    return "US DOT is required.";
+  }
+  if (!fields.mc.trim()) {
+    return "MC is required.";
+  }
+  if (!fields.legalName.trim()) {
+    return "Legal name is required.";
+  }
+  if (isCreate && !fields.taxId.trim()) {
+    return "Tax ID is required.";
+  }
+  const amount = normalizeSaleAmount(fields.amount);
+  if (amount.length === 0 || Number(amount) <= 0) {
+    return "Enter an amount greater than 0.";
+  }
+  if (!/^\d+(\.\d{1,2})?$/.test(amount)) {
+    return "Amount must be a valid number (up to 2 decimal places).";
+  }
+  if (fields.currency.trim().length !== 3) {
+    return "Select a currency.";
+  }
+  return null;
+}
 
 export function maskTaxId(value: string): string {
   const trimmed = value.trim();

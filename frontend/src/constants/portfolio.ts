@@ -5,7 +5,6 @@ export const portfolioCopy = {
   heroSupport:
     "Websites, software, apps, and brand systems — built to convert, scale, and hold up in the wild.",
   gridTitle: "Recent engagements",
-  gridLede: "Six projects across the growth system.",
   featuredEyebrow: "Featured case",
   featuredTitle: "Conversion-first website for a growth-stage brand.",
   featuredBody:

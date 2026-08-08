@@ -1,18 +1,32 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { AdminImageField } from "@/components/admin/AdminImageField";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { adminTodayLabel, useAdminDemo } from "@/components/admin/AdminDemoProvider";
+import { useAdmin } from "@/components/admin/AdminProvider";
 import {
   AdminFormModal,
   adminFieldClass,
   adminLabelClass,
 } from "@/components/admin/AdminFormModal";
+import { BlogBodyEditor } from "@/components/admin/BlogBodyEditor";
 import { ConfirmDeleteModal } from "@/components/admin/ConfirmDeleteModal";
 import { adminIcons } from "@/components/admin/AdminIcons";
 import type { AdminBlogPost } from "@/lib/data/admin";
+import {
+  createEmptyBlogBody,
+  parseBlogBody,
+  serializeBlogBody,
+  type BlogBodyDocument,
+} from "@/lib/blogBody";
+import { cmsMediaSrc } from "@/lib/cmsMedia";
+import {
+  archiveAdminBlogPostAction,
+  createAdminBlogPostAction,
+  getAdminBlogPostAction,
+  updateAdminBlogPostAction,
+} from "@/lib/submitAdminBlog";
 
 const cardClass =
   "overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";
@@ -21,6 +35,8 @@ type BlogForm = {
   title: string;
   slug: string;
   excerpt: string;
+  body: BlogBodyDocument;
+  category: string;
   image: string;
   active: boolean;
 };
@@ -29,37 +45,68 @@ const emptyForm: BlogForm = {
   title: "",
   slug: "",
   excerpt: "",
+  body: createEmptyBlogBody(),
+  category: "",
   image: "",
   active: true,
 };
 
 export function BlogPage() {
-  const { state, setBlog } = useAdminDemo();
+  const { state, setBlog } = useAdmin();
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<BlogForm>(emptyForm);
-
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
   const EditIcon = adminIcons.edit;
   const TrashIcon = adminIcons.trash;
 
   const openAdd = () => {
     setEditingId(null);
-    setForm(emptyForm);
+    setForm({ ...emptyForm, body: createEmptyBlogBody() });
+    setError(null);
     setModalOpen(true);
   };
 
   const openEdit = (item: AdminBlogPost) => {
     setEditingId(item.id);
+    setError(null);
+    setModalOpen(true);
     setForm({
       title: item.title,
       slug: item.slug,
       excerpt: item.excerpt,
+      body: parseBlogBody(item.body),
+      category: item.category,
       image: item.image,
       active: item.active,
     });
-    setModalOpen(true);
+
+    startTransition(async () => {
+      const result = await getAdminBlogPostAction({ id: item.id });
+      if (!result.ok || !("post" in result)) {
+        setError("Could not load blog post body.");
+        return;
+      }
+
+      const post = result.post;
+      setForm({
+        title: post.title,
+        slug: post.slug,
+        excerpt: post.excerpt,
+        body: parseBlogBody(post.body),
+        category: post.category,
+        image: post.image,
+        active: post.active,
+      });
+      setBlog(
+        state.blog.map((entry) =>
+          entry.id === post.id ? { ...post, body: "" } : entry,
+        ),
+      );
+    });
   };
 
   const save = () => {
@@ -69,32 +116,100 @@ export function BlogPage() {
       return;
     }
 
-    const payload: AdminBlogPost = {
-      id: editingId ?? crypto.randomUUID(),
-      title,
-      slug,
-      excerpt: form.excerpt.trim(),
-      image: form.image,
-      active: form.active,
-      updatedAt: adminTodayLabel(),
-    };
+    const body = serializeBlogBody(form.body);
 
-    if (editingId) {
-      setBlog(state.blog.map((item) => (item.id === editingId ? payload : item)));
-    } else {
-      setBlog([...state.blog, payload]);
-    }
+    startTransition(async () => {
+      setError(null);
 
-    setModalOpen(false);
+      if (editingId) {
+        const existing = state.blog.find((item) => item.id === editingId);
+        if (!existing) {
+          setError("Blog post not found.");
+          return;
+        }
+
+        const result = await updateAdminBlogPostAction({
+          id: existing.id,
+          version: existing.version,
+          title,
+          slug,
+          excerpt: form.excerpt.trim(),
+          body,
+          category: form.category.trim(),
+          image: form.image,
+          active: form.active,
+          publishedAt: existing.publishedAt,
+        });
+
+        if (!result.ok || !("post" in result)) {
+          setError(
+            result.ok
+              ? "Save failed."
+              : result.reason === "conflict"
+                ? "This post was updated elsewhere. Refresh and try again."
+                : "Could not save blog post.",
+          );
+          return;
+        }
+
+        setBlog(
+          state.blog.map((item) =>
+            item.id === editingId ? { ...result.post, body: "" } : item,
+          ),
+        );
+      } else {
+        const result = await createAdminBlogPostAction({
+          title,
+          slug,
+          excerpt: form.excerpt.trim(),
+          body,
+          category: form.category.trim(),
+          image: form.image,
+          active: form.active,
+        });
+
+        if (!result.ok || !("post" in result)) {
+          setError("Could not create blog post.");
+          return;
+        }
+
+        setBlog([...state.blog, { ...result.post, body: "" }]);
+      }
+
+      setModalOpen(false);
+    });
   };
 
   const confirmDelete = () => {
     if (!deleteId) {
       return;
     }
-    setBlog(state.blog.filter((item) => item.id !== deleteId));
-    setDeleteOpen(false);
-    setDeleteId(null);
+
+    const existing = state.blog.find((item) => item.id === deleteId);
+    if (!existing) {
+      return;
+    }
+
+    startTransition(async () => {
+      setError(null);
+      const result = await archiveAdminBlogPostAction({
+        id: existing.id,
+        version: existing.version,
+      });
+
+      if (!result.ok) {
+        setError(
+          result.reason === "conflict"
+            ? "This post was updated elsewhere. Refresh and try again."
+            : "Could not delete blog post.",
+        );
+        return;
+      }
+
+      setBlog(state.blog.filter((item) => item.id !== deleteId));
+      setDeleteOpen(false);
+      setDeleteId(null);
+    });
   };
 
   const deleteTarget = state.blog.find((item) => item.id === deleteId);
@@ -108,6 +223,12 @@ export function BlogPage() {
         onAction={openAdd}
       />
 
+      {error ? (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[0.88rem] font-semibold text-red-700">
+          {error}
+        </p>
+      ) : null}
+
       <div className={cardClass}>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[42rem] text-left">
@@ -117,7 +238,7 @@ export function BlogPage() {
                   Title
                 </th>
                 <th className="px-4 py-3 text-[0.72rem] font-extrabold tracking-[0.14em] text-black/40 uppercase">
-                  Slug
+                  Category
                 </th>
                 <th className="px-4 py-3 text-[0.72rem] font-extrabold tracking-[0.14em] text-black/40 uppercase">
                   Status
@@ -138,7 +259,7 @@ export function BlogPage() {
                       {item.image ? (
                         <div className="relative size-12 shrink-0 overflow-hidden rounded-lg border border-black/8">
                           <Image
-                            src={item.image}
+                            src={cmsMediaSrc(item.image)}
                             alt={item.title}
                             fill
                             unoptimized
@@ -152,14 +273,14 @@ export function BlogPage() {
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-[0.84rem] font-medium text-black/45">
-                    {item.slug}
+                  <td className="px-4 py-3 text-[0.84rem] font-medium text-black/50">
+                    {item.category}
                   </td>
                   <td className="px-4 py-3">
                     <span
                       className={`inline-flex rounded-full px-2.5 py-1 text-[0.72rem] font-bold ${
                         item.active
-                          ? "bg-[rgba(116,129,95,0.16)] text-brand"
+                          ? "bg-[rgba(92,104,73,0.16)] text-brand"
                           : "bg-black/8 text-black/45"
                       }`}
                     >
@@ -174,19 +295,21 @@ export function BlogPage() {
                       <button
                         type="button"
                         aria-label="Edit"
+                        disabled={pending}
                         onClick={() => openEdit(item)}
-                        className="inline-flex size-8 items-center justify-center rounded-lg border border-black/10 bg-white"
+                        className="inline-flex size-8 items-center justify-center rounded-lg border border-black/10 bg-white disabled:opacity-40"
                       >
                         <EditIcon className="size-4" />
                       </button>
                       <button
                         type="button"
                         aria-label="Delete"
+                        disabled={pending}
                         onClick={() => {
                           setDeleteId(item.id);
                           setDeleteOpen(true);
                         }}
-                        className="inline-flex size-8 items-center justify-center rounded-lg border border-black/10 bg-white"
+                        className="inline-flex size-8 items-center justify-center rounded-lg border border-black/10 bg-white disabled:opacity-40"
                       >
                         <TrashIcon className="size-4" />
                       </button>
@@ -201,6 +324,7 @@ export function BlogPage() {
 
       <AdminFormModal
         open={modalOpen}
+        wide
         title={editingId ? "Edit blog post" : "Add blog post"}
         onClose={() => setModalOpen(false)}
         onSubmit={save}
@@ -209,42 +333,58 @@ export function BlogPage() {
           <label className="block">
             <span className={adminLabelClass}>Title</span>
             <input
-            className={adminFieldClass}
-            value={form.title}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, title: event.target.value }))
-            }
-          />
+              className={adminFieldClass}
+              value={form.title}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, title: event.target.value }))
+              }
+            />
           </label>
         </div>
         <div>
           <label className="block">
             <span className={adminLabelClass}>Slug</span>
             <input
-            className={adminFieldClass}
-            value={form.slug}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, slug: event.target.value }))
-            }
-          />
+              className={adminFieldClass}
+              value={form.slug}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, slug: event.target.value }))
+              }
+            />
           </label>
         </div>
         <div>
           <label className="block">
             <span className={adminLabelClass}>Excerpt</span>
             <textarea
-            className={`${adminFieldClass} min-h-[5rem] resize-y`}
-            value={form.excerpt}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, excerpt: event.target.value }))
-            }
-          />
+              className={`${adminFieldClass} min-h-[5rem] resize-y`}
+              value={form.excerpt}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, excerpt: event.target.value }))
+              }
+            />
+          </label>
+        </div>
+        <div>
+          <label className="block">
+            <span className={adminLabelClass}>Category</span>
+            <input
+              className={adminFieldClass}
+              value={form.category}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, category: event.target.value }))
+              }
+            />
           </label>
         </div>
         <AdminImageField
-          label="Image"
+          label="Cover image"
           value={form.image}
           onChange={(image) => setForm((current) => ({ ...current, image }))}
+        />
+        <BlogBodyEditor
+          value={form.body}
+          onChange={(body) => setForm((current) => ({ ...current, body }))}
         />
         <label className="inline-flex items-center gap-2 text-[0.88rem] font-semibold">
           <input

@@ -9,8 +9,9 @@ import {
   PinRotateSections,
 } from "@/components/scroll/PinRotateSections";
 import { aboutCopy } from "@/constants/about";
-import { aboutFlowCopy, aboutFlowImages } from "@/constants/aboutFlow";
-import { teamIntro, teamMembers, type TeamMember } from "@/lib/data/team";
+import { aboutFlowCopy } from "@/constants/aboutFlow";
+import { teamIntro } from "@/constants/team";
+import type { TeamMember } from "@/lib/data/team";
 
 const CREAM_BG = "#f7f5f0";
 
@@ -68,7 +69,15 @@ const PRINCIPLE_SECTION = {
   },
 } as const;
 
-export function AboutBelowFold() {
+export function AboutBelowFold({
+  members,
+  studioImages,
+  principles,
+}: Readonly<{
+  members: readonly TeamMember[];
+  studioImages: readonly string[];
+  principles: readonly import("@/lib/data/siteSections").SitePrinciple[];
+}>) {
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
 
   return (
@@ -79,7 +88,7 @@ export function AboutBelowFold() {
         flowParagraphs={aboutFlowCopy.flowParagraphs}
         flowCtaLabel={aboutFlowCopy.flowCtaLabel}
         flowCtaHref={aboutFlowCopy.flowCtaHref}
-        images={aboutFlowImages}
+        images={studioImages}
       />
 
       <section
@@ -105,12 +114,12 @@ export function AboutBelowFold() {
         </div>
 
         <PinRotateSections>
-          {aboutCopy.principles.map((principle) => {
+          {principles.map((principle) => {
             const theme = PRINCIPLE_SECTION[principle.accent];
 
             return (
               <PinRotateSection
-                key={principle.index}
+                key={`${principle.index}-${principle.title}`}
                 className={`${theme.surface} ${theme.border}`}
               >
                 <Image
@@ -177,7 +186,7 @@ export function AboutBelowFold() {
           </div>
 
           <div className="mt-4 md:mt-8">
-            {teamMembers.map((member, index) => {
+            {members.map((member, index) => {
               const { firstName, lastName } = splitName(member.name);
 
               return (

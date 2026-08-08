@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict NGWxpJb9BtTzdmeoekbRGLbrFF2zoi3ZalIGGgomrQ30KULa8YMdfo1fOnK4hEf
+\restrict oln1ZA8psSFTCnE42OPwtZdgiusiLq9fv0xNjwBQfunzu3iDl6gk491v5JxmQsK
 
 -- Dumped from database version 18.4
 -- Dumped by pg_dump version 18.4
@@ -371,6 +371,7 @@ CREATE TABLE public.faqs (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     archived_at timestamp with time zone,
+    sort_order integer DEFAULT 0 NOT NULL,
     CONSTRAINT faqs_answer_len CHECK (((char_length(answer) >= 1) AND (char_length(answer) <= 10000))),
     CONSTRAINT faqs_question_len CHECK (((char_length(question) >= 1) AND (char_length(question) <= 500))),
     CONSTRAINT faqs_version_pos CHECK ((version >= 1))
@@ -389,7 +390,8 @@ CREATE VIEW public.faqs_active AS
     version,
     created_at,
     updated_at,
-    archived_at
+    archived_at,
+    sort_order
    FROM public.faqs
   WHERE (archived_at IS NULL);
 
@@ -499,7 +501,7 @@ CREATE TABLE public.invoice_statuses (
 
 CREATE TABLE public.invoices (
     id uuid DEFAULT uuidv7() NOT NULL,
-    client_id uuid NOT NULL,
+    client_id uuid,
     number text NOT NULL,
     title text NOT NULL,
     amount numeric(14,2) NOT NULL,
@@ -511,8 +513,24 @@ CREATE TABLE public.invoices (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     archived_at timestamp with time zone,
+    bill_to_company text DEFAULT ''::text NOT NULL,
+    bill_to_name text DEFAULT ''::text NOT NULL,
+    bill_to_email text DEFAULT ''::text NOT NULL,
+    bill_to_phone text DEFAULT ''::text NOT NULL,
+    bill_to_location text DEFAULT ''::text NOT NULL,
+    from_company text DEFAULT ''::text NOT NULL,
+    from_email text DEFAULT ''::text NOT NULL,
+    from_phone text DEFAULT ''::text NOT NULL,
     CONSTRAINT invoices_amount_nonneg CHECK ((amount >= (0)::numeric)),
+    CONSTRAINT invoices_bill_to_company_len CHECK ((char_length(bill_to_company) <= 200)),
+    CONSTRAINT invoices_bill_to_email_len CHECK ((char_length(bill_to_email) <= 320)),
+    CONSTRAINT invoices_bill_to_location_len CHECK ((char_length(bill_to_location) <= 200)),
+    CONSTRAINT invoices_bill_to_name_len CHECK ((char_length(bill_to_name) <= 200)),
+    CONSTRAINT invoices_bill_to_phone_len CHECK ((char_length(bill_to_phone) <= 64)),
     CONSTRAINT invoices_currency_check CHECK ((currency ~ '^[A-Z]{3}$'::text)),
+    CONSTRAINT invoices_from_company_len CHECK ((char_length(from_company) <= 200)),
+    CONSTRAINT invoices_from_email_len CHECK ((char_length(from_email) <= 320)),
+    CONSTRAINT invoices_from_phone_len CHECK ((char_length(from_phone) <= 64)),
     CONSTRAINT invoices_number_len CHECK (((char_length(number) >= 1) AND (char_length(number) <= 64))),
     CONSTRAINT invoices_title_len CHECK (((char_length(title) >= 1) AND (char_length(title) <= 200))),
     CONSTRAINT invoices_version_pos CHECK ((version >= 1))
@@ -623,6 +641,17 @@ CREATE VIEW public.leads_active AS
 
 
 --
+-- Name: message_attachments; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.message_attachments (
+    message_id uuid NOT NULL,
+    file_id uuid NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
 -- Name: messages; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -636,7 +665,7 @@ CREATE TABLE public.messages (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     archived_at timestamp with time zone,
-    CONSTRAINT messages_body_len CHECK (((char_length(body) >= 1) AND (char_length(body) <= 20000))),
+    CONSTRAINT messages_body_len CHECK ((char_length(body) <= 20000)),
     CONSTRAINT messages_sender_role_check CHECK ((sender_role = ANY (ARRAY['admin'::text, 'client'::text, 'employee'::text])))
 );
 
@@ -706,6 +735,22 @@ CREATE VIEW public.parties_active AS
 
 
 --
+-- Name: password_reset_tokens; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.password_reset_tokens (
+    id uuid DEFAULT uuidv7() NOT NULL,
+    user_id uuid NOT NULL,
+    token_hash text NOT NULL,
+    expires_at timestamp with time zone NOT NULL,
+    used_at timestamp with time zone,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT password_reset_tokens_token_hash_len CHECK (((char_length(token_hash) >= 32) AND (char_length(token_hash) <= 128)))
+);
+
+
+--
 -- Name: portfolio_items; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -720,8 +765,10 @@ CREATE TABLE public.portfolio_items (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     archived_at timestamp with time zone,
+    slug text NOT NULL,
     CONSTRAINT portfolio_items_category_len CHECK ((char_length(category) <= 128)),
     CONSTRAINT portfolio_items_image_path_len CHECK ((char_length(image_path) <= 1024)),
+    CONSTRAINT portfolio_items_slug_len CHECK (((char_length(slug) >= 1) AND (char_length(slug) <= 200))),
     CONSTRAINT portfolio_items_summary_len CHECK ((char_length(summary) <= 5000)),
     CONSTRAINT portfolio_items_title_len CHECK (((char_length(title) >= 1) AND (char_length(title) <= 200))),
     CONSTRAINT portfolio_items_version_pos CHECK ((version >= 1))
@@ -742,7 +789,8 @@ CREATE VIEW public.portfolio_items_active AS
     version,
     created_at,
     updated_at,
-    archived_at
+    archived_at,
+    slug
    FROM public.portfolio_items
   WHERE (archived_at IS NULL);
 
@@ -996,6 +1044,180 @@ CREATE TABLE public.sessions (
 
 
 --
+-- Name: site_contact; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.site_contact (
+    id uuid DEFAULT uuidv7() NOT NULL,
+    singleton_key text DEFAULT 'default'::text NOT NULL,
+    email text NOT NULL,
+    phone text NOT NULL,
+    phone_href text DEFAULT ''::text NOT NULL,
+    address_label text DEFAULT ''::text NOT NULL,
+    address_line_1 text DEFAULT ''::text NOT NULL,
+    address_line_2 text DEFAULT ''::text NOT NULL,
+    address_line_3 text DEFAULT ''::text NOT NULL,
+    location_lede text DEFAULT ''::text NOT NULL,
+    map_embed_url text DEFAULT ''::text NOT NULL,
+    version integer DEFAULT 1 NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT site_contact_address_label_len CHECK ((char_length(address_label) <= 200)),
+    CONSTRAINT site_contact_address_line_1_len CHECK ((char_length(address_line_1) <= 300)),
+    CONSTRAINT site_contact_address_line_2_len CHECK ((char_length(address_line_2) <= 300)),
+    CONSTRAINT site_contact_address_line_3_len CHECK ((char_length(address_line_3) <= 300)),
+    CONSTRAINT site_contact_email_len CHECK (((char_length(email) >= 3) AND (char_length(email) <= 320))),
+    CONSTRAINT site_contact_location_lede_len CHECK ((char_length(location_lede) <= 500)),
+    CONSTRAINT site_contact_map_embed_url_len CHECK ((char_length(map_embed_url) <= 2000)),
+    CONSTRAINT site_contact_phone_href_len CHECK ((char_length(phone_href) <= 128)),
+    CONSTRAINT site_contact_phone_len CHECK (((char_length(phone) >= 1) AND (char_length(phone) <= 64))),
+    CONSTRAINT site_contact_singleton_key_check CHECK ((singleton_key = 'default'::text)),
+    CONSTRAINT site_contact_version_pos CHECK ((version >= 1))
+);
+
+
+--
+-- Name: site_gallery_images; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.site_gallery_images (
+    id uuid DEFAULT uuidv7() NOT NULL,
+    section_key text NOT NULL,
+    image_path text DEFAULT ''::text NOT NULL,
+    alt_text text DEFAULT ''::text NOT NULL,
+    sort_order integer DEFAULT 0 NOT NULL,
+    published_at timestamp with time zone,
+    version integer DEFAULT 1 NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    archived_at timestamp with time zone,
+    CONSTRAINT site_gallery_images_alt_text_len CHECK ((char_length(alt_text) <= 500)),
+    CONSTRAINT site_gallery_images_image_path_len CHECK ((char_length(image_path) <= 1024)),
+    CONSTRAINT site_gallery_images_section_key_check CHECK ((section_key = ANY (ARRAY['about_gallery'::text, 'studio_flow'::text]))),
+    CONSTRAINT site_gallery_images_version_pos CHECK ((version >= 1))
+);
+
+
+--
+-- Name: site_gallery_images_active; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.site_gallery_images_active AS
+ SELECT id,
+    section_key,
+    image_path,
+    alt_text,
+    sort_order,
+    published_at,
+    version,
+    created_at,
+    updated_at,
+    archived_at
+   FROM public.site_gallery_images
+  WHERE (archived_at IS NULL);
+
+
+--
+-- Name: site_principles; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.site_principles (
+    id uuid DEFAULT uuidv7() NOT NULL,
+    index_label text DEFAULT ''::text NOT NULL,
+    title text NOT NULL,
+    body text DEFAULT ''::text NOT NULL,
+    accent text DEFAULT 'brand'::text NOT NULL,
+    image_path text DEFAULT ''::text NOT NULL,
+    image_alt text DEFAULT ''::text NOT NULL,
+    sort_order integer DEFAULT 0 NOT NULL,
+    published_at timestamp with time zone,
+    version integer DEFAULT 1 NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    archived_at timestamp with time zone,
+    CONSTRAINT site_principles_accent_check CHECK ((accent = ANY (ARRAY['brand'::text, 'secondary'::text]))),
+    CONSTRAINT site_principles_body_len CHECK ((char_length(body) <= 5000)),
+    CONSTRAINT site_principles_image_alt_len CHECK ((char_length(image_alt) <= 500)),
+    CONSTRAINT site_principles_image_path_len CHECK ((char_length(image_path) <= 1024)),
+    CONSTRAINT site_principles_index_label_len CHECK ((char_length(index_label) <= 16)),
+    CONSTRAINT site_principles_title_len CHECK (((char_length(title) >= 1) AND (char_length(title) <= 200))),
+    CONSTRAINT site_principles_version_pos CHECK ((version >= 1))
+);
+
+
+--
+-- Name: site_principles_active; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.site_principles_active AS
+ SELECT id,
+    index_label,
+    title,
+    body,
+    accent,
+    image_path,
+    image_alt,
+    sort_order,
+    published_at,
+    version,
+    created_at,
+    updated_at,
+    archived_at
+   FROM public.site_principles
+  WHERE (archived_at IS NULL);
+
+
+--
+-- Name: site_testimonials; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.site_testimonials (
+    id uuid DEFAULT uuidv7() NOT NULL,
+    quote text NOT NULL,
+    author_name text NOT NULL,
+    role_title text DEFAULT ''::text NOT NULL,
+    company text DEFAULT ''::text NOT NULL,
+    accent text DEFAULT 'brand'::text NOT NULL,
+    image_path text DEFAULT ''::text NOT NULL,
+    sort_order integer DEFAULT 0 NOT NULL,
+    published_at timestamp with time zone,
+    version integer DEFAULT 1 NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    archived_at timestamp with time zone,
+    CONSTRAINT site_testimonials_accent_check CHECK ((accent = ANY (ARRAY['brand'::text, 'secondary'::text, 'dark'::text]))),
+    CONSTRAINT site_testimonials_author_name_len CHECK (((char_length(author_name) >= 1) AND (char_length(author_name) <= 200))),
+    CONSTRAINT site_testimonials_company_len CHECK ((char_length(company) <= 200)),
+    CONSTRAINT site_testimonials_image_path_len CHECK ((char_length(image_path) <= 1024)),
+    CONSTRAINT site_testimonials_quote_len CHECK (((char_length(quote) >= 1) AND (char_length(quote) <= 2000))),
+    CONSTRAINT site_testimonials_role_title_len CHECK ((char_length(role_title) <= 200)),
+    CONSTRAINT site_testimonials_version_pos CHECK ((version >= 1))
+);
+
+
+--
+-- Name: site_testimonials_active; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.site_testimonials_active AS
+ SELECT id,
+    quote,
+    author_name,
+    role_title,
+    company,
+    accent,
+    image_path,
+    sort_order,
+    published_at,
+    version,
+    created_at,
+    updated_at,
+    archived_at
+   FROM public.site_testimonials
+  WHERE (archived_at IS NULL);
+
+
+--
 -- Name: tax_id_access_audit; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1053,6 +1275,7 @@ CREATE TABLE public.team_members (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     archived_at timestamp with time zone,
+    sort_order integer DEFAULT 0 NOT NULL,
     CONSTRAINT team_members_bio_len CHECK ((char_length(bio) <= 10000)),
     CONSTRAINT team_members_image_path_len CHECK ((char_length(image_path) <= 1024)),
     CONSTRAINT team_members_name_len CHECK (((char_length(name) >= 1) AND (char_length(name) <= 200))),
@@ -1076,7 +1299,8 @@ CREATE VIEW public.team_members_active AS
     version,
     created_at,
     updated_at,
-    archived_at
+    archived_at,
+    sort_order
    FROM public.team_members
   WHERE (archived_at IS NULL);
 
@@ -1301,6 +1525,14 @@ ALTER TABLE ONLY public.leads
 
 
 --
+-- Name: message_attachments message_attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.message_attachments
+    ADD CONSTRAINT message_attachments_pkey PRIMARY KEY (message_id, file_id);
+
+
+--
 -- Name: messages messages_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1314,6 +1546,22 @@ ALTER TABLE ONLY public.messages
 
 ALTER TABLE ONLY public.parties
     ADD CONSTRAINT parties_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: password_reset_tokens password_reset_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.password_reset_tokens
+    ADD CONSTRAINT password_reset_tokens_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: password_reset_tokens password_reset_tokens_token_hash_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.password_reset_tokens
+    ADD CONSTRAINT password_reset_tokens_token_hash_key UNIQUE (token_hash);
 
 
 --
@@ -1405,6 +1653,46 @@ ALTER TABLE ONLY public.sessions
 
 
 --
+-- Name: site_contact site_contact_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.site_contact
+    ADD CONSTRAINT site_contact_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: site_contact site_contact_singleton_key_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.site_contact
+    ADD CONSTRAINT site_contact_singleton_key_unique UNIQUE (singleton_key);
+
+
+--
+-- Name: site_gallery_images site_gallery_images_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.site_gallery_images
+    ADD CONSTRAINT site_gallery_images_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: site_principles site_principles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.site_principles
+    ADD CONSTRAINT site_principles_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: site_testimonials site_testimonials_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.site_testimonials
+    ADD CONSTRAINT site_testimonials_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: tax_id_access_audit tax_id_access_audit_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1437,10 +1725,24 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: blog_posts_published_at_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX blog_posts_published_at_active_idx ON public.blog_posts USING btree (published_at DESC, id) WHERE ((archived_at IS NULL) AND (published_at IS NOT NULL));
+
+
+--
 -- Name: blog_posts_slug_active_key; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX blog_posts_slug_active_key ON public.blog_posts USING btree (slug) WHERE (archived_at IS NULL);
+
+
+--
+-- Name: callbacks_status_created_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX callbacks_status_created_active_idx ON public.callbacks USING btree (status_code, created_at, id) WHERE (archived_at IS NULL);
 
 
 --
@@ -1465,10 +1767,31 @@ CREATE INDEX client_employee_assignments_employee_id_idx ON public.client_employ
 
 
 --
+-- Name: clients_status_code_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX clients_status_code_active_idx ON public.clients USING btree (status_code, created_at, id) WHERE (archived_at IS NULL);
+
+
+--
+-- Name: contact_messages_status_created_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX contact_messages_status_created_active_idx ON public.contact_messages USING btree (status_code, created_at, id) WHERE (archived_at IS NULL);
+
+
+--
 -- Name: employees_kind_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX employees_kind_active_idx ON public.employees USING btree (kind) WHERE (archived_at IS NULL);
+
+
+--
+-- Name: faqs_sort_order_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX faqs_sort_order_active_idx ON public.faqs USING btree (sort_order, id) WHERE (archived_at IS NULL);
 
 
 --
@@ -1521,6 +1844,13 @@ CREATE UNIQUE INDEX invoices_number_active_key ON public.invoices USING btree (n
 
 
 --
+-- Name: invoices_status_code_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX invoices_status_code_active_idx ON public.invoices USING btree (status_code, created_at, id) WHERE (archived_at IS NULL);
+
+
+--
 -- Name: lead_follow_ups_lead_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1535,10 +1865,52 @@ CREATE INDEX leads_rep_id_active_idx ON public.leads USING btree (rep_id, id) WH
 
 
 --
+-- Name: leads_status_code_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX leads_status_code_active_idx ON public.leads USING btree (status_code, id) WHERE (archived_at IS NULL);
+
+
+--
+-- Name: message_attachments_file_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX message_attachments_file_id_idx ON public.message_attachments USING btree (file_id);
+
+
+--
 -- Name: messages_client_id_created_at_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX messages_client_id_created_at_idx ON public.messages USING btree (client_id, created_at, id) WHERE (archived_at IS NULL);
+
+
+--
+-- Name: parties_kind_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX parties_kind_active_idx ON public.parties USING btree (kind, id) WHERE (archived_at IS NULL);
+
+
+--
+-- Name: password_reset_tokens_expires_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX password_reset_tokens_expires_at_idx ON public.password_reset_tokens USING btree (expires_at);
+
+
+--
+-- Name: password_reset_tokens_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX password_reset_tokens_user_id_idx ON public.password_reset_tokens USING btree (user_id);
+
+
+--
+-- Name: portfolio_items_slug_active_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX portfolio_items_slug_active_key ON public.portfolio_items USING btree (slug) WHERE (archived_at IS NULL);
 
 
 --
@@ -1577,6 +1949,27 @@ CREATE INDEX sales_carrier_id_idx ON public.sales USING btree (carrier_id);
 
 
 --
+-- Name: sales_factoring_party_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX sales_factoring_party_id_idx ON public.sales USING btree (factoring_party_id) WHERE (factoring_party_id IS NOT NULL);
+
+
+--
+-- Name: sales_insurance_party_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX sales_insurance_party_id_idx ON public.sales USING btree (insurance_party_id) WHERE (insurance_party_id IS NOT NULL);
+
+
+--
+-- Name: sales_messages_from_rep_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX sales_messages_from_rep_id_idx ON public.sales_messages USING btree (from_rep_id, sent_at);
+
+
+--
 -- Name: sales_messages_to_rep_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1612,10 +2005,38 @@ CREATE INDEX sessions_expires_at_idx ON public.sessions USING btree (expires_at)
 
 
 --
+-- Name: sessions_revoked_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX sessions_revoked_at_idx ON public.sessions USING btree (revoked_at) WHERE (revoked_at IS NOT NULL);
+
+
+--
 -- Name: sessions_subject_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX sessions_subject_id_idx ON public.sessions USING btree (subject_id);
+
+
+--
+-- Name: site_gallery_images_section_sort_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX site_gallery_images_section_sort_idx ON public.site_gallery_images USING btree (section_key, sort_order, id) WHERE (archived_at IS NULL);
+
+
+--
+-- Name: site_principles_sort_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX site_principles_sort_idx ON public.site_principles USING btree (sort_order, id) WHERE (archived_at IS NULL);
+
+
+--
+-- Name: site_testimonials_sort_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX site_testimonials_sort_idx ON public.site_testimonials USING btree (sort_order, id) WHERE (archived_at IS NULL);
 
 
 --
@@ -1640,10 +2061,24 @@ CREATE INDEX team_member_socials_team_member_id_idx ON public.team_member_social
 
 
 --
+-- Name: team_members_sort_order_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX team_members_sort_order_active_idx ON public.team_members USING btree (sort_order, id) WHERE (archived_at IS NULL);
+
+
+--
 -- Name: users_email_active_key; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX users_email_active_key ON public.users USING btree (email) WHERE (archived_at IS NULL);
+
+
+--
+-- Name: users_role_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX users_role_active_idx ON public.users USING btree (role, id) WHERE (archived_at IS NULL);
 
 
 --
@@ -1759,6 +2194,22 @@ ALTER TABLE ONLY public.leads
 
 
 --
+-- Name: message_attachments message_attachments_file_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.message_attachments
+    ADD CONSTRAINT message_attachments_file_id_fkey FOREIGN KEY (file_id) REFERENCES public.files(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: message_attachments message_attachments_message_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.message_attachments
+    ADD CONSTRAINT message_attachments_message_id_fkey FOREIGN KEY (message_id) REFERENCES public.messages(id) ON DELETE CASCADE;
+
+
+--
 -- Name: messages messages_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1772,6 +2223,14 @@ ALTER TABLE ONLY public.messages
 
 ALTER TABLE ONLY public.messages
     ADD CONSTRAINT messages_sender_user_id_fkey FOREIGN KEY (sender_user_id) REFERENCES public.users(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: password_reset_tokens password_reset_tokens_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.password_reset_tokens
+    ADD CONSTRAINT password_reset_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --
@@ -1898,5 +2357,5 @@ ALTER TABLE ONLY public.team_members
 -- PostgreSQL database dump complete
 --
 
-\unrestrict NGWxpJb9BtTzdmeoekbRGLbrFF2zoi3ZalIGGgomrQ30KULa8YMdfo1fOnK4hEf
+\unrestrict oln1ZA8psSFTCnE42OPwtZdgiusiLq9fv0xNjwBQfunzu3iDl6gk491v5JxmQsK
 

@@ -220,6 +220,37 @@ function TrashIcon({ className }: { readonly className?: string }) {
   );
 }
 
+function KeyIcon({ className }: { readonly className?: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="15" r="3.2" />
+      <path d="M10.5 13.5 20 4" />
+      <path d="M16 5.5 18.5 8" />
+      <path d="M14 7.5 16.5 10" />
+    </svg>
+  );
+}
+
+function EyeIcon({ className }: { readonly className?: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function EyeOffIcon({ className }: { readonly className?: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 3l18 18" />
+      <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
+      <path d="M9.9 5.1A10.5 10.5 0 0 1 12 5c6.5 0 10 7 10 7a18.3 18.3 0 0 1-3.2 4.3" />
+      <path d="M6.1 6.1A18.4 18.4 0 0 0 2 12s3.5 7 10 7a10.4 10.4 0 0 0 4.4-1" />
+    </svg>
+  );
+}
+
 function ChevronUpIcon({ className }: { readonly className?: string }) {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -236,6 +267,67 @@ function ChevronDownIcon({ className }: { readonly className?: string }) {
   );
 }
 
+function BlockHeadingIcon({ className }: { readonly className?: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 5v14" />
+      <path d="M18 5v14" />
+      <path d="M6 12h12" />
+    </svg>
+  );
+}
+
+function BlockParagraphIcon({ className }: { readonly className?: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 7h16" />
+      <path d="M4 12h16" />
+      <path d="M4 17h10" />
+    </svg>
+  );
+}
+
+function BlockListIcon({ className }: { readonly className?: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="5" cy="7" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="5" cy="12" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="5" cy="17" r="1.2" fill="currentColor" stroke="none" />
+      <path d="M9 7h11" />
+      <path d="M9 12h11" />
+      <path d="M9 17h11" />
+    </svg>
+  );
+}
+
+function BlockQuoteIcon({ className }: { readonly className?: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 17c-2.2 0-4-1.8-4-4V7h6v6H7.5c0 1.4 1.1 2.5 2.5 2.5v1.5z" />
+      <path d="M18 17c-2.2 0-4-1.8-4-4V7h6v6h-2.5c0 1.4 1.1 2.5 2.5 2.5v1.5z" />
+    </svg>
+  );
+}
+
+function BlockImageIcon({ className }: { readonly className?: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3.5" y="5" width="17" height="14" rx="2" />
+      <circle cx="9" cy="10" r="1.6" />
+      <path d="M5.5 17l4.2-4.2 2.8 2.8 3-3.2 3 4.6" />
+    </svg>
+  );
+}
+
+function BlockVideoIcon({ className }: { readonly className?: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3.5" y="6" width="13" height="12" rx="2" />
+      <path d="M16.5 10.5l4-2.5v8l-4-2.5z" />
+    </svg>
+  );
+}
+
 export const adminIcons = {
   overview: OverviewIcon,
   clients: ClientsIcon,
@@ -247,6 +339,7 @@ export const adminIcons = {
   portfolio: PortfolioIcon,
   blog: BlogIcon,
   team: TeamIcon,
+  siteSections: PortfolioIcon,
   faqs: FaqsIcon,
   contact: ContactIcon,
   callbacks: CallbacksIcon,
@@ -260,6 +353,15 @@ export const adminIcons = {
   plus: PlusIcon,
   edit: EditIcon,
   trash: TrashIcon,
+  key: KeyIcon,
+  eye: EyeIcon,
+  eyeOff: EyeOffIcon,
   chevronUp: ChevronUpIcon,
   chevronDown: ChevronDownIcon,
+  blockHeading: BlockHeadingIcon,
+  blockParagraph: BlockParagraphIcon,
+  blockList: BlockListIcon,
+  blockQuote: BlockQuoteIcon,
+  blockImage: BlockImageIcon,
+  blockVideo: BlockVideoIcon,
 } as const;

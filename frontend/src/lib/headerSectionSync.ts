@@ -4,7 +4,7 @@ const HEADER_HEIGHT = 72;
 
 export function syncHeaderFromSections(
   fallbackLight = false,
-  fallbackBg = "#74815f",
+  fallbackBg = "#5c6849",
 ): void {
   const nodes = document.querySelectorAll<HTMLElement>(
     "[data-header-tone][data-header-bg]",
@@ -32,7 +32,7 @@ export function syncHeaderFromSections(
 
 export function bindHeaderSectionSync(
   fallbackLight = false,
-  fallbackBg = "#74815f",
+  fallbackBg = "#5c6849",
 ): () => void {
   const sync = () => syncHeaderFromSections(fallbackLight, fallbackBg);
   sync();

@@ -63,10 +63,15 @@ export function buildGalleryItems(
   config: GalleryLayoutConfig,
   viewportWidth: number,
   viewportHeight: number,
+  imagePaths: readonly string[] = IMAGE_POOL,
 ): GalleryItemData[] {
   const random = createSeededRandom(GALLERY_SEED);
   const items: GalleryItemData[] = [];
   const total = config.itemCount;
+  const pool = imagePaths;
+  if (pool.length === 0) {
+    return items;
+  }
 
   for (let index = 0; index < total; index += 1) {
     const pathT = total <= 0 ? 0 : index / total;
@@ -79,7 +84,7 @@ export function buildGalleryItems(
       config,
     );
     const size = SIZE_PRESETS[index % SIZE_PRESETS.length];
-    const source = IMAGE_POOL[index % IMAGE_POOL.length];
+    const source = pool[index % pool.length];
 
     if (!size || !source) {
       continue;

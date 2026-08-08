@@ -1,0 +1,224 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - "backend/**"
+      - "packages/contracts/**"
+      - "database/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/backend-ci.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "packages/contracts/**"
+      - "database/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/backend-ci.yml"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: jumpifzero
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d jumpifzero"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: jumpifzero
+      JZ_OWNER_PASSWORD: ci-jz-owner-password-32chars!!
+      JZ_APP_PASSWORD: ci-jz-app-password-32chars!!!!
+      JZ_READONLY_PASSWORD: ci-jz-readonly-password-32ch
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run typecheck -w @jumpifzero/contracts
+      - run: npm run typecheck -w @jumpifzero/backend
+      - run: npm run lint -w @jumpifzero/backend
+      - run: npm run test:unit -w @jumpifzero/backend
+      - name: Bootstrap database roles
+        run: |
+          psql -v ON_ERROR_STOP=1 -f database/roles/001_roles.sql
+          psql -v ON_ERROR_STOP=1 -c "ALTER ROLE jz_owner PASSWORD '${JZ_OWNER_PASSWORD}'"
+          psql -v ON_ERROR_STOP=1 -c "ALTER ROLE jz_app PASSWORD '${JZ_APP_PASSWORD}'"
+          psql -v ON_ERROR_STOP=1 -c "ALTER ROLE jz_readonly PASSWORD '${JZ_READONLY_PASSWORD}'"
+      - name: Apply migrations
+        env:
+          PGPASSWORD: ${{ env.JZ_OWNER_PASSWORD }}
+          PGUSER: jz_owner
+        run: |
+          set -euo pipefail
+          for migration in \
+            0001_init \
+            0002_jz_app_select_soft_delete \
+            0003_password_reset_tokens \
+            0004_phase5_cms \
+            0005_site_sections \
+            0006_phase_x_indexes \
+            0007_message_attachments \
+            0008_site_contact \
+            0009_invoice_party_snapshot \
+            0010_invoice_optional_client
+          do
+            file="database/migrations/${migration}.up.sql"
+            psql -v ON_ERROR_STOP=1 -f "$file"
+            checksum="$(sha256sum "$file" | awk '{print $1}')"
+            psql -v ON_ERROR_STOP=1 -c "INSERT INTO schema_migrations (version, checksum) VALUES ('${migration}', '${checksum}');"
+          done
+          psql -v ON_ERROR_STOP=1 -c "SELECT version FROM schema_migrations ORDER BY version;"
+      - name: Seed development fixtures
+        env:
+          PGPASSWORD: ${{ env.JZ_OWNER_PASSWORD }}
+          PGUSER: jz_owner
+        run: |
+          set -euo pipefail
+          for seed in 001_identity 002_operations 003_crm 004_cms 005_site_sections
+          do
+            psql -v ON_ERROR_STOP=1 -f "database/seeds/dev/${seed}.sql"
+          done
+      - name: Write backend/.env for CI
+        run: |
+          mkdir -p /tmp/jz-files
+          cat > backend/.env <<EOF
+          NODE_ENV=test
+          HOST=127.0.0.1
+          PORT=3001
+          DATABASE_HOST=127.0.0.1
+          DATABASE_PORT=5432
+          DATABASE_NAME=jumpifzero
+          DATABASE_USER=jz_app
+          DATABASE_PASSWORD=${JZ_APP_PASSWORD}
+          HMAC_SECRET=local-dev-hmac-secret-key-v1-ok!!
+          HMAC_SECRET_PREVIOUS=
+          HMAC_KEY_ID=v1
+          HMAC_KEY_ID_PREVIOUS=
+          HMAC_GATEWAY_SUBJECT_ID=01900000-0000-7000-8000-000000000099
+          TAX_ID_AEAD_KEY=AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=
+          TAX_ID_AEAD_KEY_PREVIOUS=
+          FILE_STORAGE_ROOT=/tmp/jz-files
+          FILE_STORAGE_BACKEND=local
+          RATE_LIMIT_BACKEND=postgres
+          NONCE_BACKEND=postgres
+          OTEL_ENABLED=false
+          METRICS_ENABLED=false
+          CORS_ORIGIN=http://localhost:3000
+          REQUEST_TIMEOUT_MS=30000
+          BODY_MAX_BYTES=1048576
+          SLOW_QUERY_MS=500
+          DATABASE_POOL_MAX=10
+          SHUTDOWN_DRAIN_MS=15000
+          EOF
+          # strip accidental leading whitespace from heredoc lines
+          sed -i 's/^[[:space:]]*//' backend/.env
+      - name: Start backend
+        run: |
+          npm run start -w @jumpifzero/backend > /tmp/jz-backend.log 2>&1 &
+          echo $! > /tmp/jz-backend.pid
+          for i in $(seq 1 60); do
+            code="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:3001/health/live" || true)"
+            if [ "$code" = "401" ] || [ "$code" = "200" ]; then
+              break
+            fi
+            if ! kill -0 "$(cat /tmp/jz-backend.pid)" 2>/dev/null; then
+              echo "backend exited early"
+              cat /tmp/jz-backend.log
+              exit 1
+            fi
+            sleep 1
+          done
+          code="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:3001/health/live" || true)"
+          if [ "$code" != "401" ] && [ "$code" != "200" ]; then
+            echo "backend not accepting connections: HTTP $code"
+            cat /tmp/jz-backend.log
+            exit 1
+          fi
+      - name: Wait for signed readiness
+        run: |
+          node --experimental-strip-types <<'NODE'
+          import { createHash, createHmac, randomUUID } from "node:crypto";
+          import { readFileSync } from "node:fs";
+
+          const env = Object.fromEntries(
+            readFileSync("backend/.env", "utf8")
+              .split(/\r?\n/)
+              .filter((line) => line && !line.startsWith("#") && line.includes("="))
+              .map((line) => {
+                const i = line.indexOf("=");
+                return [line.slice(0, i).trim(), line.slice(i + 1).trim()];
+              }),
+          );
+
+          const method = "GET";
+          const path = "/health/ready";
+          const body = Buffer.alloc(0);
+          const timestamp = Math.floor(Date.now() / 1000);
+          const nonce =
+            randomUUID().replaceAll("-", "") +
+            randomUUID().replaceAll("-", "").slice(0, 8);
+          const payload = [
+            "v1",
+            method,
+            path,
+            "",
+            createHash("sha256").update(body).digest("hex"),
+            String(timestamp),
+            nonce,
+            env.HMAC_GATEWAY_SUBJECT_ID,
+            "gateway",
+            "-",
+            env.HMAC_KEY_ID,
+          ].join("\n");
+          const signature = createHmac("sha256", env.HMAC_SECRET)
+            .update(payload, "utf8")
+            .digest("hex");
+          const response = await fetch(`http://${env.HOST}:${env.PORT}${path}`, {
+            method,
+            headers: {
+              "x-jz-key-id": env.HMAC_KEY_ID,
+              "x-jz-timestamp": String(timestamp),
+              "x-jz-nonce": nonce,
+              "x-jz-subject-id": env.HMAC_GATEWAY_SUBJECT_ID,
+              "x-jz-role": "gateway",
+              "x-jz-signature": signature,
+            },
+          });
+          const text = await response.text();
+          if (response.status !== 200) {
+            console.error(text);
+            process.exit(1);
+          }
+          console.log(text);
+          NODE
+      - name: Backend integration and journey tests
+        run: npm run test:integration -w @jumpifzero/backend
+      - name: npm audit (backend production)
+        run: npm audit --omit=dev --audit-level=high -w @jumpifzero/backend
+      - name: Stop backend
+        if: always()
+        run: |
+          if [ -f /tmp/jz-backend.pid ]; then
+            kill "$(cat /tmp/jz-backend.pid)" || true
+          fi
+          if [ -f /tmp/jz-backend.log ]; then
+            tail -n 100 /tmp/jz-backend.log || true
+          fi

@@ -78,7 +78,7 @@ export function AltMarquee() {
       ref={sectionRef}
       aria-label="What we deliver"
       data-header-tone="dark"
-      data-header-bg="#74815f"
+      data-header-bg="#5c6849"
       className="relative overflow-hidden border-y border-black/10 bg-brand py-14 md:py-16"
     >
       <div

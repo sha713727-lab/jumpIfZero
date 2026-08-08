@@ -1,0 +1,36 @@
+{
+  "name": "@jumpifzero/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./backend-env": "./src/backend-env.ts",
+    "./admin": "./src/admin.ts",
+    "./login": "./src/login.ts",
+    "./customer": "./src/customer.ts",
+    "./env": "./src/env.ts",
+    "./db-content": "./src/db-content.ts",
+    "./db-auth": "./src/db-auth.ts",
+    "./content": "./src/content.ts",
+    "./hmac": "./src/hmac.ts",
+    "./auth": "./src/auth.ts",
+    "./identity": "./src/identity.ts",
+    "./operations": "./src/operations.ts",
+    "./crm": "./src/crm.ts",
+    "./z": "./src/z.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

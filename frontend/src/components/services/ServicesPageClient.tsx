@@ -10,9 +10,10 @@ import {
   servicesPageCopy,
 } from "@/constants/servicesPage";
 import { bindHeaderSectionSync } from "@/lib/headerSectionSync";
+import type { ServiceChapter } from "@/lib/data/services";
 
 const CREAM_BG = "#f7f5f0";
-const BRAND_BG = "#74815f";
+const BRAND_BG = "#5c6849";
 
 const PROCESS_CARD_THEMES = {
   brand: {
@@ -65,7 +66,11 @@ const AltServices = dynamic(
   },
 );
 
-export function ServicesPageClient() {
+export function ServicesPageClient({
+  serviceChapters,
+}: Readonly<{
+  serviceChapters: readonly ServiceChapter[];
+}>) {
   const processRef = useRef<HTMLElement | null>(null);
   const ctaRef = useRef<HTMLElement | null>(null);
 
@@ -90,7 +95,7 @@ export function ServicesPageClient() {
           />
         }
       >
-        <AltServices />
+        <AltServices chapters={serviceChapters} />
       </DeferredMount>
 
       <section

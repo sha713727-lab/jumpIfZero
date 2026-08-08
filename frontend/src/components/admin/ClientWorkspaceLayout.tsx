@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
-import { useAdminDemo } from "@/components/admin/AdminDemoProvider";
+import { useAdmin } from "@/components/admin/AdminProvider";
 
 const tabs = [
   { label: "Overview", segment: "" },
@@ -21,7 +21,7 @@ export function ClientWorkspaceLayout({
   const params = useParams();
   const pathname = usePathname();
   const router = useRouter();
-  const { state } = useAdminDemo();
+  const { state } = useAdmin();
 
   const clientId = typeof params.id === "string" ? params.id : "";
   const client = state.clients.find((item) => item.id === clientId);
@@ -62,7 +62,7 @@ export function ClientWorkspaceLayout({
           <span
             className={`ml-auto rounded-full px-2.5 py-1 text-[0.72rem] font-bold ${
               client.status === "active"
-                ? "bg-[rgba(116,129,95,0.16)] text-brand"
+                ? "bg-[rgba(92,104,73,0.16)] text-brand"
                 : "bg-black/8 text-black/45"
             }`}
           >

@@ -169,7 +169,7 @@ Seven tables: client, project, invoice, sale, lead, callback, contact_message st
 
 ## 8. Indexes (key)
 
-Partial UK: users.email, services.slug, blog_posts.slug, invoices.number, carriers.us_dot, carriers.mc, files(client_id, original_name).  
+Partial UK: users.email, services.slug, blog_posts.slug, portfolio_items.slug, invoices.number, carriers.us_dot, carriers.mc, files(client_id, original_name).  
 Idempotency: `UNIQUE NULLS NOT DISTINCT (idempotency_key, method, path, subject_id)`.  
 Cleanup: `rate_limit_buckets(last_refill_at)`, `hmac_nonces(expires_at)`, `sessions(expires_at)`.
 

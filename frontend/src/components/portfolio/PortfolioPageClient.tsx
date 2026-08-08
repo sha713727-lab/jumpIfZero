@@ -9,12 +9,12 @@ import styles from "@/components/landingAlt/landingAlt.module.css";
 import {
   portfolioCopy,
   portfolioMarqueeImages,
-  portfolioProjects,
-} from "@/lib/data/portfolio";
+} from "@/constants/portfolio";
+import type { PortfolioGsapProject } from "@/lib/data/portfolio";
 import { bindHeaderSectionSync } from "@/lib/headerSectionSync";
 
 const CREAM_BG = "#f7f5f0";
-const BRAND_BG = "#74815f";
+const BRAND_BG = "#5c6849";
 const DARK_BG = "#0d120b";
 
 const ThreeDMarquee = dynamic(
@@ -43,7 +43,11 @@ const GsapProjectsSection = dynamic(
   },
 );
 
-export function PortfolioPageClient() {
+export function PortfolioPageClient({
+  projects,
+}: Readonly<{
+  projects: readonly PortfolioGsapProject[];
+}>) {
   const heroRef = useRef<HTMLElement | null>(null);
   const gridRef = useRef<HTMLElement | null>(null);
   const featuredRef = useRef<HTMLElement | null>(null);
@@ -78,9 +82,8 @@ export function PortfolioPageClient() {
       >
         <GsapProjectsSection
           sectionRef={gridRef}
-          projects={portfolioProjects}
+          projects={projects}
           title={portfolioCopy.gridTitle}
-          lede={portfolioCopy.gridLede}
         />
       </DeferredMount>
 
@@ -93,7 +96,7 @@ export function PortfolioPageClient() {
       >
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_74%_38%,rgba(116,129,95,0.26)_0%,transparent_64%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_74%_38%,rgba(92, 104, 73,0.26)_0%,transparent_64%)]"
         />
 
         <div className="relative mx-auto grid w-full max-w-[1360px] gap-10 lg:grid-cols-2 lg:items-center lg:gap-14">

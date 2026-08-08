@@ -5,29 +5,25 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { MagneticLink } from "@/components/landingAlt/MagneticLink";
 import styles from "@/components/landingAlt/landingAlt.module.css";
-import {
-  blogCopy,
-  blogPosts,
-  type BlogPost,
-} from "@/lib/data/blog";
+import { BlogBodyRenderer } from "@/components/blog/BlogBodyRenderer";
+import { blogCopy } from "@/constants/blog";
+import type { BlogPost } from "@/lib/data/blog";
 import { applyHeaderTone } from "@/lib/headerTone";
 
 const HEADER_HEIGHT = 72;
-const HERO_BG = "#74815f";
+const HERO_BG = "#5c6849";
 const CREAM_BG = "#f7f5f0";
 
 export type BlogDetailClientProps = {
   readonly post: BlogPost;
+  readonly related: readonly BlogPost[];
 };
 
-export function BlogDetailClient({ post }: BlogDetailClientProps) {
+export function BlogDetailClient({ post, related }: BlogDetailClientProps) {
   const heroRef = useRef<HTMLElement | null>(null);
   const articleRef = useRef<HTMLElement | null>(null);
   const relatedRef = useRef<HTMLElement | null>(null);
   const ctaRef = useRef<HTMLElement | null>(null);
-  const related = blogPosts
-    .filter((item) => item.slug !== post.slug)
-    .slice(0, 3);
 
   useEffect(() => {
     const zones: ReadonlyArray<{
@@ -91,7 +87,7 @@ export function BlogDetailClient({ post }: BlogDetailClientProps) {
             />
             <div
               aria-hidden="true"
-              className="absolute inset-0 bg-[linear-gradient(180deg,rgba(13,18,11,0.35)_0%,rgba(13,18,11,0.55)_42%,rgba(116,129,95,0.92)_100%)]"
+              className="absolute inset-0 bg-[linear-gradient(180deg,rgba(13,18,11,0.35)_0%,rgba(13,18,11,0.55)_42%,rgba(92, 104, 73,0.92)_100%)]"
             />
             <div
               aria-hidden="true"
@@ -134,26 +130,8 @@ export function BlogDetailClient({ post }: BlogDetailClientProps) {
             {post.excerpt}
           </p>
 
-          <div className="mt-10 space-y-6 border-t border-black/10 pt-10">
-            {post.body.map((paragraph, index) => (
-              <div key={paragraph.slice(0, 48)}>
-                {index === 1 ? (
-                  <div className="relative my-10 aspect-[16/9] overflow-hidden rounded-[1.75rem] border border-black/10 bg-[#e2e4de] shadow-[0_22px_50px_rgba(47,58,40,0.12)]">
-                    <Image
-                      src={post.image}
-                      alt={post.imageAlt}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 860px) 100vw, 860px"
-                      loading="lazy"
-                    />
-                  </div>
-                ) : null}
-                <p className="text-[1rem] leading-[1.75] font-medium text-black/70 md:text-[1.05rem]">
-                  {paragraph}
-                </p>
-              </div>
-            ))}
+          <div className="mt-10 border-t border-black/10 pt-10">
+            <BlogBodyRenderer blocks={post.body} />
           </div>
 
           <div className="mt-12 flex flex-wrap items-center gap-3 border-t border-black/10 pt-10">
@@ -198,7 +176,7 @@ export function BlogDetailClient({ post }: BlogDetailClientProps) {
             <ul className="grid gap-6 md:grid-cols-3">
               {related.map((item) => (
                 <li key={item.slug}>
-                  <article className="group overflow-hidden rounded-[1.75rem] border border-black/10 bg-white shadow-[0_16px_36px_rgba(47,58,40,0.08)] transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-brand/30 hover:shadow-[0_24px_50px_rgba(116,129,95,0.14)]">
+                  <article className="group overflow-hidden rounded-[1.75rem] border border-black/10 bg-white shadow-[0_16px_36px_rgba(47,58,40,0.08)] transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-brand/30 hover:shadow-[0_24px_50px_rgba(92, 104, 73,0.14)]">
                     <Link
                       href={`/blog/${item.slug}`}
                       className="relative block aspect-[16/10] overflow-hidden bg-[#e2e4de] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"

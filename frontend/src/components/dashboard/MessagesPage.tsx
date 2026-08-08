@@ -1,59 +1,121 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { dashboardEmptyCopy, demoMessages } from "@/lib/data/dashboard";
+import { ChatBubble } from "@/components/chat/ChatBubble";
+import { useDashboard } from "@/components/dashboard/DashboardProvider";
+import {
+  markMessageReadAction,
+  sendMessageAction,
+  uploadFileAction,
+} from "@/lib/submitCustomerPortal";
+import { dashboardEmptyCopy } from "@/lib/data/dashboard";
 import { EmptyState } from "@/components/ui/EmptyState";
 
-type MessageRow = {
+type PendingFile = {
   readonly id: string;
-  readonly from: string;
-  readonly role: string;
-  readonly preview: string;
-  readonly time: string;
-  unread: boolean;
+  readonly name: string;
 };
 
 export function MessagesPage() {
   const formId = useId();
-  const [rows, setRows] = useState<MessageRow[]>(
-    demoMessages.map((message) => ({ ...message })),
+  const fileInputId = useId();
+  const threadEndRef = useRef<HTMLDivElement>(null);
+  const markedRef = useRef<Set<string>>(new Set());
+  const { state, setMessages } = useDashboard();
+  const rows = [...state.messages].sort((a, b) =>
+    a.createdAt.localeCompare(b.createdAt),
   );
-  const [selectedId, setSelectedId] = useState(rows[0]?.id ?? "");
   const [draft, setDraft] = useState("");
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
-  const selected =
-    rows.find((row) => row.id === selectedId) ?? rows.at(0);
+  useEffect(() => {
+    threadEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [rows.length, pendingFiles.length]);
 
-  const openMessage = (id: string) => {
-    setSelectedId(id);
-    setRows((current) =>
-      current.map((row) => (row.id === id ? { ...row, unread: false } : row)),
+  useEffect(() => {
+    const unread = rows.filter(
+      (row) =>
+        row.unread &&
+        row.senderRole !== "client" &&
+        !markedRef.current.has(row.id),
     );
+    if (unread.length === 0) {
+      return;
+    }
+    void (async () => {
+      const updates = new Map<string, (typeof rows)[number]>();
+      for (const message of unread) {
+        markedRef.current.add(message.id);
+        const result = await markMessageReadAction({ id: message.id });
+        if (result.ok && "data" in result) {
+          updates.set(message.id, result.data);
+        }
+      }
+      if (updates.size === 0) {
+        return;
+      }
+      setMessages(
+        state.messages.map((row) => updates.get(row.id) ?? row),
+      );
+    })();
+  }, [rows, setMessages, state.messages]);
+
+  const onPickFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) {
+      return;
+    }
+    setUploading(true);
+    setNotice(null);
+    const next: PendingFile[] = [];
+    for (const file of Array.from(files)) {
+      if (pendingFiles.length + next.length >= 10) {
+        break;
+      }
+      const formData = new FormData();
+      formData.set("kind", "chat");
+      formData.set("file", file);
+      const result = await uploadFileAction(formData);
+      if (!result.ok || !("data" in result)) {
+        setNotice("Could not attach file. Try again.");
+        break;
+      }
+      next.push({ id: result.data.id, name: result.data.name });
+    }
+    if (next.length > 0) {
+      setPendingFiles((current) => [...current, ...next]);
+    }
+    setUploading(false);
   };
 
-  const onSend = (event: FormEvent<HTMLFormElement>) => {
+  const onSend = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const text = draft.trim();
 
-    if (!text) {
+    if ((!text && pendingFiles.length === 0) || sending || uploading) {
       return;
     }
 
-    const next: MessageRow = {
-      id: `msg_local_${Date.now()}`,
-      from: "You",
-      role: "Customer",
-      preview: text,
-      time: "Just now",
-      unread: false,
-    };
+    setSending(true);
+    setNotice(null);
+    const result = await sendMessageAction({
+      body: text,
+      fileIds: pendingFiles.map((item) => item.id),
+    });
+    setSending(false);
 
-    setRows((current) => [next, ...current]);
-    setSelectedId(next.id);
+    if (!result.ok) {
+      setNotice("Could not send your message. Try again.");
+      return;
+    }
+
+    setMessages([...state.messages, result.data]);
     setDraft("");
-    setNotice("Message sent to your account team (demo).");
+    setPendingFiles([]);
+    setNotice("Message sent to your account team.");
   };
 
   return (
@@ -63,100 +125,118 @@ export function MessagesPage() {
           Messages
         </h1>
         <p className="mt-2 text-[0.95rem] font-medium text-black/50">
-          Talk with your JZ account team.
+          Chat with your JZ account team.
         </p>
       </div>
 
       {notice ? (
         <p
           role="status"
-          className="rounded-xl border border-brand/25 bg-[rgba(116,129,95,0.1)] px-4 py-3 text-[0.88rem] font-semibold text-[#2f3a28]"
+          className="rounded-xl border border-brand/25 bg-[rgba(92,104,73,0.1)] px-4 py-3 text-[0.88rem] font-semibold text-[#2f3a28]"
         >
           {notice}
         </p>
       ) : null}
 
-      <div className="grid overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)] lg:grid-cols-[18rem_1fr]">
-        {rows.length === 0 ? (
-          <div className="lg:col-span-2">
-            <EmptyState message={dashboardEmptyCopy.messages} />
-          </div>
-        ) : (
-          <>
-            <ul className="divide-y divide-black/8 border-b border-black/8 lg:border-r lg:border-b-0">
-              {rows.map((message) => {
-                const active = message.id === selected?.id;
+      <div className="overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]">
+        <div className="border-b border-black/8 bg-[#f7f8f4] px-5 py-4">
+          <p className="text-[0.95rem] font-extrabold tracking-[-0.02em] text-[#0d120b]">
+            Account team
+          </p>
+          <p className="mt-0.5 text-[0.78rem] font-medium text-black/45">
+            Direct support conversation
+          </p>
+        </div>
 
+        <div className="flex min-h-[28rem] flex-col bg-[linear-gradient(180deg,#f3f5ef_0%,#fafbf8_40%,#f7f5f0_100%)]">
+          <div className="flex-1 space-y-3 overflow-y-auto px-4 py-5 md:px-6 md:py-6">
+            {rows.length === 0 ? (
+              <EmptyState message={dashboardEmptyCopy.messages} />
+            ) : (
+              rows.map((message) => {
+                const self = message.senderRole === "client";
                 return (
-                  <li key={message.id}>
+                  <ChatBubble
+                    key={message.id}
+                    align={self ? "self" : "other"}
+                    body={message.body}
+                    meta={`${self ? "You" : message.from} · ${message.time}`}
+                    attachments={message.attachments.map((item) => ({
+                      fileId: item.fileId,
+                      name: item.name,
+                    }))}
+                  />
+                );
+              })
+            )}
+            <div ref={threadEndRef} />
+          </div>
+
+          <form
+            id={formId}
+            onSubmit={onSend}
+            className="border-t border-black/8 bg-white/95 px-4 py-4 backdrop-blur md:px-6"
+          >
+            {pendingFiles.length > 0 ? (
+              <ul className="mb-3 flex flex-wrap gap-2">
+                {pendingFiles.map((file) => (
+                  <li
+                    key={file.id}
+                    className="inline-flex items-center gap-2 rounded-full bg-[rgba(92,104,73,0.1)] px-3 py-1.5 text-[0.78rem] font-semibold text-[#0d120b]"
+                  >
+                    <span className="max-w-[10rem] truncate">{file.name}</span>
                     <button
                       type="button"
-                      onClick={() => openMessage(message.id)}
-                      className={`w-full px-4 py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary ${
-                        active ? "bg-[rgba(116,129,95,0.1)]" : "hover:bg-[#f3f5ef]"
-                      }`}
+                      className="text-black/45 hover:text-[#0d120b]"
+                      aria-label={`Remove ${file.name}`}
+                      onClick={() =>
+                        setPendingFiles((current) =>
+                          current.filter((item) => item.id !== file.id),
+                        )
+                      }
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="truncate text-[0.9rem] font-bold text-[#0d120b]">
-                          {message.from}
-                        </p>
-                        {message.unread ? (
-                          <span className="size-2 shrink-0 rounded-full bg-logo-gradient" />
-                        ) : null}
-                      </div>
-                      <p className="mt-0.5 text-[0.72rem] font-medium text-black/40">
-                        {message.role} · {message.time}
-                      </p>
-                      <p className="mt-2 line-clamp-2 text-[0.82rem] font-medium text-black/55">
-                        {message.preview}
-                      </p>
+                      ×
                     </button>
                   </li>
-                );
-              })}
-            </ul>
-
-            <div className="flex min-h-[22rem] flex-col p-5 md:p-6">
-              {selected ? (
-                <>
-                  <div>
-                    <p className="text-[1.05rem] font-extrabold text-[#0d120b]">
-                      {selected.from}
-                    </p>
-                    <p className="text-[0.8rem] font-medium text-black/40">
-                      {selected.role} · {selected.time}
-                    </p>
-                  </div>
-                  <p className="mt-5 flex-1 text-[0.95rem] leading-[1.6] font-medium text-[#0d120b]/80">
-                    {selected.preview}
-                  </p>
-                  <form onSubmit={onSend} className="mt-6 space-y-3 border-t border-black/8 pt-5">
-                    <label
-                      htmlFor={`${formId}-draft`}
-                      className="block text-[0.8rem] font-bold text-[#0d120b]"
-                    >
-                      Reply
-                    </label>
-                    <textarea
-                      id={`${formId}-draft`}
-                      rows={3}
-                      value={draft}
-                      onChange={(event) => setDraft(event.target.value)}
-                      placeholder="Write a message…"
-                      className="w-full rounded-xl border-0 bg-[rgba(116,129,95,0.1)] px-4 py-3 text-[0.92rem] font-medium outline-none focus-visible:shadow-[0_0_0_2px_#f3f5ef,0_0_0_4px_#f9a137]"
-                    />
-                    <button
-                      type="submit"
-                      className="rounded-xl bg-logo-gradient px-5 py-2.5 text-[0.82rem] font-extrabold text-[#0d120b] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
-                    >
-                      Send
-                    </button>
-                  </form>
-                </>
-              ) : null}
+                ))}
+              </ul>
+            ) : null}
+            <div className="flex items-end gap-2 rounded-2xl border border-black/10 bg-[#f7f8f4] p-2.5 focus-within:border-brand/40 focus-within:shadow-[0_0_0_3px_rgba(92,104,73,0.12)]">
+              <input
+                id={fileInputId}
+                type="file"
+                className="sr-only"
+                multiple
+                onChange={(event) => {
+                  void onPickFiles(event.target.files);
+                  event.target.value = "";
+                }}
+              />
+              <label
+                htmlFor={fileInputId}
+                className="inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-black/10 bg-white text-[0.82rem] font-bold text-[#0d120b] transition-colors hover:bg-[#eef1ea]"
+                title="Attach files"
+              >
+                {uploading ? "…" : "+"}
+              </label>
+              <textarea
+                rows={2}
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+                placeholder="Write a message…"
+                aria-label="Write a message"
+                className="min-h-[2.75rem] flex-1 resize-none border-0 bg-transparent px-2 py-2 text-[0.92rem] font-medium text-[#0d120b] outline-none"
+              />
+              <button
+                type="submit"
+                disabled={sending || uploading}
+                className="shrink-0 rounded-xl bg-logo-gradient px-4 py-2.5 text-[0.82rem] font-extrabold text-[#0d120b] disabled:opacity-70"
+              >
+                {sending ? "Sending…" : "Send"}
+              </button>
             </div>
-          </>
-        )}
+          </form>
+        </div>
       </div>
     </div>
   );

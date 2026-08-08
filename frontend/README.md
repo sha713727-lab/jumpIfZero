@@ -1,7 +1,8 @@
-# Local frontend notes
+# Frontend
 
-This folder is the Next.js application.
+Next.js application for the Jump If Zero public site and portals.
 
-- Root README (repo): `../README.md`
-- Env template: `.env.example`
-- Vercel Root Directory must be `frontend`
+See the repository root [`README.md`](../README.md) for setup and local run instructions.
+
+- Environment template: `.env.example`
+- For Vercel, set Root Directory to `frontend`

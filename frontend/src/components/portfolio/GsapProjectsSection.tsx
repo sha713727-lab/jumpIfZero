@@ -9,7 +9,7 @@ import type { PortfolioGsapProject } from "@/lib/data/portfolio";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const ACTIVE_NAME = "#74815f";
+const ACTIVE_NAME = "#5c6849";
 const IDLE_NAME = "rgba(47,58,40,0.35)";
 
 type ProjectCardProps = {

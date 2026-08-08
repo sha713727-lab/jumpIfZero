@@ -17,6 +17,8 @@
 
 # testing
 **/coverage/
+**/test-results/
+**/playwright-report/
 
 # next.js
 **/.next/
@@ -46,3 +48,11 @@ yarn-error.log*
 
 # image optimize backups
 **/scripts/.image-backups/
+
+# local probe / audit artifacts
+.tmp-dr-drill/
+.playwright-cli/
+backend/scripts/*-results.json
+backend/scripts/perf-rsc-profile-*.json
+backend/.tmp-platform-verify.json
+backend/.tmp-platform-verify-files/

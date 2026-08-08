@@ -1,7 +1,6 @@
-import { serviceChapters } from "@/constants/servicesStory";
-
 export type ServiceDetail = {
-  readonly category: (typeof serviceChapters)[number]["category"];
+  readonly slug: string;
+  readonly category: string;
   readonly title: string;
   readonly quote: string;
   readonly body: string;
@@ -13,6 +12,7 @@ export type ServiceDetail = {
 
 export const serviceDetails: readonly ServiceDetail[] = [
   {
+    slug: "website-development",
     category: "Website Development",
     title: "Websites engineered to convert visitors into customers.",
     quote: "A website should sell while you sleep.",
@@ -27,6 +27,7 @@ export const serviceDetails: readonly ServiceDetail[] = [
     ctaHref: "/contact",
   },
   {
+    slug: "software-development",
     category: "Software Development",
     title: "Custom software that fits your workflow — not the other way around.",
     quote: "Build once. Scale with confidence.",
@@ -41,6 +42,7 @@ export const serviceDetails: readonly ServiceDetail[] = [
     ctaHref: "/contact",
   },
   {
+    slug: "app-development",
     category: "App Development",
     title: "Mobile apps built for speed, clarity, and growth.",
     quote: "Useful in the hand. Strong in the market.",
@@ -55,6 +57,7 @@ export const serviceDetails: readonly ServiceDetail[] = [
     ctaHref: "/contact",
   },
   {
+    slug: "seo",
     category: "SEO",
     title: "SEO that targets intent, not vanity keywords.",
     quote: "Rank where your customers already search.",
@@ -69,6 +72,7 @@ export const serviceDetails: readonly ServiceDetail[] = [
     ctaHref: "/contact",
   },
   {
+    slug: "digital-marketing",
     category: "Digital Marketing",
     title: "Social content that earns attention and drives action.",
     quote: "Consistency builds the brand people remember.",
@@ -83,6 +87,7 @@ export const serviceDetails: readonly ServiceDetail[] = [
     ctaHref: "/contact",
   },
   {
+    slug: "graphic-designing",
     category: "Graphic Designing",
     title: "Visual identity that feels premium and consistent.",
     quote: "Design that speaks before you do.",
@@ -97,6 +102,7 @@ export const serviceDetails: readonly ServiceDetail[] = [
     ctaHref: "/contact",
   },
   {
+    slug: "network-security",
     category: "Network Security",
     title: "Security systems that reduce risk without slowing work.",
     quote: "Protect the business behind the brand.",
@@ -111,6 +117,7 @@ export const serviceDetails: readonly ServiceDetail[] = [
     ctaHref: "/contact",
   },
   {
+    slug: "fix-bug-error",
     category: "Fix Bug & Error",
     title: "Diagnose. Fix. Stabilize — before issues cost you more.",
     quote: "Fast fixes. Stable systems. Less downtime.",
@@ -125,6 +132,12 @@ export const serviceDetails: readonly ServiceDetail[] = [
     ctaHref: "/contact",
   },
 ] as const;
+
+export function getServiceDetailBySlug(
+  slug: string,
+): ServiceDetail | undefined {
+  return serviceDetails.find((item) => item.slug === slug);
+}
 
 export function getServiceDetail(
   category: string,

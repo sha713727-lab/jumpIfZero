@@ -1,13 +1,20 @@
-import { dashboardEmptyCopy, demoProjects } from "@/lib/data/dashboard";
+"use client";
+
+import { useDashboard } from "@/components/dashboard/DashboardProvider";
+import type { CustomerProject } from "@/lib/data/customerPortalTypes";
+import { dashboardEmptyCopy } from "@/lib/data/dashboard";
 import { EmptyState } from "@/components/ui/EmptyState";
 
-const statusClass: Record<(typeof demoProjects)[number]["status"], string> = {
-  "In progress": "bg-[rgba(116,129,95,0.14)] text-brand",
+const statusClass: Record<CustomerProject["status"], string> = {
+  "In progress": "bg-[rgba(92, 104, 73,0.14)] text-brand",
   Review: "bg-[rgba(249,161,55,0.18)] text-[#e8891a]",
+  Requested: "bg-[rgba(47,58,40,0.12)] text-[#2f3a28]",
+  Completed: "bg-[rgba(47,58,40,0.12)] text-[#2f3a28]",
 };
 
 export function ProjectsPage() {
-  const projects: readonly (typeof demoProjects)[number][] = demoProjects;
+  const { state } = useDashboard();
+  const projects = state.projects;
 
   return (
     <div className="space-y-6">
