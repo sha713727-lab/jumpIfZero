@@ -209,7 +209,7 @@ export function AltServices({
       aria-label="Our services"
       data-header-tone="dark"
       data-header-bg={SECTION_BG}
-      className={`relative isolate min-h-screen overflow-hidden bg-[#0d120b] ${styles.scene}`}
+      className={`relative isolate min-h-[100svh] overflow-hidden bg-[#0d120b] ${styles.scene}`}
     >
       <div
         aria-hidden="true"

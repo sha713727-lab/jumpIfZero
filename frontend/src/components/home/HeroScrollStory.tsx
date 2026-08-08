@@ -127,7 +127,7 @@ export function HeroScrollStory() {
       className="relative z-[1] -mt-px h-[520vh]"
       aria-label="JZ Enterprises introduction"
     >
-      <div className="sticky top-0 z-[1] h-screen overflow-hidden bg-cream">
+      <div className="sticky top-0 z-[1] h-[100svh] min-h-[100svh] overflow-hidden bg-cream">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 z-[35]"

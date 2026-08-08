@@ -477,7 +477,7 @@ export function AltTeam({
                   onPointerMove={handleDragMove}
                   onPointerUp={handleDragEnd}
                   onPointerCancel={handleDragEnd}
-                  className={`group absolute bottom-0 left-1/2 h-[26rem] w-[16.5rem] cursor-grab overflow-hidden rounded-[1.75rem] border shadow-[0_28px_60px_rgba(47,58,40,0.22)] select-none active:cursor-grabbing ${theme.surface} ${styles.deckCard} ${styles.teamDeckCard}`}
+                  className={`group absolute bottom-0 left-1/2 h-[min(26rem,72vw)] w-[min(16.5rem,78vw)] cursor-grab overflow-hidden rounded-[1.75rem] border shadow-[0_28px_60px_rgba(47,58,40,0.22)] select-none active:cursor-grabbing ${theme.surface} ${styles.deckCard} ${styles.teamDeckCard}`}
                 >
                   <TeamCardBody
                     name={member.name}

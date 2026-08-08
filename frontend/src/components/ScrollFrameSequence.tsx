@@ -7,7 +7,8 @@ import { applyHeaderTone } from "@/lib/headerTone";
 const FRAME_DIR = "/images/JZ_Frames_30FPS";
 const FRAME_COUNT = 239;
 const FRAME_PAD = 4;
-const SCROLL_DISTANCE = 4800;
+const SCROLL_DISTANCE_DESKTOP = 4800;
+const SCROLL_DISTANCE_MOBILE = 2800;
 const STRIDE_DESKTOP = 4;
 const STRIDE_MOBILE = 8;
 const STRIDE_SAVEDATA = 12;
@@ -16,7 +17,7 @@ const STRIDE_CONCURRENCY = 2;
 const MAX_DPR_DESKTOP = 2;
 const MAX_DPR_MOBILE = 1;
 const CONTAIN_BELOW_ASPECT = 1;
-const PORTRAIT_ZOOM = 1.5;
+const PORTRAIT_ZOOM = 1.08;
 const LINE_IN = 0.05;
 const LINE_OUT = 0.04;
 const LINE_CUES: ReadonlyArray<{ enter: number | null; exit: number }> = [
@@ -259,7 +260,8 @@ function drawFrame(
     : Math.max(width / image.naturalWidth, height / image.naturalHeight);
   const drawWidth = image.naturalWidth * scale;
   const drawHeight = image.naturalHeight * scale;
-  const x = (width - drawWidth) / 2;
+  const xBias = canvasAspect < 1 ? 0.42 : 0.5;
+  const x = (width - drawWidth) * xBias;
   const y = (height - drawHeight) / 2;
 
   context.clearRect(0, 0, width, height);
@@ -385,8 +387,13 @@ export function ScrollFrameSequence() {
         window.devicePixelRatio || 1,
         mobile ? MAX_DPR_MOBILE : MAX_DPR_DESKTOP,
       );
+      const viewportHeight = Math.floor(
+        window.visualViewport?.height ??
+          document.documentElement.clientHeight ??
+          window.innerHeight,
+      );
       size.width = Math.max(1, Math.floor(rect.width));
-      size.height = Math.max(1, Math.floor(window.innerHeight));
+      size.height = Math.max(1, viewportHeight);
       canvas.width = Math.floor(size.width * dpr);
       canvas.height = Math.floor(size.height * dpr);
       canvas.style.width = `${size.width}px`;
@@ -436,11 +443,15 @@ export function ScrollFrameSequence() {
           return;
         }
 
+        const scrollDistance = window.matchMedia("(max-width: 767px)").matches
+          ? SCROLL_DISTANCE_MOBILE
+          : SCROLL_DISTANCE_DESKTOP;
+
         const timeline = gsap.timeline({
           scrollTrigger: {
             trigger: section,
             start: "top top",
-            end: `+=${SCROLL_DISTANCE}`,
+            end: `+=${scrollDistance}`,
             pin: true,
             scrub: 0.45,
             anticipatePin: 1,
@@ -579,7 +590,7 @@ export function ScrollFrameSequence() {
       ref={sectionRef}
       id="home"
       aria-label="JZ Enterprises"
-      className="relative h-screen w-full overflow-hidden"
+      className="relative h-[100svh] min-h-[100svh] w-full max-w-[100vw] overflow-hidden"
       style={{ backgroundColor: STAGE_BG }}
     >
       <canvas
@@ -599,11 +610,11 @@ export function ScrollFrameSequence() {
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[7] flex items-center justify-center"
+        className="pointer-events-none absolute inset-0 z-[7] hidden items-center justify-center sm:flex"
       >
         <div
           ref={glowRef}
-          className="aspect-square h-[240vmax] w-[240vmax] shrink-0 rounded-full opacity-0"
+          className="aspect-square h-[min(240vmax,1800px)] w-[min(240vmax,1800px)] shrink-0 rounded-full opacity-0"
           style={{
             background:
               "radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 34%, rgba(255,255,255,0.7) 46%, rgba(255,255,255,0.25) 58%, rgba(255,255,255,0) 70%)",
@@ -618,25 +629,28 @@ export function ScrollFrameSequence() {
         style={{ backgroundColor: STORY_BG }}
       />
 
-      <div className="pointer-events-none absolute inset-0 z-10 flex h-full flex-col items-center justify-center px-6 pt-24 pb-24 text-center">
+      <div className="pointer-events-none absolute inset-0 z-10 flex h-full flex-col items-center justify-center px-4 pt-20 pb-20 text-center sm:px-6 sm:pt-24 sm:pb-24 md:items-end md:pr-[min(12vw,7rem)] md:pl-8 md:text-right">
         <p
           ref={welcomeRef}
-          className="text-[clamp(1.2rem,4.3vw,3.25rem)] font-semibold tracking-[0.44em] text-[#f7f5f0]/75 uppercase opacity-0"
+          className="max-w-full text-[clamp(1rem,3.8vw,3.25rem)] font-semibold tracking-[0.16em] text-[#f7f5f0]/75 uppercase opacity-0 sm:tracking-[0.28em] md:tracking-[0.44em]"
         >
           {heroCopy.welcome}
         </p>
 
-        <div className="mt-4 inline-block">
+        <div className="mt-3 inline-block max-w-full sm:mt-4">
           <h1
             ref={markRef}
-            className="bg-clip-text text-[clamp(2.4rem,8.6vw,6.5rem)] leading-[0.98] font-extrabold tracking-[0.01em] text-transparent uppercase opacity-0"
+            className="bg-clip-text text-[clamp(1.85rem,7vw,6.5rem)] leading-[0.98] font-extrabold tracking-[0.01em] text-transparent uppercase opacity-0"
             style={{ backgroundImage: LOGO_GRADIENT }}
           >
-            {`${heroCopy.headlineLead} ${heroCopy.headlineRest}`}
+            <span className="block sm:inline">{heroCopy.headlineLead}</span>
+            <span className="block sm:ml-2 sm:inline">
+              {heroCopy.headlineRest}
+            </span>
           </h1>
           <p
             ref={taglineRef}
-            className="mt-2 text-right text-[clamp(0.72rem,2vw,1.15rem)] font-semibold tracking-[0.3em] text-white uppercase opacity-0"
+            className="mt-2 text-center text-[clamp(0.68rem,1.8vw,1.15rem)] font-semibold tracking-[0.16em] text-white uppercase opacity-0 sm:tracking-[0.24em] md:text-right md:tracking-[0.3em]"
           >
             {site.tagline}
           </p>
@@ -644,7 +658,7 @@ export function ScrollFrameSequence() {
 
         <p
           ref={signatureRef}
-          className="absolute inset-x-0 bottom-12 px-6 text-[clamp(0.85rem,1.9vw,1.15rem)] font-medium tracking-[0.12em] text-[#f7f5f0]/80 italic opacity-0"
+          className="absolute inset-x-0 bottom-8 px-4 text-center text-[clamp(0.78rem,1.7vw,1.15rem)] font-medium tracking-[0.08em] text-[#f7f5f0]/80 italic opacity-0 sm:bottom-12 sm:px-6 sm:tracking-[0.12em] md:text-right md:pr-[min(12vw,7rem)]"
         >
           {heroCopy.signature}
         </p>

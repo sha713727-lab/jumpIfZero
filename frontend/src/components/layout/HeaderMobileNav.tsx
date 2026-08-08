@@ -102,7 +102,7 @@ export function HeaderMobileNav() {
     mounted &&
     createPortal(
       <div
-        className={`fixed inset-0 z-[100] md:hidden ${open ? "pointer-events-auto" : "pointer-events-none"}`}
+        className={`fixed inset-0 z-[100] lg:hidden ${open ? "pointer-events-auto" : "pointer-events-none"}`}
         {...(open ? {} : { inert: true })}
       >
         <button
@@ -186,7 +186,7 @@ export function HeaderMobileNav() {
         aria-label={open ? "Close menu" : "Open menu"}
         aria-expanded={open}
         aria-controls={drawerId}
-        className={`inline-flex size-9 items-center justify-center md:hidden ${styles.ink} ${styles.ring} ${styles.readable}`}
+        className={`inline-flex size-9 items-center justify-center lg:hidden ${styles.ink} ${styles.ring} ${styles.readable}`}
         onClick={() => {
           if (open) {
             closeMenu();
