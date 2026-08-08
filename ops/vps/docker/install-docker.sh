@@ -35,28 +35,41 @@ fi
 COMPOSE_DIR="$APP_ROOT/ops/vps/docker"
 
 echo "=== secrets ==="
+rand_hex() { openssl rand -hex 24; }
 if [[ ! -f "$SECRETS_FILE" ]]; then
   umask 077
   cat > "$SECRETS_FILE" <<EOF
-JZ_POSTGRES_SUPER_PASSWORD=$(openssl rand -base64 32 | tr -d '\n')
-JZ_OWNER_PASSWORD=$(openssl rand -base64 32 | tr -d '\n')
-JZ_APP_PASSWORD=$(openssl rand -base64 32 | tr -d '\n')
-JZ_READONLY_PASSWORD=$(openssl rand -base64 32 | tr -d '\n')
-JZ_HMAC_SECRET=$(openssl rand -base64 48 | tr -d '\n' | head -c 48)
-JZ_SESSION_SECRET=$(openssl rand -base64 48 | tr -d '\n' | head -c 48)
+JZ_POSTGRES_SUPER_PASSWORD=$(rand_hex)
+JZ_OWNER_PASSWORD=$(rand_hex)
+JZ_APP_PASSWORD=$(rand_hex)
+JZ_READONLY_PASSWORD=$(rand_hex)
+JZ_HMAC_SECRET=$(openssl rand -hex 32)
+JZ_SESSION_SECRET=$(openssl rand -hex 32)
 JZ_TAX_ID_AEAD_KEY=$(openssl rand -base64 32 | tr -d '\n')
 JZ_HMAC_GATEWAY_SUBJECT_ID=$(cat /proc/sys/kernel/random/uuid)
 JZ_DEMO_ADMIN_EMAIL=admin@${DOMAIN}
-JZ_DEMO_ADMIN_PASSWORD=$(openssl rand -base64 18 | tr -d '\n')
-JZ_DEMO_EMPLOYEE_PASSWORD=$(openssl rand -base64 18 | tr -d '\n')
-JZ_DEMO_CUSTOMER_PASSWORD=$(openssl rand -base64 18 | tr -d '\n')
+JZ_DEMO_ADMIN_PASSWORD=$(rand_hex)
+JZ_DEMO_EMPLOYEE_PASSWORD=$(rand_hex)
+JZ_DEMO_CUSTOMER_PASSWORD=$(rand_hex)
 EOF
   chmod 600 "$SECRETS_FILE"
-elif ! grep -q '^JZ_POSTGRES_SUPER_PASSWORD=' "$SECRETS_FILE"; then
-  echo "JZ_POSTGRES_SUPER_PASSWORD=$(openssl rand -base64 32 | tr -d '\n')" >>"$SECRETS_FILE"
 fi
+if ! grep -q '^JZ_POSTGRES_SUPER_PASSWORD=.\+' "$SECRETS_FILE"; then
+  # replace empty/missing postgres password
+  grep -v '^JZ_POSTGRES_SUPER_PASSWORD=' "$SECRETS_FILE" >"${SECRETS_FILE}.tmp" || true
+  echo "JZ_POSTGRES_SUPER_PASSWORD=$(rand_hex)" >>"${SECRETS_FILE}.tmp"
+  mv "${SECRETS_FILE}.tmp" "$SECRETS_FILE"
+  chmod 600 "$SECRETS_FILE"
+fi
+set -a
 # shellcheck disable=SC1090
 source "$SECRETS_FILE"
+set +a
+if [[ -z "${JZ_POSTGRES_SUPER_PASSWORD:-}" ]]; then
+  echo "JZ_POSTGRES_SUPER_PASSWORD is empty"
+  exit 1
+fi
+echo "postgres super password length: ${#JZ_POSTGRES_SUPER_PASSWORD}"
 
 install -d -m 750 /etc/jumpifzero
 cat > /etc/jumpifzero/backend.env <<EOF
@@ -123,11 +136,29 @@ cd "$COMPOSE_DIR"
 export JZ_POSTGRES_SUPER_PASSWORD
 
 echo "=== docker compose up postgres ==="
-docker compose --env-file "$SECRETS_FILE" up -d --build postgres
+# Reset JZ postgres volume if a previous empty-password init left it broken
+docker compose --env-file "$SECRETS_FILE" down
+docker volume rm jumpifzero_jz_pgdata 2>/dev/null || true
+docker compose --env-file "$SECRETS_FILE" up -d postgres
 
-for _ in $(seq 1 60); do
-  docker compose exec -T postgres pg_isready -U postgres >/dev/null 2>&1 && break
+echo "=== wait for postgres healthy ==="
+for i in $(seq 1 60); do
+  status="$(docker inspect -f '{{.State.Status}}' jumpifzero-postgres-1 2>/dev/null || echo missing)"
+  health="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' jumpifzero-postgres-1 2>/dev/null || echo none)"
+  if [[ "$status" == "running" ]] && docker compose exec -T postgres pg_isready -U postgres >/dev/null 2>&1; then
+    echo "postgres ready (${i}s) health=${health}"
+    break
+  fi
+  if [[ "$status" == "restarting" && "$i" -gt 10 ]]; then
+    echo "postgres stuck restarting — logs:"
+    docker logs jumpifzero-postgres-1 2>&1 | tail -n 80
+    exit 1
+  fi
   sleep 1
+  if [[ "$i" -eq 60 ]]; then
+    docker logs jumpifzero-postgres-1 2>&1 | tail -n 80
+    exit 1
+  fi
 done
 
 echo "=== database + roles + migrations (no seeds) ==="
