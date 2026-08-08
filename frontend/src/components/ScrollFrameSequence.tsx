@@ -17,7 +17,7 @@ const STRIDE_CONCURRENCY = 2;
 const MAX_DPR_DESKTOP = 2;
 const MAX_DPR_MOBILE = 1;
 const CONTAIN_BELOW_ASPECT = 1;
-const PORTRAIT_ZOOM = 1.08;
+const PORTRAIT_ZOOM = 1.5;
 const LINE_IN = 0.05;
 const LINE_OUT = 0.04;
 const LINE_CUES: ReadonlyArray<{ enter: number | null; exit: number }> = [
@@ -427,24 +427,41 @@ export function ScrollFrameSequence() {
 
       ctx = gsap.context(() => {
         if (media.matches) {
-          paint(FRAME_COUNT - 1);
+          paint(0);
           for (const line of lines) {
             if (line) {
               gsap.set(line, { opacity: 1, y: 0 });
             }
           }
           if (glowRef.current) {
-            gsap.set(glowRef.current, { opacity: 1, scale: 1 });
+            gsap.set(glowRef.current, { opacity: 0, scale: 1 });
           }
           if (washRef.current) {
-            gsap.set(washRef.current, { opacity: 1 });
+            gsap.set(washRef.current, { opacity: 0 });
           }
+          if (veilRef.current) {
+            gsap.set(veilRef.current, { opacity: 1 });
+          }
+          syncHeader(false);
           return;
         }
 
         const scrollDistance = window.matchMedia("(max-width: 767px)").matches
           ? SCROLL_DISTANCE_MOBILE
           : SCROLL_DISTANCE_DESKTOP;
+
+        if (washRef.current) {
+          gsap.set(washRef.current, { opacity: 0 });
+        }
+        for (const line of lines) {
+          if (line) {
+            gsap.set(line, { opacity: 0, y: 24 });
+          }
+        }
+        if (glowRef.current) {
+          gsap.set(glowRef.current, { opacity: 0, scale: 0.92 });
+        }
+        paint(0);
 
         const timeline = gsap.timeline({
           scrollTrigger: {
@@ -455,6 +472,11 @@ export function ScrollFrameSequence() {
             scrub: 0.45,
             anticipatePin: 1,
             invalidateOnRefresh: true,
+            onRefresh: (self) => {
+              if (window.scrollY < 8) {
+                self.scroll(self.start);
+              }
+            },
             onEnter: (self) => syncHeader(self.progress >= WASH_START),
             onEnterBack: (self) => syncHeader(self.progress >= WASH_START),
             onUpdate: (self) => {
@@ -589,7 +611,7 @@ export function ScrollFrameSequence() {
       ref={sectionRef}
       id="home"
       aria-label="JZ Enterprises"
-      className="relative h-[100svh] min-h-[100svh] w-full max-w-[100vw] overflow-hidden"
+      className="relative h-[100svh] min-h-[100svh] w-full overflow-hidden"
       style={{ backgroundColor: STAGE_BG }}
     >
       <canvas
@@ -609,11 +631,11 @@ export function ScrollFrameSequence() {
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[7] hidden items-center justify-center sm:flex"
+        className="pointer-events-none absolute inset-0 z-[7] flex items-center justify-center"
       >
         <div
           ref={glowRef}
-          className="aspect-square h-[min(240vmax,1800px)] w-[min(240vmax,1800px)] shrink-0 rounded-full opacity-0"
+          className="aspect-square h-[240vmax] w-[240vmax] shrink-0 rounded-full opacity-0"
           style={{
             background:
               "radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 34%, rgba(255,255,255,0.7) 46%, rgba(255,255,255,0.25) 58%, rgba(255,255,255,0) 70%)",
@@ -628,25 +650,25 @@ export function ScrollFrameSequence() {
         style={{ backgroundColor: STORY_BG }}
       />
 
-      <div className="pointer-events-none absolute inset-0 z-10 flex h-full flex-col items-center justify-center px-4 pt-20 pb-20 text-center sm:px-6 sm:pt-24 sm:pb-24">
+      <div className="pointer-events-none absolute inset-0 z-10 flex h-full flex-col items-center justify-center px-6 pt-24 pb-24 text-center">
         <p
           ref={welcomeRef}
-          className="max-w-full text-[clamp(1rem,3.8vw,3.25rem)] font-semibold tracking-[0.16em] text-[#f7f5f0]/75 uppercase opacity-0 sm:tracking-[0.28em] md:tracking-[0.44em]"
+          className="text-[clamp(1.2rem,4.3vw,3.25rem)] font-semibold tracking-[0.22em] text-[#f7f5f0]/75 uppercase opacity-0 sm:tracking-[0.44em]"
         >
           {heroCopy.welcome}
         </p>
 
-        <div className="mt-3 inline-block max-w-full sm:mt-4">
+        <div className="mt-4 inline-block">
           <h1
             ref={markRef}
-            className="bg-clip-text text-[clamp(1.85rem,7vw,6.5rem)] leading-[0.98] font-extrabold tracking-[0.01em] text-transparent uppercase opacity-0"
+            className="bg-clip-text text-[clamp(2.4rem,8.6vw,6.5rem)] leading-[0.98] font-extrabold tracking-[0.01em] text-transparent uppercase opacity-0"
             style={{ backgroundImage: LOGO_GRADIENT }}
           >
             {`${heroCopy.headlineLead} ${heroCopy.headlineRest}`}
           </h1>
           <p
             ref={taglineRef}
-            className="mt-2 text-right text-[clamp(0.68rem,1.8vw,1.15rem)] font-semibold tracking-[0.16em] text-white uppercase opacity-0 sm:tracking-[0.24em] md:tracking-[0.3em]"
+            className="mt-2 text-right text-[clamp(0.72rem,2vw,1.15rem)] font-semibold tracking-[0.3em] text-white uppercase opacity-0"
           >
             {site.tagline}
           </p>
@@ -654,7 +676,7 @@ export function ScrollFrameSequence() {
 
         <p
           ref={signatureRef}
-          className="absolute inset-x-0 bottom-8 px-4 text-center text-[clamp(0.78rem,1.7vw,1.15rem)] font-medium tracking-[0.08em] text-[#f7f5f0]/80 italic opacity-0 sm:bottom-12 sm:px-6 sm:tracking-[0.12em]"
+          className="absolute inset-x-0 bottom-12 px-6 text-[clamp(0.85rem,1.9vw,1.15rem)] font-medium tracking-[0.12em] text-[#f7f5f0]/80 italic opacity-0"
         >
           {heroCopy.signature}
         </p>
