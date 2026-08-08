@@ -192,52 +192,7 @@ echo "=== build/start backend + frontend ==="
 docker compose --env-file "$SECRETS_FILE" up -d --build backend frontend
 
 echo "=== install nginx vhost into aviosupportdesk ==="
-NGINX_ID="$(docker ps -qf name=aviosupportdesk-nginx)"
-HOST_CONF_DIR="$(docker inspect "$NGINX_ID" --format '{{range .Mounts}}{{if eq .Destination "/etc/nginx/conf.d"}}{{println .Source}}{{end}}{{end}}' | head -n 1)"
-HOST_DEFAULT_CONF="$(docker inspect "$NGINX_ID" --format '{{range .Mounts}}{{if eq .Destination "/etc/nginx/conf.d/default.conf"}}{{println .Source}}{{end}}{{end}}' | head -n 1)"
-if [[ -z "$HOST_CONF_DIR" ]]; then
-  NGINX_ROOT="$(docker inspect "$NGINX_ID" --format '{{range .Mounts}}{{if eq .Destination "/etc/nginx"}}{{println .Source}}{{end}}{{end}}' | head -n 1)"
-  if [[ -n "$NGINX_ROOT" ]]; then
-    mkdir -p "$NGINX_ROOT/conf.d"
-    HOST_CONF_DIR="$NGINX_ROOT/conf.d"
-  fi
-fi
-
-install_nginx_vhost() {
-  docker exec "$NGINX_ID" nginx -t
-  docker exec "$NGINX_ID" nginx -s reload
-}
-
-if [[ -n "$HOST_CONF_DIR" && -d "$HOST_CONF_DIR" ]]; then
-  cp "$COMPOSE_DIR/nginx-jumpifzero.conf" "$HOST_CONF_DIR/jumpifzero.conf"
-  install_nginx_vhost
-  echo "nginx vhost: $HOST_CONF_DIR/jumpifzero.conf"
-elif [[ -n "$HOST_DEFAULT_CONF" && -f "$HOST_DEFAULT_CONF" ]]; then
-  if grep -q 'server_name[[:space:]]\+jumpifzero\.com' "$HOST_DEFAULT_CONF"; then
-    echo "nginx already has jumpifzero.com in $HOST_DEFAULT_CONF"
-    install_nginx_vhost
-  else
-    BAK="${HOST_DEFAULT_CONF}.bak.jz.$(date +%Y%m%d%H%M%S)"
-    cp -a "$HOST_DEFAULT_CONF" "$BAK"
-    {
-      echo
-      echo "# --- jumpifzero (managed by install-docker.sh) ---"
-      cat "$COMPOSE_DIR/nginx-jumpifzero.conf"
-    } >> "$HOST_DEFAULT_CONF"
-    echo "appended jumpifzero vhost to $HOST_DEFAULT_CONF"
-    if ! docker exec "$NGINX_ID" nginx -t; then
-      echo "nginx -t failed; restoring $BAK"
-      cp -a "$BAK" "$HOST_DEFAULT_CONF"
-      docker exec "$NGINX_ID" nginx -t
-      exit 1
-    fi
-    docker exec "$NGINX_ID" nginx -s reload
-  fi
-else
-  echo "WARNING: nginx conf mount not found. Inspect mounts and add server_name jumpifzero.com manually:"
-  docker inspect "$NGINX_ID" --format '{{json .Mounts}}'
-  echo "proxy_pass http://jumpifzero-frontend:3010; network=$JZ_PROXY_NETWORK"
-fi
+bash "$COMPOSE_DIR/fix-nginx-jumpifzero.sh"
 
 echo
 echo "=== DONE ==="
