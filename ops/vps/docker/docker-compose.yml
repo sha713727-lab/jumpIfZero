@@ -1,0 +1,75 @@
+name: jumpifzero
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${JZ_POSTGRES_SUPER_PASSWORD}
+      POSTGRES_DB: postgres
+    volumes:
+      - jz_pgdata:/var/lib/postgresql/data
+    networks:
+      - jz_internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: ../../..
+      dockerfile: ops/vps/docker/Dockerfile
+      target: backend
+    restart: unless-stopped
+    env_file:
+      - /etc/jumpifzero/backend.env
+    environment:
+      HOST: 0.0.0.0
+      PORT: "3011"
+      DATABASE_HOST: postgres
+      DATABASE_PORT: "5432"
+    volumes:
+      - jz_files:/var/lib/jumpifzero/files
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - jz_internal
+    expose:
+      - "3011"
+
+  frontend:
+    build:
+      context: ../../..
+      dockerfile: ops/vps/docker/Dockerfile
+      target: frontend
+      args:
+        NEXT_PUBLIC_SITE_URL: https://jumpifzero.com
+    restart: unless-stopped
+    env_file:
+      - /etc/jumpifzero/frontend.env
+    environment:
+      BACKEND_BASE_URL: http://backend:3011
+    depends_on:
+      - backend
+    networks:
+      jz_internal:
+      proxy:
+        aliases:
+          - jumpifzero-frontend
+    expose:
+      - "3010"
+
+volumes:
+  jz_pgdata:
+  jz_files:
+
+networks:
+  jz_internal:
+    driver: bridge
+  proxy:
+    external: true
+    name: ${JZ_PROXY_NETWORK:-aviosupportdesk_default}
