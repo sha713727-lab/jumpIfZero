@@ -1,10 +1,13 @@
-FROM node:24-bookworm-slim AS deps
+FROM node:24-bookworm AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY packages/contracts/package.json ./packages/contracts/
 COPY frontend/package.json ./frontend/
 COPY backend/package.json ./backend/
-RUN npm ci
+RUN npm ci \
+  && npm install --no-save \
+    lightningcss-linux-x64-gnu \
+    @tailwindcss/oxide-linux-x64-gnu
 
 FROM deps AS frontend-build
 COPY packages/contracts ./packages/contracts

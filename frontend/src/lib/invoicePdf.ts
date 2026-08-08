@@ -396,7 +396,7 @@ function loadPngAsset(
   ];
   for (const assetPath of candidates) {
     try {
-      return decodePng(readFileSync(assetPath), {
+      return decodePng(readFileSync(/* turbopackIgnore: true */ assetPath), {
         keyDarkLight: opts?.keyDarkLight ?? true,
       });
     } catch {
