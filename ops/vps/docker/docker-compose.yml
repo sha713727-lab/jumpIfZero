@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: ${JZ_POSTGRES_SUPER_PASSWORD}
       POSTGRES_DB: postgres
     volumes:
-      - jz_pgdata:/var/lib/postgresql/data
+      - jz_pgdata:/var/lib/postgresql
     networks:
       - jz_internal
     healthcheck:
