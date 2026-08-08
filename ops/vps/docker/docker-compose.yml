@@ -48,6 +48,15 @@ services:
       target: frontend
       args:
         NEXT_PUBLIC_SITE_URL: https://jumpifzero.com
+        SESSION_SECRET: ${JZ_SESSION_SECRET}
+        BACKEND_BASE_URL: http://backend:3011
+        HMAC_SECRET: ${JZ_HMAC_SECRET}
+        HMAC_KEY_ID: v1
+        HMAC_GATEWAY_SUBJECT_ID: ${JZ_HMAC_GATEWAY_SUBJECT_ID}
+        DEMO_ADMIN_EMAIL: ${JZ_DEMO_ADMIN_EMAIL}
+        DEMO_ADMIN_PASSWORD: ${JZ_DEMO_ADMIN_PASSWORD}
+        DEMO_EMPLOYEE_PASSWORD: ${JZ_DEMO_EMPLOYEE_PASSWORD}
+        DEMO_CUSTOMER_PASSWORD: ${JZ_DEMO_CUSTOMER_PASSWORD}
     restart: unless-stopped
     env_file:
       - /etc/jumpifzero/frontend.env
