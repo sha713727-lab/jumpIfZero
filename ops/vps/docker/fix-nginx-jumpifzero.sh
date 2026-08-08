@@ -35,7 +35,6 @@ if ! docker exec "$NGINX_ID" getent hosts jumpifzero-frontend; then
   exit 1
 fi
 
-
 LE_LIVE_HOST="$(docker inspect "$NGINX_ID" --format '{{range .Mounts}}{{if eq .Destination "/etc/letsencrypt"}}{{println .Source}}{{end}}{{end}}' | head -n 1)"
 if [[ -z "$LE_LIVE_HOST" ]]; then
   echo "letsencrypt mount not found"
@@ -46,29 +45,21 @@ CERT_DIR="$LE_LIVE_HOST/live/$DOMAIN"
 mkdir -p "$CERT_DIR"
 if [[ ! -f "$CERT_DIR/fullchain.pem" || ! -f "$CERT_DIR/privkey.pem" ]]; then
   echo "=== create origin TLS cert for $DOMAIN (Cloudflare Full) ==="
-  if openssl req -x509 -nodes -newkey rsa:2048 -days 825 \
+  if ! openssl req -x509 -nodes -newkey rsa:2048 -days 825 \
     -keyout "$CERT_DIR/privkey.pem" \
     -out "$CERT_DIR/fullchain.pem" \
     -subj "/CN=$DOMAIN" \
     -addext "subjectAltName=DNS:$DOMAIN,DNS:www.$DOMAIN" 2>/dev/null; then
-    true
-  else
     openssl req -x509 -nodes -newkey rsa:2048 -days 825 \
       -keyout "$CERT_DIR/privkey.pem" \
       -out "$CERT_DIR/fullchain.pem" \
       -subj "/CN=$DOMAIN"
   fi
-  chmod 644 "$CERT_DIR/fullchain.pem"
-  chmod 640 "$CERT_DIR/privkey.pem"
 fi
+chmod 644 "$CERT_DIR/fullchain.pem" "$CERT_DIR/privkey.pem"
 
 HOST_DEFAULT_CONF="$(docker inspect "$NGINX_ID" --format '{{range .Mounts}}{{if eq .Destination "/etc/nginx/conf.d/default.conf"}}{{println .Source}}{{end}}{{end}}' | head -n 1)"
 HOST_CONF_DIR="$(docker inspect "$NGINX_ID" --format '{{range .Mounts}}{{if eq .Destination "/etc/nginx/conf.d"}}{{println .Source}}{{end}}{{end}}' | head -n 1)"
-
-write_snippet_file() {
-  local dest="$1"
-  cp "$SNIPPET" "$dest"
-}
 
 strip_managed_block() {
   local file="$1"
@@ -80,24 +71,25 @@ strip_managed_block() {
       {print}
     ' "$file" > "${file}.jz.tmp"
     mv "${file}.jz.tmp" "$file"
-  elif grep -q 'server_name[[:space:]]\+jumpifzero\.com' "$file"; then
-    echo "manual jumpifzero server_name present in $file — refusing to auto-edit"
-    exit 1
   fi
 }
 
 if [[ -n "$HOST_CONF_DIR" && -d "$HOST_CONF_DIR" ]]; then
-  write_snippet_file "$HOST_CONF_DIR/jumpifzero.conf"
+  cp "$SNIPPET" "$HOST_CONF_DIR/jumpifzero.conf"
   echo "wrote $HOST_CONF_DIR/jumpifzero.conf"
 elif [[ -n "$HOST_DEFAULT_CONF" && -f "$HOST_DEFAULT_CONF" ]]; then
   BAK="${HOST_DEFAULT_CONF}.bak.jz.$(date +%Y%m%d%H%M%S)"
   cp -a "$HOST_DEFAULT_CONF" "$BAK"
   strip_managed_block "$HOST_DEFAULT_CONF"
+  echo "=== server_name lines mentioning jumpifzero (should be none before prepend) ==="
+  grep -n 'jumpifzero' "$HOST_DEFAULT_CONF" || echo "(none)"
   {
-    echo
     cat "$SNIPPET"
-  } >> "$HOST_DEFAULT_CONF"
-  echo "updated jumpifzero block in $HOST_DEFAULT_CONF (backup $BAK)"
+    echo
+    cat "$HOST_DEFAULT_CONF"
+  } > "${HOST_DEFAULT_CONF}.jz.new"
+  mv "${HOST_DEFAULT_CONF}.jz.new" "$HOST_DEFAULT_CONF"
+  echo "prepended jumpifzero block in $HOST_DEFAULT_CONF (backup $BAK)"
 else
   echo "nginx conf mount not found"
   docker inspect "$NGINX_ID" --format '{{json .Mounts}}'
@@ -112,7 +104,17 @@ if ! docker exec "$NGINX_ID" nginx -t; then
 fi
 docker exec "$NGINX_ID" nginx -s reload
 
-echo "=== checks ==="
-curl -skI -H "Host: $DOMAIN" "https://127.0.0.1" | head -n 15
-curl -sI -H "Host: $DOMAIN" "http://127.0.0.1" | head -n 15
-echo "done — hard-refresh https://$DOMAIN (Cloudflare SSL mode Full is OK with this origin cert)"
+echo "=== origin with correct SNI (must be JumpIfZero, header X-JumpIfZero: 1) ==="
+curl -skI --resolve "${DOMAIN}:443:127.0.0.1" "https://${DOMAIN}/" | head -n 20
+echo "--- body title ---"
+curl -sk --resolve "${DOMAIN}:443:127.0.0.1" "https://${DOMAIN}/" | tr '\n' ' ' | sed 's/.*<title>//;s/<\/title>.*//' | head -c 120
+echo
+echo
+echo "=== via Cloudflare edge ==="
+curl -sI "https://${DOMAIN}/" | head -n 25
+echo "--- body title ---"
+curl -s "https://${DOMAIN}/" | tr '\n' ' ' | sed 's/.*<title>//;s/<\/title>.*//' | head -c 120
+echo
+echo
+echo "If origin title is JumpIfZero but Cloudflare title is Avion: purge CF cache + enable Development Mode."
+echo "If origin title is Avion: paste grep -n server_name $HOST_DEFAULT_CONF | head -40"
