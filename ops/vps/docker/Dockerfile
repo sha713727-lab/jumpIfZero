@@ -14,7 +14,7 @@ COPY packages/contracts ./packages/contracts
 COPY frontend ./frontend
 ARG NEXT_PUBLIC_SITE_URL=https://jumpifzero.com
 ARG SESSION_SECRET
-ARG BACKEND_BASE_URL=http://backend:3011
+ARG BACKEND_BASE_URL=http://127.0.0.1:3011
 ARG HMAC_SECRET
 ARG HMAC_KEY_ID=v1
 ARG HMAC_GATEWAY_SUBJECT_ID
