@@ -53,6 +53,6 @@ WORKDIR /app
 ENV NODE_ENV=production
 COPY packages/contracts ./packages/contracts
 COPY backend ./backend
-WORKDIR /app
+WORKDIR /app/backend
 EXPOSE 3011
-CMD ["npm", "run", "start", "-w", "@jumpifzero/backend"]
+CMD ["node", "--experimental-strip-types", "src/server.ts"]
