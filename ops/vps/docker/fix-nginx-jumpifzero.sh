@@ -35,6 +35,9 @@ if ! docker exec "$NGINX_ID" getent hosts jumpifzero-frontend; then
   exit 1
 fi
 
+echo "=== frontend title (must be JumpIfZero, not Avion) ==="
+docker exec "$FRONTEND_ID" node -e "fetch('http://127.0.0.1:3010').then(r=>r.text()).then(t=>{const m=t.match(/<title>([^<]*)<\/title>/i); console.log(m?m[1]:'NO_TITLE');})"
+
 LE_LIVE_HOST="$(docker inspect "$NGINX_ID" --format '{{range .Mounts}}{{if eq .Destination "/etc/letsencrypt"}}{{println .Source}}{{end}}{{end}}' | head -n 1)"
 if [[ -z "$LE_LIVE_HOST" ]]; then
   echo "letsencrypt mount not found"
@@ -62,16 +65,26 @@ HOST_DEFAULT_CONF="$(docker inspect "$NGINX_ID" --format '{{range .Mounts}}{{if 
 HOST_CONF_DIR="$(docker inspect "$NGINX_ID" --format '{{range .Mounts}}{{if eq .Destination "/etc/nginx/conf.d"}}{{println .Source}}{{end}}{{end}}' | head -n 1)"
 
 strip_managed_block() {
-  local file="$1"
-  if grep -q '# --- jumpifzero (managed by install-docker.sh) ---' "$file"; then
+  local src="$1"
+  local dest="$2"
+  if grep -q '# --- jumpifzero (managed by install-docker.sh) ---' "$src"; then
     awk '
       /# --- jumpifzero \(managed by install-docker\.sh\) ---/ {skip=1; next}
       /# --- end jumpifzero ---/ {skip=0; next}
       skip {next}
       {print}
-    ' "$file" > "${file}.jz.tmp"
-    mv "${file}.jz.tmp" "$file"
+    ' "$src" > "$dest"
+  else
+    cat "$src" > "$dest"
   fi
+}
+
+# Bind-mounted files: never mv/replace the inode. Write via truncate-in-place or docker cp.
+write_bind_file() {
+  local host_path="$1"
+  local content_file="$2"
+  cat "$content_file" > "$host_path"
+  docker cp "$content_file" "$NGINX_ID:/etc/nginx/conf.d/default.conf"
 }
 
 if [[ -n "$HOST_CONF_DIR" && -d "$HOST_CONF_DIR" ]]; then
@@ -80,16 +93,17 @@ if [[ -n "$HOST_CONF_DIR" && -d "$HOST_CONF_DIR" ]]; then
 elif [[ -n "$HOST_DEFAULT_CONF" && -f "$HOST_DEFAULT_CONF" ]]; then
   BAK="${HOST_DEFAULT_CONF}.bak.jz.$(date +%Y%m%d%H%M%S)"
   cp -a "$HOST_DEFAULT_CONF" "$BAK"
-  strip_managed_block "$HOST_DEFAULT_CONF"
-  echo "=== server_name lines mentioning jumpifzero (should be none before prepend) ==="
-  grep -n 'jumpifzero' "$HOST_DEFAULT_CONF" || echo "(none)"
+  TMP_BASE="$(mktemp)"
+  TMP_OUT="$(mktemp)"
+  strip_managed_block "$HOST_DEFAULT_CONF" "$TMP_BASE"
   {
     cat "$SNIPPET"
     echo
-    cat "$HOST_DEFAULT_CONF"
-  } > "${HOST_DEFAULT_CONF}.jz.new"
-  mv "${HOST_DEFAULT_CONF}.jz.new" "$HOST_DEFAULT_CONF"
-  echo "prepended jumpifzero block in $HOST_DEFAULT_CONF (backup $BAK)"
+    cat "$TMP_BASE"
+  } > "$TMP_OUT"
+  write_bind_file "$HOST_DEFAULT_CONF" "$TMP_OUT"
+  rm -f "$TMP_BASE" "$TMP_OUT"
+  echo "wrote jumpifzero block into $HOST_DEFAULT_CONF (backup $BAK)"
 else
   echo "nginx conf mount not found"
   docker inspect "$NGINX_ID" --format '{{json .Mounts}}'
@@ -97,24 +111,26 @@ else
 fi
 
 if ! docker exec "$NGINX_ID" nginx -t; then
-  if [[ -n "${BAK:-}" && -f "$BAK" ]]; then
-    cp -a "$BAK" "$HOST_DEFAULT_CONF"
+  if [[ -n "${BAK:-}" && -f "${BAK:-}" ]]; then
+    write_bind_file "$HOST_DEFAULT_CONF" "$BAK"
   fi
   exit 1
 fi
 docker exec "$NGINX_ID" nginx -s reload
 
-echo "=== origin with correct SNI (must be JumpIfZero, header X-JumpIfZero: 1) ==="
-curl -skI --resolve "${DOMAIN}:443:127.0.0.1" "https://${DOMAIN}/" | head -n 20
-echo "--- body title ---"
+echo "=== nginx must contain X-JumpIfZero ==="
+docker exec "$NGINX_ID" nginx -T 2>/dev/null | grep -c 'X-JumpIfZero' || true
+
+echo "=== origin with correct SNI ==="
+curl -skI --resolve "${DOMAIN}:443:127.0.0.1" "https://${DOMAIN}/" | head -n 25
+echo "--- title ---"
 curl -sk --resolve "${DOMAIN}:443:127.0.0.1" "https://${DOMAIN}/" | tr '\n' ' ' | sed 's/.*<title>//;s/<\/title>.*//' | head -c 120
 echo
 echo
-echo "=== via Cloudflare edge ==="
+echo "=== via Cloudflare ==="
 curl -sI "https://${DOMAIN}/" | head -n 25
-echo "--- body title ---"
+echo "--- title ---"
 curl -s "https://${DOMAIN}/" | tr '\n' ' ' | sed 's/.*<title>//;s/<\/title>.*//' | head -c 120
 echo
 echo
-echo "If origin title is JumpIfZero but Cloudflare title is Avion: purge CF cache + enable Development Mode."
-echo "If origin title is Avion: paste grep -n server_name $HOST_DEFAULT_CONF | head -40"
+echo "Expect header X-JumpIfZero: 1 and a JumpIfZero title. Then purge Cloudflare cache."
