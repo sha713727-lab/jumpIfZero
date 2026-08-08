@@ -307,4 +307,9 @@
   .scrollCue::after {
     animation: none;
   }
+
+  .panelSwap {
+    opacity: 1;
+    transform: none;
+  }
 }

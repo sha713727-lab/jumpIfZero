@@ -103,9 +103,11 @@ export function AltTestimonials({
         opacity: 0,
         duration: 0.9,
         ease: "power3.out",
+        immediateRender: false,
         scrollTrigger: {
           trigger: section,
           start: "top 72%",
+          toggleActions: "play none none none",
         },
       });
     }, section);

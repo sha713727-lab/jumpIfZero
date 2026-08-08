@@ -213,6 +213,17 @@ export function useGalleryAnimation({
       paint(false);
 
       if (reduceMotion) {
+        if (copy) {
+          gsap.set(copy, { opacity: 1, z: 0, clearProps: "transform" });
+        }
+        nodes.forEach((node, index) => {
+          const sample = samples[index];
+          if (!sample) {
+            return;
+          }
+          sample.opacity = Math.max(sample.opacity, 0.85);
+          node.style.opacity = String(sample.opacity);
+        });
         return;
       }
 

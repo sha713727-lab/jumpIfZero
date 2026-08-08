@@ -57,6 +57,7 @@ export function AltContact() {
     }
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      gsap.set(panel, { rotateX: 0, z: 0, opacity: 1, clearProps: "transform" });
       return;
     }
 
@@ -69,6 +70,7 @@ export function AltContact() {
           z: 0,
           opacity: 1,
           ease: "power3.out",
+          immediateRender: false,
           scrollTrigger: {
             trigger: section,
             start: "top 88%",

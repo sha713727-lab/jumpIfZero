@@ -57,6 +57,7 @@ export function RevealText({
           ease: "power4.out",
           stagger: WORD_STAGGER,
           delay,
+          immediateRender: false,
         };
 
         if (playOnLoad) {
@@ -66,7 +67,11 @@ export function RevealText({
 
         gsap.from(words, {
           ...motion,
-          scrollTrigger: { trigger: host, start: TRIGGER_START },
+          scrollTrigger: {
+            trigger: host,
+            start: TRIGGER_START,
+            toggleActions: "play none none none",
+          },
         });
       }, host);
     })();

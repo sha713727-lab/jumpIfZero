@@ -71,9 +71,11 @@ export function AltFaq({
         duration: 0.65,
         ease: "power3.out",
         stagger: 0.06,
+        immediateRender: false,
         scrollTrigger: {
           trigger: section,
           start: "top 68%",
+          toggleActions: "play none none none",
         },
       });
     }, section);

@@ -311,9 +311,11 @@ export function AltTeam({
           duration: 0.95,
           ease: "power3.out",
           stagger: 0.12,
+          immediateRender: false,
           scrollTrigger: {
             trigger: section,
             start: "top 68%",
+            toggleActions: "play none none none",
           },
         });
       }
