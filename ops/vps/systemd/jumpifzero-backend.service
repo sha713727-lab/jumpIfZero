@@ -1,0 +1,23 @@
+[Unit]
+Description=JumpIfZero backend API (localhost only)
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=jumpifzero
+Group=jumpifzero
+WorkingDirectory=/var/www/jumpifzero
+EnvironmentFile=/etc/jumpifzero/backend.env
+ExecStart=/usr/bin/npm run start -w @jumpifzero/backend
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/jumpifzero /var/www/jumpifzero
+
+[Install]
+WantedBy=multi-user.target

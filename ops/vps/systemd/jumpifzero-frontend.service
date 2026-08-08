@@ -1,0 +1,24 @@
+[Unit]
+Description=JumpIfZero Next.js frontend
+After=network.target jumpifzero-backend.service
+Wants=jumpifzero-backend.service
+
+[Service]
+Type=simple
+User=jumpifzero
+Group=jumpifzero
+WorkingDirectory=/var/www/jumpifzero/frontend
+EnvironmentFile=/etc/jumpifzero/frontend.env
+Environment=PORT=3010
+ExecStart=/usr/bin/npx next start --port 3010 --hostname 127.0.0.1
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/jumpifzero
+
+[Install]
+WantedBy=multi-user.target

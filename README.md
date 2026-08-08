@@ -80,6 +80,12 @@ npm run dev -w frontend
 
 ## Deployment
 
+### Shared VPS (second site beside an existing app)
+
+See [`ops/vps/DEPLOY.md`](./ops/vps/DEPLOY.md): Cloudflare DNS → gate → `ops/vps/install.sh` (nginx + systemd on ports 3010/3011, isolated Postgres, no production use of `database/seeds/dev`).
+
+### Other
+
 - **Frontend:** deploy the `frontend/` directory (for example Vercel Root Directory `frontend`) with server env: `SESSION_SECRET`, `BACKEND_BASE_URL`, HMAC settings, and `NEXT_PUBLIC_SITE_URL`.
 - **Backend:** run as a private long-lived Node process. Only the Next.js gateway should call it.
 - Keep PostgreSQL, file storage, and secrets outside public networks.
