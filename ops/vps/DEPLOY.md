@@ -49,6 +49,17 @@ docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' | grep -E 'jumpif
 
 Site 1 must still respond on its own domain.
 
+## 2b. Production bootstrap (users + CMS)
+
+After the stack is healthy, seed admin/employee logins and public CMS (no CRM freight seeds):
+
+```bash
+export JZ_DOMAIN='jumpifzero.com'
+export JZ_PROXY_NETWORK=aviosupportdesk_avion
+bash /var/www/jumpifzero/ops/vps/docker/bootstrap-prod.sh
+grep -E '^JZ_DEMO_(ADMIN|EMPLOYEE)_' /root/jz-secrets.env
+```
+
 ## Files
 
 | Path | Role |
