@@ -4,10 +4,12 @@ import {
   actorSchema,
   cmsMediaUploadResponseSchema,
 } from "@jumpifzero/contracts/content";
+import { z } from "@jumpifzero/contracts/z";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { env } from "@/lib/env";
 import { signBackendRequest } from "@/lib/backend/hmacSign";
 import { CMS_MEDIA_MAX_BYTES } from "@/lib/cmsMediaLimits";
-import { requireSession, type SessionPayload } from "@/lib/session";
+import { requireSession, verifySession, type SessionPayload } from "@/lib/session";
 
 export type CmsMediaUploadResult =
   | { readonly ok: true; readonly imagePath: string }
@@ -15,6 +17,12 @@ export type CmsMediaUploadResult =
       readonly ok: false;
       readonly reason: "unauthorized" | "validation" | "server";
     };
+
+const successEnvelopeSchema = z.object({
+  ok: z.literal(true),
+  data: z.unknown(),
+  correlationId: z.string(),
+});
 
 function actorFromSession(session: SessionPayload) {
   return actorSchema.parse({
@@ -26,11 +34,44 @@ function actorFromSession(session: SessionPayload) {
 }
 
 async function requireAdminOrEmployeeSession(): Promise<SessionPayload> {
-  try {
-    return await requireSession("admin");
-  } catch {
-    return requireSession("employee");
+  const admin = await verifySession("admin");
+  if (admin) {
+    return admin;
   }
+  return requireSession("employee");
+}
+
+function sanitizeFilename(name: string, mimeType: string): string {
+  const base = name.replace(/[^\w.\-]+/g, "_").slice(0, 120);
+  if (base.length > 0 && base !== "." && base !== "..") {
+    return base;
+  }
+  if (mimeType === "image/png") {
+    return "upload.png";
+  }
+  if (mimeType === "image/webp") {
+    return "upload.webp";
+  }
+  if (mimeType === "video/mp4") {
+    return "upload.mp4";
+  }
+  if (mimeType === "video/webm") {
+    return "upload.webm";
+  }
+  return "upload.jpg";
+}
+
+function isUploadFile(value: FormDataEntryValue | null): value is File {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "arrayBuffer" in value &&
+    "size" in value &&
+    "type" in value &&
+    "name" in value &&
+    typeof (value as File).arrayBuffer === "function" &&
+    typeof (value as File).size === "number"
+  );
 }
 
 function buildMultipartBody(input: {
@@ -55,7 +96,7 @@ export async function uploadCmsMediaAction(
     const actor = actorFromSession(session);
     const file = formData.get("file");
 
-    if (!(file instanceof File) || file.size === 0) {
+    if (!isUploadFile(file) || file.size === 0) {
       return { ok: false, reason: "validation" };
     }
 
@@ -75,8 +116,8 @@ export async function uploadCmsMediaAction(
     const boundary = `jz${crypto.randomUUID().replaceAll("-", "")}`;
     const rawBody = buildMultipartBody({
       boundary,
-      filename: file.name,
-      mimeType: file.type,
+      filename: sanitizeFilename(file.name, file.type),
+      mimeType: file.type.length > 0 ? file.type : "application/octet-stream",
       buffer,
     });
 
@@ -109,13 +150,21 @@ export async function uploadCmsMediaAction(
     }
 
     const json: unknown = await response.json();
-    const parsed = cmsMediaUploadResponseSchema.safeParse(json);
+    const envelope = successEnvelopeSchema.safeParse(json);
+    if (!envelope.success) {
+      return { ok: false, reason: "server" };
+    }
+
+    const parsed = cmsMediaUploadResponseSchema.safeParse(envelope.data.data);
     if (!parsed.success) {
       return { ok: false, reason: "server" };
     }
 
     return { ok: true, imagePath: parsed.data.imagePath };
-  } catch {
+  } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     return { ok: false, reason: "server" };
   }
 }

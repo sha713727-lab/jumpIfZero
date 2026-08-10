@@ -75,7 +75,7 @@ export function AdminImageField({
         id={inputId}
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp"
         className="sr-only"
         disabled={pending}
         onChange={(event) => {
