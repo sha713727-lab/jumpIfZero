@@ -125,9 +125,9 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
           </div>
         </header>
 
-        <div className="flex flex-1 flex-col px-[5.5%] pt-[6%] pr-[8.5%] pb-[2%]">
-          <div className="grid gap-8 md:grid-cols-2">
-            <div>
+        <div className="flex flex-1 flex-col pl-[5.5%] pr-[28%] pt-[5%] pb-[2%]">
+          <div className="grid max-w-[34rem] gap-8 sm:grid-cols-2 sm:gap-10">
+            <div className="min-w-0">
               <p className="text-[0.65rem] font-extrabold tracking-[0.16em] text-[#5c3d18]/75 uppercase">
                 Bill to
               </p>
@@ -140,7 +140,7 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
                 </p>
               ) : null}
               {invoice.client.email ? (
-                <p className="mt-1 text-[0.84rem] font-medium text-[#1a140c]/65">
+                <p className="mt-1 break-all text-[0.84rem] font-medium text-[#1a140c]/65">
                   {invoice.client.email}
                 </p>
               ) : null}
@@ -155,20 +155,20 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
                 </p>
               ) : null}
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-[0.65rem] font-extrabold tracking-[0.16em] text-[#5c3d18]/75 uppercase">
                 From
               </p>
               <p className="mt-2.5 text-[1rem] font-extrabold tracking-[-0.02em]">
                 {invoice.company.legalName}
               </p>
-              <p className="mt-1 text-[0.84rem] font-medium text-[#1a140c]/65">
+              <p className="mt-1 break-all text-[0.84rem] font-medium text-[#1a140c]/65">
                 {invoice.company.email}
               </p>
               <p className="text-[0.84rem] font-medium text-[#1a140c]/65">
                 {invoice.company.phone}
               </p>
-              <dl className="mt-4 grid grid-cols-2 gap-3 text-[0.8rem]">
+              <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-[0.8rem]">
                 <div>
                   <dt className="font-bold tracking-[0.08em] text-[#5c3d18]/65 uppercase">
                     Issued
@@ -187,14 +187,14 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
             </div>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-8 max-w-[34rem]">
             <table className="w-full border-collapse text-left">
               <thead>
                 <tr className="border-b border-[#1a140c]/22">
                   <th className="pb-2.5 text-[0.65rem] font-extrabold tracking-[0.14em] text-[#5c3d18]/75 uppercase">
                     Description
                   </th>
-                  <th className="pb-2.5 text-right text-[0.65rem] font-extrabold tracking-[0.14em] text-[#5c3d18]/75 uppercase">
+                  <th className="w-[7.5rem] pb-2.5 text-right text-[0.65rem] font-extrabold tracking-[0.14em] text-[#5c3d18]/75 uppercase">
                     Amount
                   </th>
                 </tr>
@@ -207,7 +207,7 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
                       Professional services
                     </p>
                   </td>
-                  <td className="py-4 align-top text-right text-[0.94rem] font-semibold">
+                  <td className="w-[7.5rem] py-4 align-top text-right text-[0.94rem] font-semibold">
                     {total}
                   </td>
                 </tr>
@@ -230,7 +230,7 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
             </div>
           </div>
 
-          <div className="mt-auto pt-8">
+          <div className="mt-auto max-w-[34rem] pt-8">
             <p className="text-[0.65rem] font-extrabold tracking-[0.16em] text-[#5c3d18]/75 uppercase">
               Authorized signature &amp; stamp
             </p>
@@ -264,7 +264,7 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
           </div>
         </div>
 
-        <footer className="grid grid-cols-3 items-end gap-3 px-[5.5%] pt-[2.8%] pb-[2.4%] pr-[7.5%] text-[0.7rem] font-bold leading-[1.35] text-[#1a140c]">
+        <footer className="grid grid-cols-3 items-end gap-3 px-[5.5%] pt-[2.8%] pb-[2.4%] pr-[12%] text-[0.7rem] font-bold leading-[1.35] text-[#1a140c]">
           <p>Phone: {footerPhone}</p>
           <p className="text-center">Email: {footerEmail}</p>
           <div className="text-right">
