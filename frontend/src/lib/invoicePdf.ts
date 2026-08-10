@@ -575,8 +575,8 @@ export function buildInvoicePdf(
 
   let y = PAGE_H - 168;
   ops.push(setFill(MUTED));
-  ops.push(text("BILL TO", MARGIN_X, y, 8, true));
-  ops.push(text("FROM", COL2_X, y, 8, true));
+  ops.push(text("BILL TO", MARGIN_X, y, 9, true));
+  ops.push(text("FROM", COL2_X, y, 9, true));
 
   y -= 18;
   ops.push(setFill(INK));
@@ -615,23 +615,23 @@ export function buildInvoicePdf(
   ops.push(setFill(MUTED));
   let leftY = y;
   for (const detail of leftDetails) {
-    for (const lineText of wrapText(detail, COL2_X - MARGIN_X - 12, 10)) {
-      ops.push(text(lineText, MARGIN_X, leftY, 10));
+    for (const lineText of wrapText(detail, COL2_X - MARGIN_X - 12, 10, true)) {
+      ops.push(text(lineText, MARGIN_X, leftY, 10, true));
       leftY -= 13;
     }
   }
   let rightY = fromY;
   for (const detail of rightDetails) {
-    for (const lineText of wrapText(detail, CONTENT_RIGHT - COL2_X, 10)) {
-      ops.push(text(lineText, COL2_X, rightY, 10));
+    for (const lineText of wrapText(detail, CONTENT_RIGHT - COL2_X, 10, true)) {
+      ops.push(text(lineText, COL2_X, rightY, 10, true));
       rightY -= 13;
     }
   }
 
   const datesY = Math.min(leftY, rightY) - 12;
   ops.push(setFill(MUTED));
-  ops.push(text("ISSUED", COL2_X, datesY, 8, true));
-  ops.push(text("DUE", COL2_X + 86, datesY, 8, true));
+  ops.push(text("ISSUED", COL2_X, datesY, 9, true));
+  ops.push(text("DUE", COL2_X + 86, datesY, 9, true));
   ops.push(setFill(INK));
   ops.push(text(formatDate(issued), COL2_X, datesY - 14, 10, true));
   ops.push(text(formatDate(invoice.dueDate), COL2_X + 86, datesY - 14, 10, true));
@@ -643,8 +643,8 @@ export function buildInvoicePdf(
 
   let tableY = sectionRuleY - 24;
   ops.push(setFill(MUTED));
-  ops.push(text("DESCRIPTION", MARGIN_X, tableY, 8, true));
-  ops.push(textRight("AMOUNT", CONTENT_RIGHT, tableY, 8, true));
+  ops.push(text("DESCRIPTION", MARGIN_X, tableY, 9, true));
+  ops.push(textRight("AMOUNT", CONTENT_RIGHT, tableY, 9, true));
   tableY -= 10;
   ops.push(setStroke(RULE));
   ops.push(line(MARGIN_X, tableY, CONTENT_RIGHT, tableY));
@@ -682,14 +682,14 @@ export function buildInvoicePdf(
   ops.push(setFill({ r: 0.36, g: 0.24, b: 0.09 }));
   ops.push(textRight(total, CONTENT_RIGHT, tableY, 12, true));
 
-  const authRuleY = 220;
+  const authRuleY = 236;
   ops.push(setStroke(RULE));
   ops.push("0.8 w");
   ops.push(line(MARGIN_X, authRuleY, CONTENT_RIGHT, authRuleY));
 
   const labelY = authRuleY - 18;
   ops.push(setFill(MUTED));
-  ops.push(text("AUTHORIZED SIGNATURE & STAMP", MARGIN_X, labelY, 8, true));
+  ops.push(text("AUTHORIZED SIGNATURE & STAMP", MARGIN_X, labelY, 9, true));
 
   const fitImage = (
     width: number,
@@ -727,6 +727,21 @@ export function buildInvoicePdf(
   ops.push(setFill(MUTED));
   ops.push(text("Authorized representative", MARGIN_X, sigLineY - 28, 9, true));
 
+  const disclaimer =
+    "This is a system-generated invoice and is valid without a physical signature.";
+  const disclaimerSize = 8;
+  const disclaimerWidth = measureWidth(disclaimer, disclaimerSize, true);
+  ops.push(setFill(MUTED));
+  ops.push(
+    text(
+      disclaimer,
+      Math.max(MARGIN_X, (PAGE_W - disclaimerWidth) / 2),
+      48,
+      disclaimerSize,
+      true,
+    ),
+  );
+
   const footerPhone = invoice.footer.phone.trim() || "-";
   const footerEmail = invoice.footer.email.trim() || "-";
   const phoneLabel = `Phone: ${footerPhone}`;
@@ -739,7 +754,7 @@ export function buildInvoicePdf(
     `Location: ${addressLines[0] ?? "-"}`,
     ...addressLines.slice(1),
   ];
-  const footerBaseY = 32;
+  const footerBaseY = 28;
   const footerSize = 9;
   const footerRight = PAGE_W * 0.88;
   ops.push(setFill(FOOTER_INK));

@@ -65,6 +65,12 @@ type InvoiceDocumentProps = {
   readonly invoice: InvoiceDocumentModel;
 };
 
+const sectionLabelClass =
+  "text-[0.72rem] font-extrabold tracking-[0.12em] text-[#5c3d18] uppercase";
+
+const disclaimer =
+  "This is a system-generated invoice and is valid without a physical signature.";
+
 export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
   const issued = invoice.issuedOn ?? invoice.createdAt.slice(0, 10);
   const total = formatMoney(invoice.amount, invoice.currency);
@@ -107,19 +113,19 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
               <p className="text-[1.08rem] font-extrabold tracking-[0.05em] text-white uppercase md:text-[1.32rem]">
                 {brandName}
               </p>
-              <p className="mt-0.5 text-[0.7rem] font-bold tracking-[0.22em] text-white uppercase md:text-[0.78rem]">
+              <p className="mt-0.5 text-[0.7rem] font-extrabold tracking-[0.22em] text-white uppercase md:text-[0.78rem]">
                 {site.tagline}
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[0.65rem] font-extrabold tracking-[0.18em] text-white/70 uppercase">
+            <p className="text-[0.65rem] font-extrabold tracking-[0.18em] text-white uppercase">
               Invoice
             </p>
             <p className="mt-1 text-[1.1rem] font-extrabold tracking-[-0.02em] text-white md:text-[1.25rem]">
               {invoice.number}
             </p>
-            <p className="mt-1.5 inline-flex rounded-full bg-white/15 px-2.5 py-0.5 text-[0.68rem] font-bold text-white">
+            <p className="mt-1.5 inline-flex rounded-full bg-white/15 px-2.5 py-0.5 text-[0.68rem] font-extrabold text-white">
               {statusLabel[invoice.status]}
             </p>
           </div>
@@ -128,58 +134,50 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
         <div className="flex flex-1 flex-col pl-[5.5%] pr-[28%] pt-[5%] pb-[2%]">
           <div className="grid max-w-[34rem] gap-8 sm:grid-cols-2 sm:gap-10">
             <div className="min-w-0">
-              <p className="text-[0.65rem] font-extrabold tracking-[0.16em] text-[#5c3d18]/75 uppercase">
-                Bill to
-              </p>
+              <p className={sectionLabelClass}>Bill to</p>
               <p className="mt-2.5 text-[1rem] font-extrabold tracking-[-0.02em]">
                 {invoice.client.company || invoice.client.name}
               </p>
               {invoice.client.name && invoice.client.company ? (
-                <p className="mt-1 text-[0.86rem] font-medium text-[#1a140c]/72">
+                <p className="mt-1 text-[0.86rem] font-bold text-[#1a140c]/80">
                   {invoice.client.name}
                 </p>
               ) : null}
               {invoice.client.email ? (
-                <p className="mt-1 break-all text-[0.84rem] font-medium text-[#1a140c]/65">
+                <p className="mt-1 break-all text-[0.84rem] font-bold text-[#1a140c]/75">
                   {invoice.client.email}
                 </p>
               ) : null}
               {invoice.client.phone ? (
-                <p className="text-[0.84rem] font-medium text-[#1a140c]/65">
+                <p className="text-[0.84rem] font-bold text-[#1a140c]/75">
                   {invoice.client.phone}
                 </p>
               ) : null}
               {invoice.client.location ? (
-                <p className="text-[0.84rem] font-medium text-[#1a140c]/65">
+                <p className="text-[0.84rem] font-bold text-[#1a140c]/75">
                   {invoice.client.location}
                 </p>
               ) : null}
             </div>
             <div className="min-w-0">
-              <p className="text-[0.65rem] font-extrabold tracking-[0.16em] text-[#5c3d18]/75 uppercase">
-                From
-              </p>
+              <p className={sectionLabelClass}>From</p>
               <p className="mt-2.5 text-[1rem] font-extrabold tracking-[-0.02em]">
                 {invoice.company.legalName}
               </p>
-              <p className="mt-1 break-all text-[0.84rem] font-medium text-[#1a140c]/65">
+              <p className="mt-1 break-all text-[0.84rem] font-bold text-[#1a140c]/75">
                 {invoice.company.email}
               </p>
-              <p className="text-[0.84rem] font-medium text-[#1a140c]/65">
+              <p className="text-[0.84rem] font-bold text-[#1a140c]/75">
                 {invoice.company.phone}
               </p>
               <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-[0.8rem]">
                 <div>
-                  <dt className="font-extrabold tracking-[0.08em] text-[#5c3d18]/65 uppercase">
-                    Issued
-                  </dt>
-                  <dd className="mt-1 font-bold">{formatDate(issued)}</dd>
+                  <dt className={sectionLabelClass}>Issued</dt>
+                  <dd className="mt-1 font-extrabold">{formatDate(issued)}</dd>
                 </div>
                 <div>
-                  <dt className="font-extrabold tracking-[0.08em] text-[#5c3d18]/65 uppercase">
-                    Due
-                  </dt>
-                  <dd className="mt-1 font-bold">
+                  <dt className={sectionLabelClass}>Due</dt>
+                  <dd className="mt-1 font-extrabold">
                     {formatDate(invoice.dueDate)}
                   </dd>
                 </div>
@@ -191,10 +189,12 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
             <table className="w-full border-collapse text-left">
               <thead>
                 <tr className="border-b border-[#1a140c]/22">
-                  <th className="pb-2.5 text-[0.65rem] font-extrabold tracking-[0.14em] text-[#5c3d18]/75 uppercase">
+                  <th className={`pb-2.5 text-left ${sectionLabelClass}`}>
                     Description
                   </th>
-                  <th className="w-[7.5rem] pb-2.5 text-right text-[0.65rem] font-extrabold tracking-[0.14em] text-[#5c3d18]/75 uppercase">
+                  <th
+                    className={`w-[7.5rem] pb-2.5 text-right ${sectionLabelClass}`}
+                  >
                     Amount
                   </th>
                 </tr>
@@ -202,12 +202,14 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
               <tbody>
                 <tr className="border-b border-[#1a140c]/12">
                   <td className="py-4 align-top">
-                    <p className="text-[0.94rem] font-bold">{invoice.title}</p>
-                    <p className="mt-1 text-[0.78rem] font-bold text-[#1a140c]/55">
+                    <p className="text-[0.94rem] font-extrabold">
+                      {invoice.title}
+                    </p>
+                    <p className="mt-1 text-[0.78rem] font-bold text-[#1a140c]/70">
                       Professional services
                     </p>
                   </td>
-                  <td className="w-[7.5rem] py-4 align-top text-right text-[0.94rem] font-bold">
+                  <td className="w-[7.5rem] py-4 align-top text-right text-[0.94rem] font-extrabold">
                     {total}
                   </td>
                 </tr>
@@ -217,8 +219,8 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
             <div className="mt-6 flex justify-end">
               <div className="w-full max-w-[14rem] space-y-2">
                 <div className="flex items-center justify-between text-[0.86rem]">
-                  <span className="font-bold text-[#1a140c]/55">Subtotal</span>
-                  <span className="font-bold">{total}</span>
+                  <span className="font-extrabold text-[#1a140c]">Subtotal</span>
+                  <span className="font-extrabold">{total}</span>
                 </div>
                 <div className="flex items-center justify-between border-t border-[#1a140c]/18 pt-2.5 text-[1rem]">
                   <span className="font-extrabold tracking-[-0.02em]">
@@ -231,7 +233,7 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
           </div>
 
           <div className="mt-auto max-w-[34rem] pt-8">
-            <p className="text-[0.65rem] font-extrabold tracking-[0.16em] text-[#5c3d18]/75 uppercase">
+            <p className={sectionLabelClass}>
               Authorized signature &amp; stamp
             </p>
             <div className="mt-3 inline-flex items-end gap-3">
@@ -246,8 +248,8 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
                   />
                 </div>
                 <div className="mt-2 max-w-[11rem] border-b border-[#1a140c]/40" />
-                <p className="mt-2.5 text-[0.84rem] font-bold">{brandName}</p>
-                <p className="text-[0.74rem] font-bold text-[#1a140c]/55">
+                <p className="mt-2.5 text-[0.84rem] font-extrabold">{brandName}</p>
+                <p className="text-[0.74rem] font-bold text-[#1a140c]/70">
                   Authorized representative
                 </p>
               </div>
@@ -264,7 +266,13 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
           </div>
         </div>
 
-        <footer className="grid grid-cols-3 items-end gap-3 px-[5.5%] pt-[2.8%] pb-[2.4%] pr-[12%] text-[0.7rem] font-bold leading-[1.35] text-[#1a140c]">
+        <div className="px-[5.5%] pr-[12%] pb-2">
+          <p className="text-center text-[0.68rem] font-bold tracking-[0.02em] text-[#1a140c]/70">
+            {disclaimer}
+          </p>
+        </div>
+
+        <footer className="grid grid-cols-3 items-end gap-3 px-[5.5%] pt-[1.2%] pb-[2.4%] pr-[12%] text-[0.7rem] font-extrabold leading-[1.35] text-[#1a140c]">
           <p>Phone: {footerPhone}</p>
           <p className="text-center">Email: {footerEmail}</p>
           <div className="text-right">
