@@ -4,11 +4,15 @@ import path from "node:path";
 import type { InvoiceDocumentModel } from "@/components/invoices/InvoiceDocument";
 import { site } from "@/constants/site";
 
-const PAGE_W = 612;
-const PAGE_H = 792;
-const MARGIN_X = 48;
-const CONTENT_RIGHT = PAGE_W - 48;
+const PAGE_W = 595;
+const PAGE_H = 842;
+const MARGIN_X = 33;
+const CONTENT_RIGHT = 428;
+const COL2_X = 236;
+const TOTALS_X = 298;
 const FRAME = { r: 116 / 255, g: 132 / 255, b: 92 / 255 };
+const YELLOW_TOP = { r: 254 / 255, g: 220 / 255, b: 90 / 255 };
+const YELLOW_BOTTOM = { r: 245 / 255, g: 120 / 255, b: 40 / 255 };
 const MUTED = { r: 0.36, g: 0.24, b: 0.09 };
 const INK = { r: 0.1, g: 0.08, b: 0.05 };
 const WHITE = { r: 1, g: 1, b: 1 };
@@ -476,6 +480,54 @@ function image(
   return `q ${w.toFixed(2)} 0 0 ${h.toFixed(2)} ${x.toFixed(2)} ${y.toFixed(2)} cm /${name} Do Q`;
 }
 
+function yellowPanelPath(): DrawOp {
+  const left = 0;
+  const bottom = PAGE_H * 0.016;
+  const top = PAGE_H * (1 - 0.135);
+  const right = PAGE_W * (1 - 0.042);
+  const curve = Math.min(right, top - bottom) * 0.52;
+  return [
+    `${left.toFixed(2)} ${bottom.toFixed(2)} m`,
+    `${left.toFixed(2)} ${top.toFixed(2)} l`,
+    `${(right - curve).toFixed(2)} ${top.toFixed(2)} l`,
+    `${(right - curve * 0.45).toFixed(2)} ${top.toFixed(2)} ${right.toFixed(2)} ${(top - curve * 0.45).toFixed(2)} ${right.toFixed(2)} ${(top - curve).toFixed(2)} c`,
+    `${right.toFixed(2)} ${bottom.toFixed(2)} l`,
+    "h",
+  ].join(" ");
+}
+
+function lerpColor(
+  a: { r: number; g: number; b: number },
+  b: { r: number; g: number; b: number },
+  t: number,
+): { r: number; g: number; b: number } {
+  return {
+    r: a.r + (b.r - a.r) * t,
+    g: a.g + (b.g - a.g) * t,
+    b: a.b + (b.b - a.b) * t,
+  };
+}
+
+function drawLetterheadFrame(ops: DrawOp[]): void {
+  ops.push(setFill(FRAME));
+  ops.push(rect(0, 0, PAGE_W, PAGE_H, "f"));
+  ops.push("q");
+  ops.push(yellowPanelPath());
+  ops.push("W n");
+  const yellowBottom = PAGE_H * 0.016;
+  const yellowTop = PAGE_H * (1 - 0.135);
+  const bands = 28;
+  const bandH = (yellowTop - yellowBottom) / bands;
+  for (let i = 0; i < bands; i += 1) {
+    const t = i / (bands - 1);
+    ops.push(setFill(lerpColor(YELLOW_BOTTOM, YELLOW_TOP, t)));
+    ops.push(rect(0, yellowBottom + i * bandH, PAGE_W, bandH + 0.6, "f"));
+  }
+  ops.push("Q");
+  ops.push(setFill(FRAME));
+  ops.push(rect(0, yellowBottom, PAGE_W * 0.032, PAGE_H * 0.062, "f"));
+}
+
 export function buildInvoicePdf(
   invoice: InvoiceDocumentModel,
 ): { readonly bytes: Uint8Array; readonly filename: string } {
@@ -489,26 +541,18 @@ export function buildInvoicePdf(
         : "Paid";
   const billTo = invoice.client.company || invoice.client.name || "Client";
   const brandName = invoice.company.legalName || site.name;
-  const letterhead = loadPngAsset("jz-invoice-letterhead.png", {
-    keyDarkLight: false,
-  });
   const logo = loadLogo();
   const stamp = loadStamp();
   const signature = loadSignature();
   const ops: DrawOp[] = [];
 
-  if (letterhead) {
-    ops.push(image("Im0", 0, 0, PAGE_W, PAGE_H));
-  } else {
-    ops.push(setFill(FRAME));
-    ops.push(rect(0, 0, PAGE_W, PAGE_H, "f"));
-  }
+  drawLetterheadFrame(ops);
 
-  const logoDrawW = 36;
+  const logoDrawW = 34;
   const logoDrawH = logo
     ? (logoDrawW * logo.height) / logo.width
     : logoDrawW;
-  const headerTop = PAGE_H - 42;
+  const headerTop = PAGE_H - 36;
 
   if (logo) {
     ops.push(
@@ -518,29 +562,39 @@ export function buildInvoicePdf(
 
   const textLeft = MARGIN_X + (logo ? logoDrawW + 12 : 0);
   ops.push(setFill(WHITE));
-  ops.push(text(brandName.toUpperCase(), textLeft, headerTop - 6, 14, true));
+  ops.push(text(brandName.toUpperCase(), textLeft, headerTop - 6, 13, true));
   ops.push(setFill(WHITE));
-  ops.push(text(site.tagline.toUpperCase(), textLeft, headerTop - 22, 8, true));
+  ops.push(text(site.tagline.toUpperCase(), textLeft, headerTop - 20, 8, true));
 
   ops.push(setFill({ r: 0.9, g: 0.9, b: 0.88 }));
-  ops.push(textRight("INVOICE", CONTENT_RIGHT, headerTop - 2, 8, true));
+  ops.push(textRight("INVOICE", PAGE_W - 33, headerTop - 2, 8, true));
   ops.push(setFill(WHITE));
-  ops.push(textRight(invoice.number, CONTENT_RIGHT, headerTop - 20, 14, true));
+  ops.push(textRight(invoice.number, PAGE_W - 33, headerTop - 18, 13, true));
   ops.push(setFill({ r: 0.95, g: 0.95, b: 0.92 }));
-  ops.push(textRight(status, CONTENT_RIGHT, headerTop - 36, 8, true));
+  ops.push(textRight(status, PAGE_W - 33, headerTop - 34, 8, true));
 
-  let y = PAGE_H - 150;
-  const midX = 318;
+  let y = PAGE_H - 168;
   ops.push(setFill(MUTED));
   ops.push(text("BILL TO", MARGIN_X, y, 8, true));
-  ops.push(text("FROM", midX, y, 8, true));
+  ops.push(text("FROM", COL2_X, y, 8, true));
 
   y -= 18;
   ops.push(setFill(INK));
-  ops.push(text(billTo, MARGIN_X, y, 12, true));
-  ops.push(text(invoice.company.legalName, midX, y, 12, true));
+  for (const lineText of wrapText(billTo, COL2_X - MARGIN_X - 12, 12, true)) {
+    ops.push(text(lineText, MARGIN_X, y, 12, true));
+    y -= 14;
+  }
+  let fromY = PAGE_H - 186;
+  for (const lineText of wrapText(
+    invoice.company.legalName,
+    CONTENT_RIGHT - COL2_X,
+    12,
+    true,
+  )) {
+    ops.push(text(lineText, COL2_X, fromY, 12, true));
+    fromY -= 14;
+  }
 
-  y -= 16;
   const leftDetails: string[] = [];
   if (invoice.client.name && invoice.client.company) {
     leftDetails.push(invoice.client.name);
@@ -561,22 +615,26 @@ export function buildInvoicePdf(
   ops.push(setFill(MUTED));
   let leftY = y;
   for (const detail of leftDetails) {
-    ops.push(text(detail, MARGIN_X, leftY, 10));
-    leftY -= 14;
+    for (const lineText of wrapText(detail, COL2_X - MARGIN_X - 12, 10)) {
+      ops.push(text(lineText, MARGIN_X, leftY, 10));
+      leftY -= 13;
+    }
   }
-  let rightY = y;
+  let rightY = fromY;
   for (const detail of rightDetails) {
-    ops.push(text(detail, midX, rightY, 10));
-    rightY -= 14;
+    for (const lineText of wrapText(detail, CONTENT_RIGHT - COL2_X, 10)) {
+      ops.push(text(lineText, COL2_X, rightY, 10));
+      rightY -= 13;
+    }
   }
 
   const datesY = Math.min(leftY, rightY) - 12;
   ops.push(setFill(MUTED));
-  ops.push(text("ISSUED", midX, datesY, 8, true));
-  ops.push(text("DUE", midX + 100, datesY, 8, true));
+  ops.push(text("ISSUED", COL2_X, datesY, 8, true));
+  ops.push(text("DUE", COL2_X + 86, datesY, 8, true));
   ops.push(setFill(INK));
-  ops.push(text(formatDate(issued), midX, datesY - 14, 10, true));
-  ops.push(text(formatDate(invoice.dueDate), midX + 100, datesY - 14, 10, true));
+  ops.push(text(formatDate(issued), COL2_X, datesY - 14, 10, true));
+  ops.push(text(formatDate(invoice.dueDate), COL2_X + 86, datesY - 14, 10, true));
 
   const sectionRuleY = datesY - 28;
   ops.push(setStroke(RULE));
@@ -592,7 +650,7 @@ export function buildInvoicePdf(
   ops.push(line(MARGIN_X, tableY, CONTENT_RIGHT, tableY));
 
   tableY -= 22;
-  const titleLines = wrapText(invoice.title, 340, 11, true);
+  const titleLines = wrapText(invoice.title, CONTENT_RIGHT - MARGIN_X - 90, 11, true);
   ops.push(setFill(INK));
   for (const lineText of titleLines) {
     ops.push(text(lineText, MARGIN_X, tableY, 11, true));
@@ -609,23 +667,22 @@ export function buildInvoicePdf(
   ops.push(setStroke(RULE));
   ops.push(line(MARGIN_X, tableY, CONTENT_RIGHT, tableY));
 
-  const totalsX = 360;
   tableY -= 28;
   ops.push(setFill(MUTED));
-  ops.push(text("Subtotal", totalsX, tableY, 10));
+  ops.push(text("Subtotal", TOTALS_X, tableY, 10));
   ops.push(setFill(INK));
   ops.push(textRight(total, CONTENT_RIGHT, tableY, 10, true));
 
   tableY -= 12;
   ops.push(setStroke(RULE));
-  ops.push(line(totalsX, tableY, CONTENT_RIGHT, tableY));
+  ops.push(line(TOTALS_X, tableY, CONTENT_RIGHT, tableY));
   tableY -= 20;
   ops.push(setFill(INK));
-  ops.push(text("Amount due", totalsX, tableY, 12, true));
+  ops.push(text("Amount due", TOTALS_X, tableY, 12, true));
   ops.push(setFill({ r: 0.36, g: 0.24, b: 0.09 }));
   ops.push(textRight(total, CONTENT_RIGHT, tableY, 12, true));
 
-  const authRuleY = 206;
+  const authRuleY = 220;
   ops.push(setStroke(RULE));
   ops.push("0.8 w");
   ops.push(line(MARGIN_X, authRuleY, CONTENT_RIGHT, authRuleY));
@@ -682,18 +739,25 @@ export function buildInvoicePdf(
     `Location: ${addressLines[0] ?? "-"}`,
     ...addressLines.slice(1),
   ];
-  const footerBaseY = 28;
+  const footerBaseY = 32;
   const footerSize = 9;
+  const footerRight = PAGE_W * 0.88;
   ops.push(setFill(FOOTER_INK));
   ops.push(text(phoneLabel, MARGIN_X, footerBaseY, footerSize, true));
   const emailWidth = measureWidth(emailLabel, footerSize, true);
   ops.push(
-    text(emailLabel, (PAGE_W - emailWidth) / 2, footerBaseY, footerSize, true),
+    text(
+      emailLabel,
+      Math.min((PAGE_W - emailWidth) / 2, footerRight - emailWidth),
+      footerBaseY,
+      footerSize,
+      true,
+    ),
   );
   let locY = footerBaseY + (locationLines.length - 1) * 11;
   for (let i = locationLines.length - 1; i >= 0; i -= 1) {
     const lineText = locationLines[i] ?? "";
-    ops.push(textRight(lineText, CONTENT_RIGHT, locY, footerSize, true));
+    ops.push(textRight(lineText, footerRight, locY, footerSize, true));
     locY -= 11;
   }
 
@@ -711,9 +775,6 @@ export function buildInvoicePdf(
     readonly name: string;
     readonly asset: PngAsset;
   }> = [];
-  if (letterhead) {
-    pngExtras.push({ name: "Im0", asset: letterhead });
-  }
   if (logo) {
     pngExtras.push({ name: "Im1", asset: logo });
   }
@@ -737,7 +798,7 @@ export function buildInvoicePdf(
     const imageObject = nextObjectNumber;
     nextObjectNumber += 1;
     let maskObject: number | null = null;
-    if (item.asset.alpha !== null && item.name !== "Im0") {
+    if (item.asset.alpha !== null) {
       maskObject = nextObjectNumber;
       nextObjectNumber += 1;
     }
