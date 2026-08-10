@@ -9,6 +9,7 @@ export const loginCopy = {
   showPassword: "Show password",
   hidePassword: "Hide password",
   forgot: "Forgot password?",
+  createAccount: "Create an account",
   orDivider: "or",
   google: "Continue with Google",
   googleSubmitting: "Connecting…",
@@ -17,6 +18,27 @@ export const loginCopy = {
   validationSummary: "Check the highlighted fields and try again.",
   serverError: "Sign-in failed. Please try again.",
   credentialsError: "Invalid email or password.",
+} as const;
+
+export const registerCopy = {
+  watermark: "Jump If Zero",
+  title: "Create account",
+  lede: "Register to access your client dashboard.",
+  nameLabel: "Name",
+  emailLabel: "Email",
+  companyLabel: "Company",
+  companyHint: "Optional",
+  passwordLabel: "Password",
+  confirmPasswordLabel: "Confirm password",
+  submit: "Create account",
+  submitting: "Creating account…",
+  showPassword: "Show password",
+  hidePassword: "Hide password",
+  haveAccount: "Already have an account?",
+  signIn: "Sign in",
+  validationSummary: "Check the highlighted fields and try again.",
+  serverError: "Could not create your account. Please try again.",
+  conflictError: "An account with this email already exists.",
 } as const;
 
 export const forgotPasswordCopy = {
@@ -36,3 +58,7 @@ export const forgotPasswordCopy = {
 } as const;
 
 export type { LoginFormValues, LoginFieldErrors } from "@/schemas/login";
+export type {
+  RegisterFormValues,
+  RegisterFieldErrors,
+} from "@/schemas/register";

@@ -5,6 +5,7 @@ import * as healthReadyGet from "./api/health/ready/get.ts";
 import * as metricsGet from "./api/metrics/get.ts";
 
 import * as authLoginPost from "./api/auth/login/post.ts";
+import * as authRegisterPost from "./api/auth/register/post.ts";
 import * as authLogoutPost from "./api/auth/logout/post.ts";
 import * as authSessionValidatePost from "./api/auth/session/validate/post.ts";
 import * as authPasswordForgotPost from "./api/auth/password/forgot/post.ts";
@@ -209,6 +210,12 @@ export const routes: readonly CompiledRoute[] = [
   compileRoute("GET", "/metrics", "metrics.get", mod(metricsGet)),
 
   compileRoute("POST", "/auth/login", "auth.login", mod(authLoginPost)),
+  compileRoute(
+    "POST",
+    "/auth/register",
+    "auth.register",
+    mod(authRegisterPost),
+  ),
   compileRoute("POST", "/auth/logout", "auth.logout", mod(authLogoutPost)),
   compileRoute(
     "POST",

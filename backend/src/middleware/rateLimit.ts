@@ -31,6 +31,7 @@ export function createRateLimiter(input?: {
     }
     const isAuthSensitive =
       routeKey === "auth.login" ||
+      routeKey === "auth.register" ||
       routeKey === "auth.password.forgot" ||
       routeKey === "auth.password.reset";
 

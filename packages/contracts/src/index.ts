@@ -277,6 +277,8 @@ export {
   passwordResetResponseSchema,
   passwordChangeRequestSchema,
   passwordChangeResponseSchema,
+  customerRegisterRequestSchema,
+  customerRegisterResponseSchema,
   type UserRole,
   type HmacRole,
   type AuthSubject,
@@ -288,6 +290,8 @@ export {
   type PasswordForgotResponse,
   type PasswordResetRequest,
   type PasswordChangeRequest,
+  type CustomerRegisterRequest,
+  type CustomerRegisterResponse,
 } from "./auth.ts";
 
 export {

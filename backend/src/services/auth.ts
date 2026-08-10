@@ -1,10 +1,13 @@
 import {
+  customerRegisterRequestSchema,
   loginRequestSchema,
   passwordChangeRequestSchema,
   passwordForgotRequestSchema,
   passwordResetRequestSchema,
   sessionTokenRequestSchema,
   type Actor,
+  type CustomerRegisterRequest,
+  type CustomerRegisterResponse,
   type LoginRequest,
   type LoginResponse,
   type PasswordChangeRequest,
@@ -27,6 +30,8 @@ import {
   verifyPassword,
 } from "../lib/secrets.ts";
 import { consumeRateLimitToken } from "../lib/rate-limit.ts";
+import { audit } from "../lib/audit.ts";
+import { insertClient } from "../repositories/clients.ts";
 import {
   deleteExpiredPasswordResetTokens,
   findActivePasswordResetToken,
@@ -44,6 +49,7 @@ import {
 import {
   findActiveUserByEmail,
   findActiveUserById,
+  insertUser,
   updatePasswordHash,
 } from "../repositories/users.ts";
 import { parseInput } from "./_helpers.ts";
@@ -75,6 +81,74 @@ async function enforceLoginRateLimit(input: {
   if (!result.allowed) {
     throw new RateLimitError(10);
   }
+}
+
+async function enforceRegisterRateLimit(input: {
+  readonly email: string;
+  readonly clientIp: string;
+}): Promise<void> {
+  const emailKey = sha256Hex(input.email.toLowerCase());
+  const ipKey = sha256Hex(input.clientIp);
+  const result = await consumeRateLimitToken({
+    bucketKey: `auth.register:${ipKey}:${emailKey}`,
+    capacity: 5,
+    refillPerSecond: 0.05,
+  });
+  if (!result.allowed) {
+    throw new RateLimitError(10);
+  }
+}
+
+export async function registerCustomer(
+  raw: unknown,
+  clientIp: string,
+  correlationId: string,
+): Promise<CustomerRegisterResponse> {
+  const body = parseInput(
+    customerRegisterRequestSchema,
+    raw,
+  ) satisfies CustomerRegisterRequest;
+  await enforceRegisterRateLimit({ email: body.email, clientIp });
+
+  const existing = await findActiveUserByEmail(body.email);
+  if (existing !== null) {
+    throw new ConflictError("Email already in use");
+  }
+
+  const passwordHash = await hashPassword(body.password);
+  const user = await withTransaction(async (client) => {
+    const created = await insertUser({
+      email: body.email,
+      passwordHash,
+      name: body.name,
+      title: null,
+      role: "client",
+      client,
+    });
+    await insertClient(
+      {
+        userId: created.id,
+        company: body.company,
+        phone: "",
+        statusCode: "active",
+        memberSince: null,
+        clientContactTitle: "",
+        location: "",
+        plan: "",
+      },
+      client,
+    );
+    return created;
+  });
+
+  audit({
+    action: "auth.register",
+    correlationId,
+    actorSubjectId: user.id,
+    route: "auth.register",
+  });
+
+  return { registered: true };
 }
 
 export async function login(

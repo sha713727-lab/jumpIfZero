@@ -99,6 +99,22 @@ export const passwordChangeResponseSchema = z.object({
   changed: z.literal(true),
 });
 
+export const customerRegisterRequestSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  email: z
+    .string()
+    .trim()
+    .min(1)
+    .max(320)
+    .pipe(z.email()),
+  password: z.string().min(8).max(200),
+  company: z.string().trim().max(200).default(""),
+});
+
+export const customerRegisterResponseSchema = z.object({
+  registered: z.literal(true),
+});
+
 export type UserRole = z.infer<typeof userRoleSchema>;
 export type HmacRole = z.infer<typeof hmacRoleSchema>;
 export type AuthSubject = z.infer<typeof authSubjectSchema>;
@@ -114,3 +130,9 @@ export type PasswordForgotResponse = z.infer<
 >;
 export type PasswordResetRequest = z.infer<typeof passwordResetRequestSchema>;
 export type PasswordChangeRequest = z.infer<typeof passwordChangeRequestSchema>;
+export type CustomerRegisterRequest = z.infer<
+  typeof customerRegisterRequestSchema
+>;
+export type CustomerRegisterResponse = z.infer<
+  typeof customerRegisterResponseSchema
+>;
