@@ -121,8 +121,7 @@ export function ProfilePage() {
     setPasswordStatus("saved");
   };
 
-  const fieldClass =
-    "mt-2 w-full rounded-xl border-0 bg-[rgba(92, 104, 73,0.1)] px-4 py-3 text-[0.92rem] font-medium outline-none focus-visible:shadow-[0_0_0_2px_#f3f5ef,0_0_0_4px_#f9a137]";
+  const fieldClass = `${adminFieldClass} mt-2`;
 
   return (
     <div className="space-y-6">
@@ -194,7 +193,7 @@ export function ProfilePage() {
               <div key={key}>
                 <label
                   htmlFor={`${formId}-${key}`}
-                  className="block text-[0.8rem] font-bold text-[#0d120b]"
+                  className={adminLabelClass}
                 >
                   {label}
                 </label>
@@ -212,7 +211,7 @@ export function ProfilePage() {
             <div className="sm:col-span-2">
               <label
                 htmlFor={`${formId}-email`}
-                className="block text-[0.8rem] font-bold text-[#0d120b]"
+                className={adminLabelClass}
               >
                 Email
               </label>

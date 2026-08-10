@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import { adminFieldClass, adminLabelClass } from "@/components/admin/adminFormStyles";
 import { ForgotPasswordModal } from "@/components/login/ForgotPasswordModal";
 import {
   employeeLoginCopy,
@@ -75,9 +76,8 @@ function EyeOffIcon({ className }: { readonly className?: string }) {
   );
 }
 
-const labelClass = "mb-2 block text-[0.9rem] font-semibold text-[#0d120b]";
-const fieldClass =
-  "w-full rounded-xl border-0 bg-[rgba(92, 104, 73,0.12)] px-4 py-3.5 text-[0.95rem] font-medium text-black outline-none transition-[box-shadow,background-color] duration-200 placeholder:text-black/35 hover:bg-[rgba(92, 104, 73,0.16)] focus-visible:bg-[rgba(92, 104, 73,0.16)] focus-visible:shadow-[0_0_0_2px_#f7f5f0,0_0_0_4px_#f9a137] disabled:cursor-not-allowed disabled:opacity-60";
+const labelClass = adminLabelClass;
+const fieldClass = `${adminFieldClass} py-3.5 disabled:cursor-not-allowed disabled:opacity-60`;
 
 export function EmployeeLoginPageClient() {
   const router = useRouter();

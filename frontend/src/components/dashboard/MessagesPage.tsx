@@ -201,7 +201,7 @@ export function MessagesPage() {
                 ))}
               </ul>
             ) : null}
-            <div className="flex items-end gap-2 rounded-2xl border border-black/10 bg-[#f7f8f4] p-2.5 focus-within:border-brand/40 focus-within:shadow-[0_0_0_3px_rgba(92,104,73,0.12)]">
+            <div className="flex items-end gap-2 rounded-2xl border-2 border-secondary bg-[#f7f8f4] p-2.5 focus-within:border-brand">
               <input
                 id={fileInputId}
                 type="file"

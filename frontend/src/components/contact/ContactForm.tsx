@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState, useTransition } from "react";
+import { adminFieldClass, adminLabelClass } from "@/components/admin/adminFormStyles";
 import { contactCopy } from "@/constants/contact";
 import type { SiteContactDetails } from "@/lib/data/siteContact";
 import {
@@ -11,11 +12,12 @@ import {
 const cardClass =
   "space-y-5 rounded-[1.75rem] border border-black/8 bg-white/70 p-6 shadow-[0_18px_40px_rgba(47,58,40,0.06)] md:p-8";
 
-const labelClass =
+const detailLabelClass =
   "block text-[0.66rem] font-extrabold tracking-[0.18em] text-black/40 uppercase";
 
-const fieldClass =
-  "mt-2 w-full rounded-xl border border-black/8 bg-white px-4 py-3 text-[0.92rem] font-medium text-[#0d120b] outline-none transition-colors focus-visible:border-brand/40 focus-visible:ring-2 focus-visible:ring-secondary";
+const fieldLabelClass = adminLabelClass;
+
+const fieldClass = `${adminFieldClass} mt-2`;
 
 const submitClass =
   "inline-flex w-full items-center justify-center rounded-xl bg-brand px-5 py-3.5 text-[0.9rem] font-extrabold tracking-[-0.01em] text-cream transition-colors hover:bg-[#2f3a28] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary disabled:opacity-50";
@@ -83,7 +85,7 @@ export function ContactDirect({
 
       <div className="space-y-4 border-t border-black/8 pt-6">
         <div>
-          <p className={labelClass}>{contactCopy.emailLabel}</p>
+          <p className={detailLabelClass}>{contactCopy.emailLabel}</p>
           <a
             href={`mailto:${details.email}`}
             className="mt-2 inline-block text-[0.95rem] font-extrabold tracking-[-0.02em] text-brand underline-offset-4 transition-colors hover:text-logo-gradient hover:underline focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
@@ -92,7 +94,7 @@ export function ContactDirect({
           </a>
         </div>
         <div>
-          <p className={labelClass}>{contactCopy.phoneLabel}</p>
+          <p className={detailLabelClass}>{contactCopy.phoneLabel}</p>
           <a
             href={details.phoneHref}
             className="mt-2 inline-block text-[0.95rem] font-extrabold tracking-[-0.02em] text-brand underline-offset-4 transition-colors hover:text-logo-gradient hover:underline focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
@@ -160,7 +162,7 @@ export function ContactMessageForm() {
         }}
       >
         <div>
-          <label htmlFor={`${formId}-name`} className={labelClass}>
+          <label htmlFor={`${formId}-name`} className={fieldLabelClass}>
             Name
           </label>
           <input
@@ -174,7 +176,7 @@ export function ContactMessageForm() {
           />
         </div>
         <div>
-          <label htmlFor={`${formId}-email`} className={labelClass}>
+          <label htmlFor={`${formId}-email`} className={fieldLabelClass}>
             Email
           </label>
           <input
@@ -188,7 +190,7 @@ export function ContactMessageForm() {
           />
         </div>
         <div>
-          <label htmlFor={`${formId}-subject`} className={labelClass}>
+          <label htmlFor={`${formId}-subject`} className={fieldLabelClass}>
             Subject
           </label>
           <input
@@ -200,7 +202,7 @@ export function ContactMessageForm() {
           />
         </div>
         <div>
-          <label htmlFor={`${formId}-body`} className={labelClass}>
+          <label htmlFor={`${formId}-body`} className={fieldLabelClass}>
             Message
           </label>
           <textarea
@@ -275,7 +277,7 @@ export function CallbackRequestForm() {
         }}
       >
         <div>
-          <label htmlFor={`${formId}-name`} className={labelClass}>
+          <label htmlFor={`${formId}-name`} className={fieldLabelClass}>
             Name
           </label>
           <input
@@ -289,7 +291,7 @@ export function CallbackRequestForm() {
           />
         </div>
         <div>
-          <label htmlFor={`${formId}-email`} className={labelClass}>
+          <label htmlFor={`${formId}-email`} className={fieldLabelClass}>
             Email
           </label>
           <input
@@ -303,7 +305,7 @@ export function CallbackRequestForm() {
           />
         </div>
         <div>
-          <label htmlFor={`${formId}-phone`} className={labelClass}>
+          <label htmlFor={`${formId}-phone`} className={fieldLabelClass}>
             Phone
           </label>
           <input
@@ -316,7 +318,7 @@ export function CallbackRequestForm() {
           />
         </div>
         <div>
-          <label htmlFor={`${formId}-note`} className={labelClass}>
+          <label htmlFor={`${formId}-note`} className={fieldLabelClass}>
             Note
           </label>
           <textarea

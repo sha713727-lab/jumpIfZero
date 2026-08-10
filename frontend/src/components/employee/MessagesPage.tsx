@@ -235,7 +235,7 @@ function DeliveryMessagesPage() {
               <form
                 id={formId}
                 onSubmit={onSend}
-                className="mt-4 space-y-3 rounded-2xl border border-black/8 bg-white p-3 shadow-[0_4px_16px_rgba(47,58,40,0.04)]"
+                className="mt-4 space-y-3 rounded-2xl border-2 border-secondary bg-white p-3 shadow-[0_4px_16px_rgba(47,58,40,0.04)] focus-within:border-brand"
               >
                 {error ? (
                   <p
@@ -277,7 +277,7 @@ function DeliveryMessagesPage() {
                   onChange={(event) => setDraft(event.target.value)}
                   placeholder="Write a message…"
                   aria-label="Write a message"
-                  className="w-full resize-none rounded-xl border-0 bg-[#f3f5ef] px-3.5 py-3 text-[0.9rem] font-medium text-[#0d120b] outline-none focus-visible:shadow-[0_0_0_2px_#f3f5ef,0_0_0_4px_#f9a137]"
+                  className={`${adminFieldClass} resize-none`}
                 />
                 <div className="flex items-center justify-between gap-3">
                   <div>

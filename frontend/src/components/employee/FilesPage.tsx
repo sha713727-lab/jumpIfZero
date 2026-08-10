@@ -85,7 +85,7 @@ export function FilesPage() {
         <div className="flex flex-wrap items-center gap-3">
           <label
             htmlFor="employee-file-client"
-            className="text-[0.84rem] font-semibold text-[#0d120b]"
+            className="text-[0.84rem] font-bold text-[#0d120b]"
           >
             Upload for
           </label>
@@ -93,7 +93,7 @@ export function FilesPage() {
             id="employee-file-client"
             value={uploadClientId}
             onChange={(event) => setUploadClientId(event.target.value)}
-            className="rounded-xl border border-black/10 bg-white px-3 py-2 text-[0.84rem] font-semibold"
+            className="rounded-xl border-2 border-secondary bg-white px-3 py-2 text-[0.84rem] font-semibold outline-none transition-[border-color] duration-200 focus:border-brand focus-visible:border-brand"
           >
             {state.clients.map((client) => (
               <option key={client.id} value={client.id}>

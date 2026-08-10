@@ -107,7 +107,7 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
               <p className="text-[1.08rem] font-extrabold tracking-[0.05em] text-white uppercase md:text-[1.32rem]">
                 {brandName}
               </p>
-              <p className="mt-0.5 text-[0.7rem] font-semibold tracking-[0.22em] text-white uppercase md:text-[0.78rem]">
+              <p className="mt-0.5 text-[0.7rem] font-bold tracking-[0.22em] text-white uppercase md:text-[0.78rem]">
                 {site.tagline}
               </p>
             </div>
@@ -170,16 +170,16 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
               </p>
               <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-[0.8rem]">
                 <div>
-                  <dt className="font-bold tracking-[0.08em] text-[#5c3d18]/65 uppercase">
+                  <dt className="font-extrabold tracking-[0.08em] text-[#5c3d18]/65 uppercase">
                     Issued
                   </dt>
-                  <dd className="mt-1 font-semibold">{formatDate(issued)}</dd>
+                  <dd className="mt-1 font-bold">{formatDate(issued)}</dd>
                 </div>
                 <div>
-                  <dt className="font-bold tracking-[0.08em] text-[#5c3d18]/65 uppercase">
+                  <dt className="font-extrabold tracking-[0.08em] text-[#5c3d18]/65 uppercase">
                     Due
                   </dt>
-                  <dd className="mt-1 font-semibold">
+                  <dd className="mt-1 font-bold">
                     {formatDate(invoice.dueDate)}
                   </dd>
                 </div>
@@ -202,12 +202,12 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
               <tbody>
                 <tr className="border-b border-[#1a140c]/12">
                   <td className="py-4 align-top">
-                    <p className="text-[0.94rem] font-semibold">{invoice.title}</p>
-                    <p className="mt-1 text-[0.78rem] font-medium text-[#1a140c]/55">
+                    <p className="text-[0.94rem] font-bold">{invoice.title}</p>
+                    <p className="mt-1 text-[0.78rem] font-bold text-[#1a140c]/55">
                       Professional services
                     </p>
                   </td>
-                  <td className="w-[7.5rem] py-4 align-top text-right text-[0.94rem] font-semibold">
+                  <td className="w-[7.5rem] py-4 align-top text-right text-[0.94rem] font-bold">
                     {total}
                   </td>
                 </tr>
@@ -217,8 +217,8 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
             <div className="mt-6 flex justify-end">
               <div className="w-full max-w-[14rem] space-y-2">
                 <div className="flex items-center justify-between text-[0.86rem]">
-                  <span className="font-medium text-[#1a140c]/55">Subtotal</span>
-                  <span className="font-semibold">{total}</span>
+                  <span className="font-bold text-[#1a140c]/55">Subtotal</span>
+                  <span className="font-bold">{total}</span>
                 </div>
                 <div className="flex items-center justify-between border-t border-[#1a140c]/18 pt-2.5 text-[1rem]">
                   <span className="font-extrabold tracking-[-0.02em]">
@@ -246,8 +246,8 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
                   />
                 </div>
                 <div className="mt-2 max-w-[11rem] border-b border-[#1a140c]/40" />
-                <p className="mt-2.5 text-[0.84rem] font-semibold">{brandName}</p>
-                <p className="text-[0.74rem] font-medium text-[#1a140c]/55">
+                <p className="mt-2.5 text-[0.84rem] font-bold">{brandName}</p>
+                <p className="text-[0.74rem] font-bold text-[#1a140c]/55">
                   Authorized representative
                 </p>
               </div>

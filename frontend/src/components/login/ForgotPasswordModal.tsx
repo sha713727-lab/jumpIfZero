@@ -3,6 +3,7 @@
 import { useId, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { createPortal } from "react-dom";
+import { adminFieldClass, adminLabelClass } from "@/components/admin/adminFormStyles";
 import { forgotPasswordCopy } from "@/constants/login";
 import { submitForgotPassword } from "@/lib/submitForgotPassword";
 import { useModalFocus } from "@/lib/useModalFocus";
@@ -148,7 +149,7 @@ function ForgotPasswordModalContent({
 
             <label
               htmlFor={`${formId}-email`}
-              className="mt-6 mb-2 block text-[0.9rem] font-semibold text-[#0d120b]"
+              className={`mt-6 ${adminLabelClass}`}
             >
               {forgotPasswordCopy.emailLabel}
             </label>
@@ -164,7 +165,7 @@ function ForgotPasswordModalContent({
               onChange={(event) => setEmail(event.target.value)}
               aria-invalid={Boolean(error)}
               aria-describedby={error ? `${formId}-error` : undefined}
-              className={`w-full rounded-xl border-0 bg-[rgba(92, 104, 73,0.12)] px-4 py-3.5 text-[0.95rem] font-medium text-black outline-none transition-[box-shadow,background-color] duration-200 placeholder:text-black/35 focus-visible:shadow-[0_0_0_2px_#f7f5f0,0_0_0_4px_#f9a137] disabled:opacity-60 ${error ? "shadow-[0_0_0_2px_#0d120b]" : ""}`}
+              className={`${adminFieldClass} py-3.5 disabled:opacity-60 ${error ? "border-black" : ""}`}
             />
             {error ? (
               <p

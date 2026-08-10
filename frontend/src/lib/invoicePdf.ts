@@ -657,7 +657,7 @@ export function buildInvoicePdf(
     tableY -= 14;
   }
   ops.push(setFill(MUTED));
-  ops.push(text("Professional services", MARGIN_X, tableY, 9));
+  ops.push(text("Professional services", MARGIN_X, tableY, 9, true));
   ops.push(setFill(INK));
   ops.push(
     textRight(total, CONTENT_RIGHT, tableY + 14 * titleLines.length, 11, true),
@@ -669,7 +669,7 @@ export function buildInvoicePdf(
 
   tableY -= 28;
   ops.push(setFill(MUTED));
-  ops.push(text("Subtotal", TOTALS_X, tableY, 10));
+  ops.push(text("Subtotal", TOTALS_X, tableY, 10, true));
   ops.push(setFill(INK));
   ops.push(textRight(total, CONTENT_RIGHT, tableY, 10, true));
 
@@ -725,7 +725,7 @@ export function buildInvoicePdf(
   ops.push(setFill(INK));
   ops.push(text(brandName, MARGIN_X, sigLineY - 14, 10, true));
   ops.push(setFill(MUTED));
-  ops.push(text("Authorized representative", MARGIN_X, sigLineY - 28, 9));
+  ops.push(text("Authorized representative", MARGIN_X, sigLineY - 28, 9, true));
 
   const footerPhone = invoice.footer.phone.trim() || "-";
   const footerEmail = invoice.footer.email.trim() || "-";

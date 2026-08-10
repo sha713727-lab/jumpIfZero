@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import type { FormEvent } from "react";
+import { adminFieldClass, adminLabelClass } from "@/components/admin/adminFormStyles";
 import { useDashboard } from "@/components/dashboard/DashboardProvider";
 import { sendMessageAction } from "@/lib/submitCustomerPortal";
 import { supportCopy } from "@/lib/data/dashboard";
@@ -81,7 +82,7 @@ export function SupportPage() {
 
           <label
             htmlFor={`${formId}-subject`}
-            className="block text-[0.8rem] font-bold text-[#0d120b]"
+            className={adminLabelClass}
           >
             Subject
           </label>
@@ -93,7 +94,7 @@ export function SupportPage() {
                 event.target.value as (typeof supportCopy.subjects)[number],
               )
             }
-            className="mt-2 w-full rounded-xl border-0 bg-[rgba(92, 104, 73,0.1)] px-4 py-3 text-[0.92rem] font-medium outline-none focus-visible:shadow-[0_0_0_2px_#f3f5ef,0_0_0_4px_#f9a137]"
+            className={`${adminFieldClass} mt-2`}
           >
             {supportCopy.subjects.map((item) => (
               <option key={item} value={item}>
@@ -104,7 +105,7 @@ export function SupportPage() {
 
           <label
             htmlFor={`${formId}-message`}
-            className="mt-4 block text-[0.8rem] font-bold text-[#0d120b]"
+            className={`mt-4 ${adminLabelClass}`}
           >
             Message
           </label>
@@ -114,7 +115,7 @@ export function SupportPage() {
             value={message}
             onChange={(event) => setMessage(event.target.value)}
             required
-            className="mt-2 w-full rounded-xl border-0 bg-[rgba(92, 104, 73,0.1)] px-4 py-3 text-[0.92rem] font-medium outline-none focus-visible:shadow-[0_0_0_2px_#f3f5ef,0_0_0_4px_#f9a137]"
+            className={`${adminFieldClass} mt-2`}
           />
 
           <button
