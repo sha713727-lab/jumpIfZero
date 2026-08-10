@@ -304,6 +304,7 @@ export {
   employeePublicSchema,
   employeeCreateSchema,
   employeeUpdateSchema,
+  employeeSelfImageUpdateSchema,
   employeeKindChangeSchema,
   employeeArchiveSchema,
   employeeRestoreSchema,

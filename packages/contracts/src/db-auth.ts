@@ -16,6 +16,7 @@ export const userPublicRowSchema = z.object({
   name: z.string().min(1).max(200),
   title: z.string().min(1).max(200).nullable(),
   role: z.enum(["admin", "client", "employee"]),
+  image_path: z.string().max(1024),
   version: z.number().int().min(1),
   created_at: z.coerce.date(),
   updated_at: z.coerce.date(),

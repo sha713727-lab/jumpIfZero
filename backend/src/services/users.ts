@@ -30,6 +30,7 @@ function toPublic(row: {
   readonly name: string;
   readonly title: string | null;
   readonly role: "admin" | "client" | "employee";
+  readonly image_path: string;
   readonly version: number;
   readonly created_at: Date;
   readonly updated_at: Date;
@@ -41,6 +42,7 @@ function toPublic(row: {
     name: row.name,
     title: row.title,
     role: row.role,
+    imagePath: row.image_path,
     version: row.version,
     createdAt: row.created_at.toISOString(),
     updatedAt: row.updated_at.toISOString(),
@@ -156,6 +158,7 @@ export async function updateUserSelf(
     version: body.version,
     name: body.name,
     title: body.title,
+    ...(body.imagePath !== undefined ? { imagePath: body.imagePath } : {}),
   });
   const row = await resolveVersionWrite({
     result: updated,

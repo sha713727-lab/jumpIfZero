@@ -72,6 +72,7 @@ export const userPublicSchema = z.object({
   name: z.string().min(1).max(200),
   title: z.string().min(1).max(200).nullable(),
   role: userRoleSchema,
+  imagePath: z.string().max(1024),
   version: z.number().int().min(1),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
@@ -98,6 +99,7 @@ export const userSelfUpdateSchema = z.object({
   version: z.number().int().min(1),
   name: z.string().trim().min(1).max(200),
   title: z.string().trim().min(1).max(200).nullable(),
+  imagePath: z.string().trim().max(1024).optional(),
 });
 
 export const userRoleChangeSchema = z.object({
@@ -156,6 +158,11 @@ export const employeeUpdateSchema = z.object({
   version: z.number().int().min(1),
   title: z.string().trim().max(200),
   department: z.string().trim().max(200),
+  imagePath: z.string().trim().max(1024),
+});
+
+export const employeeSelfImageUpdateSchema = z.object({
+  version: z.number().int().min(1),
   imagePath: z.string().trim().max(1024),
 });
 

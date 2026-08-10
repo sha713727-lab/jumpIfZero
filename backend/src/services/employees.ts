@@ -4,6 +4,7 @@ import {
   employeeKindChangeSchema,
   employeePublicSchema,
   employeeRestoreSchema,
+  employeeSelfImageUpdateSchema,
   employeeUpdateSchema,
   employeesListQuerySchema,
   employeesListResponseSchema,
@@ -179,6 +180,44 @@ export async function updateEmployee(
     correlationId,
     actorSubjectId: actor.subjectId,
     route: "employees.update",
+  });
+  return toPublic(row);
+}
+
+export async function updateEmployeeSelfImage(
+  actor: Actor,
+  input: unknown,
+  correlationId: string,
+): Promise<EmployeePublic> {
+  if (
+    actor.role !== "employee" ||
+    (actor.employeeKind !== "delivery" && actor.employeeKind !== "sales")
+  ) {
+    throw new ForbiddenError();
+  }
+  const body = parseInput(employeeSelfImageUpdateSchema, input);
+  const existing = await employeesRepo.getActiveEmployeeByUserId(
+    actor.subjectId,
+  );
+  if (existing === null) {
+    throw new NotFoundError("Employee not found");
+  }
+  const updated = await employeesRepo.updateEmployeeImagePath({
+    id: existing.id,
+    version: body.version,
+    imagePath: body.imagePath,
+  });
+  const row = await resolveVersionWrite({
+    result: updated,
+    lookup: () => employeesRepo.getEmployeeById(existing.id),
+    notFoundMessage: "Employee not found",
+    conflictMessage: "Employee version conflict",
+  });
+  audit({
+    action: "employee.self_image.update",
+    correlationId,
+    actorSubjectId: actor.subjectId,
+    route: "employees.me.image",
   });
   return toPublic(row);
 }

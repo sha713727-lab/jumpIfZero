@@ -26,6 +26,7 @@ import * as employeesGet from "./api/employees/get.ts";
 import * as employeesPost from "./api/employees/post.ts";
 import * as employeesIdGet from "./api/employees/[id]/get.ts";
 import * as employeesIdPatch from "./api/employees/[id]/patch.ts";
+import * as employeesMeImagePatch from "./api/employees/me/image/patch.ts";
 import * as employeesIdArchivePost from "./api/employees/[id]/archive/post.ts";
 import * as employeesIdRestorePost from "./api/employees/[id]/restore/post.ts";
 import * as employeesIdKindPost from "./api/employees/[id]/kind/post.ts";
@@ -262,6 +263,12 @@ export const routes: readonly CompiledRoute[] = [
 
   compileRoute("GET", "/employees", "employees.list", mod(employeesGet)),
   compileRoute("POST", "/employees", "employees.create", mod(employeesPost)),
+  compileRoute(
+    "PATCH",
+    "/employees/me/image",
+    "employees.me.image",
+    mod(employeesMeImagePatch),
+  ),
   compileRoute("GET", "/employees/[id]", "employees.get", mod(employeesIdGet)),
   compileRoute(
     "PATCH",

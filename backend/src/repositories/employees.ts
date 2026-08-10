@@ -235,6 +235,34 @@ export async function updateEmployee(input: {
   return getEmployeeById(id, input.client);
 }
 
+export async function updateEmployeeImagePath(input: {
+  readonly id: string;
+  readonly version: number;
+  readonly imagePath: string;
+  readonly client?: DbQueryable;
+}): Promise<EmployeePublicRow | null> {
+  const result = await query(
+    `
+      UPDATE employees
+      SET
+        image_path = $2,
+        version = version + 1,
+        updated_at = now()
+      WHERE id = $1
+        AND archived_at IS NULL
+        AND version = $3
+      RETURNING id
+    `,
+    [input.id, input.imagePath, input.version],
+    input.client,
+  );
+  const id = result.rows[0]?.id;
+  if (typeof id !== "string") {
+    return null;
+  }
+  return getEmployeeById(id, input.client);
+}
+
 export async function updateEmployeeKind(input: {
   readonly id: string;
   readonly version: number;

@@ -7,12 +7,14 @@ import {
   adminFieldClass,
   adminLabelClass,
 } from "@/components/admin/AdminFormModal";
+import { AdminImageField } from "@/components/admin/AdminImageField";
 import { adminIcons } from "@/components/admin/AdminIcons";
 import { useAdmin } from "@/components/admin/AdminProvider";
 import {
   changeAdminPasswordAction,
   getAdminMeAction,
   updateAdminAccountAction,
+  updateAdminMeImageAction,
 } from "@/lib/submitAdminSecurity";
 
 const cardClass =
@@ -26,8 +28,10 @@ export function SecurityPage() {
   const [email, setEmail] = useState("");
   const [title, setTitle] = useState("");
   const [role, setRole] = useState("Admin");
+  const [imagePath, setImagePath] = useState("");
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saved">("idle");
   const [pending, startTransition] = useTransition();
   const [loading, setLoading] = useState(true);
@@ -62,6 +66,7 @@ export function SecurityPage() {
       setName(result.profile.name);
       setEmail(result.profile.email);
       setTitle(result.profile.title ?? "");
+      setImagePath(result.profile.imagePath);
       setRole(
         result.profile.role.length > 0
           ? `${result.profile.role[0]?.toUpperCase() ?? ""}${result.profile.role.slice(1)}`
@@ -70,6 +75,7 @@ export function SecurityPage() {
       setIdentity({
         name: result.profile.name,
         email: result.profile.email,
+        image: result.profile.imagePath,
       });
       setLoading(false);
     })();
@@ -114,11 +120,45 @@ export function SecurityPage() {
       setName(result.account.name);
       setEmail(result.account.email);
       setTitle(result.account.title ?? "");
+      setImagePath(result.account.imagePath);
       setIdentity({
         name: result.account.name,
         email: result.account.email,
+        image: result.account.imagePath,
       });
       setSaveStatus("saved");
+    });
+  };
+
+  const onImageChange = (nextImagePath: string) => {
+    if (pending || name.trim().length === 0) {
+      return;
+    }
+    startTransition(async () => {
+      setImageError(null);
+      const result = await updateAdminMeImageAction({
+        version,
+        name,
+        title,
+        imagePath: nextImagePath,
+      });
+      if (!result.ok || !("account" in result)) {
+        setImageError(
+          result.ok
+            ? "Could not save profile picture."
+            : result.reason === "conflict"
+              ? "Account was updated elsewhere. Refresh and try again."
+              : "Could not save profile picture.",
+        );
+        return;
+      }
+      setVersion(result.account.version);
+      setImagePath(result.account.imagePath);
+      setIdentity({
+        name: result.account.name,
+        email: result.account.email,
+        image: result.account.imagePath,
+      });
     });
   };
 
@@ -181,6 +221,18 @@ export function SecurityPage() {
               saveAccount();
             }}
           >
+            <div>
+              {imageError ? (
+                <p className="mb-3 text-[0.84rem] font-semibold text-red-700">
+                  {imageError}
+                </p>
+              ) : null}
+              <AdminImageField
+                label="Profile picture"
+                value={imagePath}
+                onChange={onImageChange}
+              />
+            </div>
             <div>
               <label className="block">
                 <span className={adminLabelClass}>Name</span>

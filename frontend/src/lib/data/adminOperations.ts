@@ -608,6 +608,7 @@ export async function getAdminMe(actor: Actor): Promise<{
   readonly email: string;
   readonly title: string | null;
   readonly role: string;
+  readonly imagePath: string;
 }> {
   const row = await backendRequest({
     method: "GET",
@@ -622,6 +623,43 @@ export async function getAdminMe(actor: Actor): Promise<{
     email: row.email,
     title: row.title,
     role: row.role,
+    imagePath: row.imagePath,
+  };
+}
+
+export async function updateAdminMeProfile(
+  actor: Actor,
+  input: {
+    readonly version: number;
+    readonly name: string;
+    readonly title: string | null;
+    readonly imagePath: string;
+  },
+): Promise<{
+  readonly version: number;
+  readonly name: string;
+  readonly email: string;
+  readonly title: string | null;
+  readonly imagePath: string;
+}> {
+  const row = await backendRequest({
+    method: "PATCH",
+    path: "/users/me",
+    body: {
+      version: input.version,
+      name: input.name,
+      title: input.title,
+      imagePath: input.imagePath,
+    },
+    actor,
+    outputSchema: userPublicSchema,
+  });
+  return {
+    version: row.version,
+    name: row.name,
+    email: row.email,
+    title: row.title,
+    imagePath: row.imagePath,
   };
 }
 
@@ -728,6 +766,7 @@ export async function updateAdminAccount(
   readonly name: string;
   readonly email: string;
   readonly title: string | null;
+  readonly imagePath: string;
 }> {
   const row = await backendRequest({
     method: "PATCH",
@@ -746,6 +785,7 @@ export async function updateAdminAccount(
     name: row.name,
     email: row.email,
     title: row.title,
+    imagePath: row.imagePath,
   };
 }
 

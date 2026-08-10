@@ -20,8 +20,17 @@ function actorFromSession(session: SessionPayload) {
   return actorSchema.parse({
     subjectId: session.subjectId,
     role: session.role === "customer" ? "client" : session.role,
-    employeeKind: null,
+    employeeKind:
+      session.role === "employee" ? session.employeeKind : null,
   });
+}
+
+async function requireAdminOrEmployeeSession(): Promise<SessionPayload> {
+  try {
+    return await requireSession("admin");
+  } catch {
+    return requireSession("employee");
+  }
 }
 
 function buildMultipartBody(input: {
@@ -42,7 +51,7 @@ export async function uploadCmsMediaAction(
   formData: FormData,
 ): Promise<CmsMediaUploadResult> {
   try {
-    const session = await requireSession("admin");
+    const session = await requireAdminOrEmployeeSession();
     const actor = actorFromSession(session);
     const file = formData.get("file");
 
@@ -50,10 +59,10 @@ export async function uploadCmsMediaAction(
       return { ok: false, reason: "validation" };
     }
 
+    const isAdmin = session.role === "admin";
     if (
       !file.type.startsWith("image/") &&
-      file.type !== "video/mp4" &&
-      file.type !== "video/webm"
+      !(isAdmin && (file.type === "video/mp4" || file.type === "video/webm"))
     ) {
       return { ok: false, reason: "validation" };
     }
@@ -89,8 +98,6 @@ export async function uploadCmsMediaAction(
       cache: "no-store",
     });
 
-    const text = await response.text();
-
     if (!response.ok) {
       if (response.status === 401 || response.status === 403) {
         return { ok: false, reason: "unauthorized" };
@@ -101,36 +108,14 @@ export async function uploadCmsMediaAction(
       return { ok: false, reason: "server" };
     }
 
-    let json: unknown;
-    try {
-      json = text.length > 0 ? JSON.parse(text) : null;
-    } catch {
-      return { ok: false, reason: "server" };
-    }
-
-    const envelope = json as {
-      ok?: boolean;
-      data?: unknown;
-    };
-
-    if (envelope.ok !== true) {
-      return { ok: false, reason: "server" };
-    }
-
-    const parsed = cmsMediaUploadResponseSchema.safeParse(envelope.data);
+    const json: unknown = await response.json();
+    const parsed = cmsMediaUploadResponseSchema.safeParse(json);
     if (!parsed.success) {
       return { ok: false, reason: "server" };
     }
 
     return { ok: true, imagePath: parsed.data.imagePath };
-  } catch (error) {
-    if (
-      error instanceof Error &&
-      (error.message.includes("Unauthorized") ||
-        error.message.includes("Forbidden"))
-    ) {
-      return { ok: false, reason: "unauthorized" };
-    }
+  } catch {
     return { ok: false, reason: "server" };
   }
 }

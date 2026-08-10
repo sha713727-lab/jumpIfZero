@@ -9,20 +9,25 @@ import {
   adminFieldClass,
   adminLabelClass,
 } from "@/components/admin/AdminFormModal";
+import { AdminImageField } from "@/components/admin/AdminImageField";
+import { cmsMediaSrc } from "@/lib/cmsMedia";
 import { changeDeliveryPasswordAction } from "@/lib/submitEmployeeDelivery";
+import { updateEmployeeSelfImageAction } from "@/lib/submitEmployeeSelfImage";
 
 const cardClass =
   "rounded-2xl border border-black/8 bg-white p-5 shadow-[0_8px_24px_rgba(47,58,40,0.04)] md:p-6";
 
 export function ProfilePage() {
-  const { state } = useEmployee();
+  const { state, setEmployee } = useEmployee();
   const { employee } = state;
   const [modalOpen, setModalOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [imagePending, startImageTransition] = useTransition();
 
   const initials = employee.name
     .split(" ")
@@ -30,6 +35,7 @@ export function ProfilePage() {
     .join("")
     .slice(0, 2)
     .toUpperCase();
+  const avatarSrc = cmsMediaSrc(employee.image);
 
   const save = () => {
     if (!currentPassword || !password || password !== confirm) {
@@ -58,6 +64,25 @@ export function ProfilePage() {
     });
   };
 
+  const onImageChange = (imagePath: string) => {
+    startImageTransition(async () => {
+      setImageError(null);
+      const result = await updateEmployeeSelfImageAction({
+        version: employee.version,
+        imagePath,
+      });
+      if (!result.ok) {
+        setImageError(
+          result.reason === "conflict"
+            ? "Profile was updated elsewhere. Refresh and try again."
+            : "Could not save profile picture.",
+        );
+        return;
+      }
+      setEmployee(result.employee);
+    });
+  };
+
   return (
     <div className="space-y-6">
       <EmployeePageHeader
@@ -68,10 +93,10 @@ export function ProfilePage() {
       <div className="grid gap-4 lg:grid-cols-[16rem_1fr]">
         <aside className={cardClass}>
           <div className="flex flex-col items-center text-center">
-            {employee.image ? (
+            {avatarSrc ? (
               <div className="relative size-16 overflow-hidden rounded-full border border-black/8">
                 <Image
-                  src={employee.image}
+                  src={avatarSrc}
                   alt={employee.name}
                   fill
                   unoptimized
@@ -90,6 +115,20 @@ export function ProfilePage() {
             <p className="text-[0.82rem] font-medium text-black/45">
               {employee.department}
             </p>
+          </div>
+          <div className="mt-5 text-left">
+            {imageError ? (
+              <p className="mb-3 text-[0.84rem] font-semibold text-red-700">
+                {imageError}
+              </p>
+            ) : null}
+            <div className={imagePending ? "pointer-events-none opacity-60" : ""}>
+              <AdminImageField
+                label="Profile picture"
+                value={employee.image}
+                onChange={onImageChange}
+              />
+            </div>
           </div>
         </aside>
 

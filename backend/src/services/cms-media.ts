@@ -3,7 +3,11 @@ import type { Readable } from "node:stream";
 import { open } from "node:fs/promises";
 import { env } from "../config/env.ts";
 import { audit } from "../lib/audit.ts";
-import { BadRequestError, NotFoundError } from "../lib/errors.ts";
+import {
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+} from "../lib/errors.ts";
 import { parseMultipart } from "../lib/multipart.ts";
 import {
   deleteUpload,
@@ -16,24 +20,31 @@ import {
   detectMagicMime,
   resolveStoragePath,
 } from "../lib/upload-security.ts";
-import { requireAdmin } from "./_helpers.ts";
 
 const CMS_KEY_RE = /^cms\/[a-zA-Z0-9._-]+$/;
 
-const CMS_ALLOWED_MIME = new Set([
+const CMS_IMAGE_MIME = new Set([
   "image/jpeg",
   "image/png",
   "image/webp",
-  "video/mp4",
-  "video/webm",
 ]);
 
-function assertCmsMime(buffer: Buffer): string {
+const CMS_VIDEO_MIME = new Set(["video/mp4", "video/webm"]);
+
+const CMS_ALLOWED_MIME = new Set([...CMS_IMAGE_MIME, ...CMS_VIDEO_MIME]);
+
+function assertCmsMime(buffer: Buffer, allowVideo: boolean): string {
   const mime = detectMagicMime(buffer);
-  if (mime === null || !CMS_ALLOWED_MIME.has(mime)) {
+  if (mime === null) {
     throw new BadRequestError("Unsupported file type");
   }
-  return mime;
+  if (CMS_IMAGE_MIME.has(mime)) {
+    return mime;
+  }
+  if (allowVideo && CMS_VIDEO_MIME.has(mime)) {
+    return mime;
+  }
+  throw new BadRequestError("Unsupported file type");
 }
 
 function assertCmsMediaKey(key: string): void {
@@ -41,6 +52,19 @@ function assertCmsMediaKey(key: string): void {
     throw new BadRequestError("Invalid media key");
   }
   assertSafeStorageKey(key);
+}
+
+function assertCanUploadCmsMedia(actor: Actor): void {
+  if (actor.role === "admin") {
+    return;
+  }
+  if (
+    actor.role === "employee" &&
+    (actor.employeeKind === "delivery" || actor.employeeKind === "sales")
+  ) {
+    return;
+  }
+  throw new ForbiddenError();
 }
 
 export async function uploadCmsMedia(
@@ -52,7 +76,8 @@ export async function uploadCmsMedia(
   },
   correlationId: string,
 ): Promise<{ readonly imagePath: string }> {
-  requireAdmin(actor);
+  assertCanUploadCmsMedia(actor);
+  const allowVideo = actor.role === "admin";
   const multipart = await parseMultipart({
     headers: input.headers,
     rawBody: input.rawBody,
@@ -62,7 +87,7 @@ export async function uploadCmsMedia(
     throw new BadRequestError("File required");
   }
 
-  const contentType = assertCmsMime(multipart.file.buffer);
+  const contentType = assertCmsMime(multipart.file.buffer, allowVideo);
   const saved = await saveUpload({
     buffer: multipart.file.buffer,
     extension: extensionForMime(contentType),

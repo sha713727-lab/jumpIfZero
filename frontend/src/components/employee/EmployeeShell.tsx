@@ -16,6 +16,7 @@ import {
   type EmployeeNavId,
 } from "@/constants/employee";
 import { site } from "@/constants/site";
+import { cmsMediaSrc } from "@/lib/cmsMedia";
 import { submitSignOut } from "@/lib/submitSignOut";
 import type { AdminEmployee } from "@/lib/data/admin";
 
@@ -74,6 +75,7 @@ function EmployeeShellInner({
   const portalLabel =
     employee.kind === "sales" ? "Sales portal" : "Delivery portal";
   const initials = initialsFromName(employee.name);
+  const avatarSrc = cmsMediaSrc(employee.image);
 
   useEffect(() => {
     if (!isPathAllowedForKind(pathname, employee.kind)) {
@@ -89,6 +91,23 @@ function EmployeeShellInner({
     await submitSignOut("employee");
     router.replace("/employee/login");
   };
+
+  const avatar = avatarSrc ? (
+    <span className="relative inline-flex size-9 overflow-hidden rounded-full border border-black/8">
+      <Image
+        src={avatarSrc}
+        alt=""
+        fill
+        unoptimized
+        className="object-cover"
+        sizes="36px"
+      />
+    </span>
+  ) : (
+    <span className="inline-flex size-9 items-center justify-center rounded-full bg-logo-gradient text-[0.72rem] font-extrabold text-[#0d120b]">
+      {initials}
+    </span>
+  );
 
   const nav = (
     <nav aria-label="Employee" className="flex flex-1 flex-col gap-1 px-3 pb-6">
@@ -143,9 +162,7 @@ function EmployeeShellInner({
           {nav}
           <div className="mt-auto border-t border-black/8 px-4 py-4">
             <div className="flex items-center gap-3">
-              <span className="inline-flex size-9 items-center justify-center rounded-full bg-logo-gradient text-[0.72rem] font-extrabold text-[#0d120b]">
-                {initials}
-              </span>
+              {avatar}
               <div className="min-w-0">
                 <p className="truncate text-[0.84rem] font-bold">
                   {employee.name}

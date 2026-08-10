@@ -99,6 +99,7 @@ export const adminEmployeeSchema = z.object({
   department: z.string(),
   kind: employeeKindSchema,
   image: z.string(),
+  version: z.number().int().min(1),
   active: z.boolean(),
   teamMemberId: z.string().nullable(),
   updatedAt: z.string(),

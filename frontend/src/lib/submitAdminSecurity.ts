@@ -6,6 +6,7 @@ import {
   changeUserPassword,
   getAdminMe,
   updateAdminAccount,
+  updateAdminMeProfile,
 } from "@/lib/data/adminOperations";
 import { requireSession } from "@/lib/session";
 
@@ -19,6 +20,7 @@ export type AdminSecurityResult =
         readonly email: string;
         readonly title: string | null;
         readonly role: string;
+        readonly imagePath: string;
       };
     }
   | {
@@ -28,6 +30,7 @@ export type AdminSecurityResult =
         readonly name: string;
         readonly email: string;
         readonly title: string | null;
+        readonly imagePath: string;
       };
     }
   | { readonly ok: true }
@@ -94,6 +97,33 @@ export async function updateAdminAccountAction(input: {
         name: input.name.trim(),
         email: input.email.trim(),
         title: input.title.trim().length > 0 ? input.title.trim() : null,
+      },
+    );
+    return { ok: true, account };
+  } catch (error) {
+    return mapBackendError(error);
+  }
+}
+
+export async function updateAdminMeImageAction(input: {
+  readonly version: number;
+  readonly name: string;
+  readonly title: string;
+  readonly imagePath: string;
+}): Promise<AdminSecurityResult> {
+  if (input.name.trim().length === 0) {
+    return { ok: false, reason: "validation" };
+  }
+
+  try {
+    const session = await requireSession("admin");
+    const account = await updateAdminMeProfile(
+      actorFromAdminSession(session.subjectId),
+      {
+        version: input.version,
+        name: input.name.trim(),
+        title: input.title.trim().length > 0 ? input.title.trim() : null,
+        imagePath: input.imagePath,
       },
     );
     return { ok: true, account };

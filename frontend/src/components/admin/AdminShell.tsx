@@ -16,6 +16,7 @@ import {
   type AdminNavId,
 } from "@/constants/admin";
 import { site } from "@/constants/site";
+import { cmsMediaSrc } from "@/lib/cmsMedia";
 import { submitSignOut } from "@/lib/submitSignOut";
 
 const logoStyle = { width: 32, height: 31 } as const;
@@ -68,6 +69,24 @@ function AdminShellInner({
     await submitSignOut("admin");
     router.replace("/admin/login");
   };
+
+  const avatarSrc = cmsMediaSrc(identity.image);
+  const avatar = avatarSrc ? (
+    <span className="relative inline-flex size-9 overflow-hidden rounded-full border border-black/8">
+      <Image
+        src={avatarSrc}
+        alt=""
+        fill
+        unoptimized
+        className="object-cover"
+        sizes="36px"
+      />
+    </span>
+  ) : (
+    <span className="inline-flex size-9 items-center justify-center rounded-full bg-logo-gradient text-[0.72rem] font-extrabold text-[#0d120b]">
+      {identity.initials}
+    </span>
+  );
 
   const nav = (
     <nav
@@ -135,9 +154,7 @@ function AdminShellInner({
           {nav}
           <div className="mt-auto border-t border-black/8 px-4 py-4">
             <div className="flex items-center gap-3">
-              <span className="inline-flex size-9 items-center justify-center rounded-full bg-logo-gradient text-[0.72rem] font-extrabold text-[#0d120b]">
-                {identity.initials}
-              </span>
+              {avatar}
               <div className="min-w-0">
                 <p className="truncate text-[0.84rem] font-bold">
                   {identity.name}

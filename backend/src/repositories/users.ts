@@ -12,7 +12,7 @@ import { ConflictError, InternalError } from "../lib/errors.ts";
 import { isPgCode, parseRow } from "./_parse.ts";
 
 const USER_PUBLIC_COLUMNS = `
-  id, email, name, title, role, version, created_at, updated_at, archived_at
+  id, email, name, title, role, image_path, version, created_at, updated_at, archived_at
 `;
 
 export async function findActiveUserByEmail(
@@ -252,50 +252,115 @@ export async function updateUserProfile(input: {
   readonly name: string;
   readonly title: string | null;
   readonly email?: string;
+  readonly imagePath?: string;
   readonly client?: DbQueryable;
 }): Promise<UserPublicRow | null> {
   try {
-    const result =
-      input.email !== undefined
-        ? await query(
-            `
-              UPDATE users
-              SET
-                name = $2,
-                title = $3,
-                email = $4,
-                version = version + 1,
-                updated_at = now()
-              WHERE id = $1
-                AND archived_at IS NULL
-                AND version = $5
-              RETURNING ${USER_PUBLIC_COLUMNS}
-            `,
-            [
-              input.id,
-              input.name,
-              input.title,
-              input.email.toLowerCase(),
-              input.version,
-            ],
-            input.client,
-          )
-        : await query(
-            `
-              UPDATE users
-              SET
-                name = $2,
-                title = $3,
-                version = version + 1,
-                updated_at = now()
-              WHERE id = $1
-                AND archived_at IS NULL
-                AND version = $4
-              RETURNING ${USER_PUBLIC_COLUMNS}
-            `,
-            [input.id, input.name, input.title, input.version],
-            input.client,
-          );
+    if (input.email !== undefined && input.imagePath !== undefined) {
+      const result = await query(
+        `
+          UPDATE users
+          SET
+            name = $2,
+            title = $3,
+            email = $4,
+            image_path = $5,
+            version = version + 1,
+            updated_at = now()
+          WHERE id = $1
+            AND archived_at IS NULL
+            AND version = $6
+          RETURNING ${USER_PUBLIC_COLUMNS}
+        `,
+        [
+          input.id,
+          input.name,
+          input.title,
+          input.email.toLowerCase(),
+          input.imagePath,
+          input.version,
+        ],
+        input.client,
+      );
+      const row = result.rows[0];
+      if (row === undefined) {
+        return null;
+      }
+      return parseRow(userPublicRowSchema, row);
+    }
+
+    if (input.email !== undefined) {
+      const result = await query(
+        `
+          UPDATE users
+          SET
+            name = $2,
+            title = $3,
+            email = $4,
+            version = version + 1,
+            updated_at = now()
+          WHERE id = $1
+            AND archived_at IS NULL
+            AND version = $5
+          RETURNING ${USER_PUBLIC_COLUMNS}
+        `,
+        [
+          input.id,
+          input.name,
+          input.title,
+          input.email.toLowerCase(),
+          input.version,
+        ],
+        input.client,
+      );
+      const row = result.rows[0];
+      if (row === undefined) {
+        return null;
+      }
+      return parseRow(userPublicRowSchema, row);
+    }
+
+    if (input.imagePath !== undefined) {
+      const result = await query(
+        `
+          UPDATE users
+          SET
+            name = $2,
+            title = $3,
+            image_path = $4,
+            version = version + 1,
+            updated_at = now()
+          WHERE id = $1
+            AND archived_at IS NULL
+            AND version = $5
+          RETURNING ${USER_PUBLIC_COLUMNS}
+        `,
+        [input.id, input.name, input.title, input.imagePath, input.version],
+        input.client,
+      );
+      const row = result.rows[0];
+      if (row === undefined) {
+        return null;
+      }
+      return parseRow(userPublicRowSchema, row);
+    }
+
+    const result = await query(
+      `
+        UPDATE users
+        SET
+          name = $2,
+          title = $3,
+          version = version + 1,
+          updated_at = now()
+        WHERE id = $1
+          AND archived_at IS NULL
+          AND version = $4
+        RETURNING ${USER_PUBLIC_COLUMNS}
+      `,
+      [input.id, input.name, input.title, input.version],
+      input.client,
+    );
     const row = result.rows[0];
     if (row === undefined) {
       return null;

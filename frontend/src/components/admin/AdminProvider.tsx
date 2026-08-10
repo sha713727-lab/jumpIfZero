@@ -45,6 +45,7 @@ export type AdminIdentity = {
   readonly name: string;
   readonly email: string;
   readonly initials: string;
+  readonly image: string;
 };
 
 type AdminLoadedDomains = Record<AdminDomain, boolean>;
@@ -54,6 +55,7 @@ type AdminContextValue = {
   readonly setIdentity: (identity: {
     readonly name: string;
     readonly email: string;
+    readonly image?: string;
   }) => void;
   readonly state: AdminDemoState;
   readonly isDomainLoaded: (domain: AdminDomain) => boolean;
@@ -125,6 +127,7 @@ export function AdminProvider({
       identity.initials.length > 0
         ? identity.initials
         : adminInitialsFromName(identity.name),
+    image: identity.image,
   }));
   const [state, setState] = useState<AdminDemoState>(() => ({
     ...initialAdminDemoState,
@@ -135,12 +138,17 @@ export function AdminProvider({
   const inflightRef = useRef<Partial<Record<AdminDomain, Promise<void>>>>({});
 
   const setIdentity = useCallback(
-    (next: { readonly name: string; readonly email: string }) => {
-      setIdentityState({
+    (next: {
+      readonly name: string;
+      readonly email: string;
+      readonly image?: string;
+    }) => {
+      setIdentityState((current) => ({
         name: next.name,
         email: next.email,
         initials: adminInitialsFromName(next.name),
-      });
+        image: next.image !== undefined ? next.image : current.image,
+      }));
     },
     [],
   );

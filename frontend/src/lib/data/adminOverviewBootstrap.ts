@@ -62,6 +62,7 @@ export async function listAdminEmployees(
     department: row.department,
     kind: row.kind,
     image: row.imagePath,
+    version: row.version,
     active: row.archivedAt === null,
     teamMemberId: null,
     updatedAt: formatUpdatedAt(row.updatedAt),
