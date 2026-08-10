@@ -21,7 +21,7 @@ export function InvoiceDocumentClient({
   backHref,
 }: InvoiceDocumentClientProps) {
   return (
-    <div className="min-h-screen bg-white px-4 py-8 md:px-8 md:py-12 print:bg-white print:p-0">
+    <div className="invoice-print-shell min-h-screen bg-white px-4 py-8 md:px-8 md:py-12 print:bg-white print:p-0">
       <div className="mx-auto mb-6 flex w-full max-w-[800px] flex-wrap items-center justify-between gap-3 print:hidden">
         <Link
           href={backHref}
