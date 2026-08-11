@@ -271,7 +271,7 @@ Reason: local environment had no backend listener on `:3001`; browser and produc
 - Integration attempted: **20** fail (connection refused — not assertion failures)
 - Frontend lint: **0** errors after fixes
 - Bundle: **2,369,224** bytes under **12,000,000** budget
-- Build includes `/reset-password`
+- Build route table: **69** app routes (includes `/reset-password`)
 - Migrations expected: **0001–0014**
 
 ---
