@@ -23,6 +23,7 @@ const cardClass =
 
 type SalaryForm = {
   employeeId: string;
+  employeeName: string;
   designation: string;
   slipDate: string;
   salaryMonth: string;
@@ -55,6 +56,7 @@ function currentSalaryMonth(): string {
 
 const emptyForm: SalaryForm = {
   employeeId: "",
+  employeeName: "",
   designation: "",
   slipDate: todayIso(),
   salaryMonth: currentSalaryMonth(),
@@ -128,8 +130,6 @@ export function SalariesPage() {
       ...emptyForm,
       slipDate: todayIso(),
       salaryMonth: currentSalaryMonth(),
-      employeeId: state.employees[0]?.id ?? "",
-      designation: state.employees[0]?.role ?? "",
     });
     setCreateOpen(true);
   };
@@ -154,7 +154,7 @@ export function SalariesPage() {
       return;
     }
     if (form.employeeId.length === 0 || form.salaryMonth.trim().length === 0) {
-      setError("Select an employee and enter the salary month.");
+      setError("Enter a valid employee name and salary month.");
       return;
     }
     if (netSalary < 0) {
@@ -307,27 +307,31 @@ export function SalariesPage() {
         <div className="space-y-4">
           <label className="block">
             <span className={adminLabelClass}>Employee</span>
-            <select
+            <input
               className={adminFieldClass}
-              value={form.employeeId}
+              list="salary-slip-employees"
+              value={form.employeeName}
+              placeholder="Type employee name"
+              autoComplete="off"
               onChange={(event) => {
-                const employee = activeEmployees.find(
-                  (item) => item.id === event.target.value,
+                const name = event.target.value;
+                const matched = activeEmployees.find(
+                  (item) =>
+                    item.name.toLowerCase() === name.trim().toLowerCase(),
                 );
                 setForm((current) => ({
                   ...current,
-                  employeeId: event.target.value,
-                  designation: employee?.role ?? current.designation,
+                  employeeName: name,
+                  employeeId: matched?.id ?? "",
+                  designation: matched?.role ?? current.designation,
                 }));
               }}
-            >
-              <option value="">Select employee</option>
+            />
+            <datalist id="salary-slip-employees">
               {activeEmployees.map((employee) => (
-                <option key={employee.id} value={employee.id}>
-                  {employee.name}
-                </option>
+                <option key={employee.id} value={employee.name} />
               ))}
-            </select>
+            </datalist>
           </label>
 
           <div className="grid gap-4 sm:grid-cols-2">
