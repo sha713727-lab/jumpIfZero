@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogDetailClient } from "@/components/blog/BlogDetailClient";
 import { getBlogPost, getRelatedPosts } from "@/lib/data/blog";
+import { pageMetadata } from "@/lib/pageMetadata";
 
 type BlogDetailPageProps = {
   readonly params: Promise<{ slug: string }>;
@@ -14,13 +15,19 @@ export async function generateMetadata({
   const post = await getBlogPost(slug);
 
   if (!post) {
-    return { title: "Blog" };
+    return pageMetadata({
+      title: "Blog",
+      description:
+        "Insights from JZ Enterprises on websites, software, brand, SEO, and growth.",
+      path: "/blog",
+    });
   }
 
-  return {
+  return pageMetadata({
     title: post.title,
     description: post.excerpt,
-  };
+    path: `/blog/${post.slug}`,
+  });
 }
 
 export default async function BlogDetailPage({ params }: BlogDetailPageProps) {

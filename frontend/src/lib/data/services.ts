@@ -5,8 +5,14 @@ import {
 import type { ServiceRow } from "@jumpifzero/contracts/db-content";
 import { gatewayBackendRequest } from "@/lib/backend/gatewayClient";
 import { cmsMediaSrc } from "@/lib/cmsMedia";
-import { getServiceDetailBySlug } from "@/constants/serviceDetails";
-import { servicesIntro } from "@/constants/servicesStory";
+import {
+  getServiceDetail,
+  getServiceDetailBySlug,
+} from "@/constants/serviceDetails";
+import {
+  serviceChapters as staticServiceChapters,
+  servicesIntro,
+} from "@/constants/servicesStory";
 
 export type ServiceChapter = {
   readonly slug: string;
@@ -31,7 +37,9 @@ function toServiceChapter(row: ServiceRow, index: number): ServiceChapter {
 
   return {
     slug: row.slug,
-    title: row.description.length > 0 ? row.description : row.title,
+    title:
+      overlay?.title ??
+      (row.description.length > 0 ? row.description : row.title),
     quote: overlay?.quote ?? "",
     category: row.title,
     href: row.path.length > 0 ? row.path : "/contact",
@@ -44,24 +52,50 @@ function toServiceChapter(row: ServiceRow, index: number): ServiceChapter {
   };
 }
 
+function toStaticServiceChapters(): readonly ServiceChapter[] {
+  return staticServiceChapters.map((chapter, index) => {
+    const detail = getServiceDetail(chapter.category);
+    return {
+      slug: detail?.slug ?? `service-${index + 1}`,
+      title: chapter.title,
+      quote: chapter.quote,
+      category: chapter.category,
+      href: chapter.href,
+      tone: chapter.tone,
+      images: {
+        left: chapter.images.left,
+        right: chapter.images.right,
+        bottom: chapter.images.bottom,
+      },
+    };
+  });
+}
+
 export async function getServiceChapters(): Promise<readonly ServiceChapter[]> {
   return getCachedServiceChapters();
 }
 
 const getCachedServiceChapters = unstable_cache(
   async (): Promise<readonly ServiceChapter[]> => {
-    const response = await gatewayBackendRequest({
-      method: "GET",
-      path: "/content/services",
-      query: {
-        limit: "100",
-        publishedOnly: "true",
-        sort: "updated_at",
-        dir: "asc",
-      },
-      outputSchema: servicesListResponseSchema,
-    });
-    return response.items.map(toServiceChapter);
+    try {
+      const response = await gatewayBackendRequest({
+        method: "GET",
+        path: "/content/services",
+        query: {
+          limit: "100",
+          publishedOnly: "true",
+          sort: "updated_at",
+          dir: "asc",
+        },
+        outputSchema: servicesListResponseSchema,
+      });
+      if (response.items.length === 0) {
+        return toStaticServiceChapters();
+      }
+      return response.items.map(toServiceChapter);
+    } catch {
+      return toStaticServiceChapters();
+    }
   },
   ["public-service-chapters"],
   { revalidate: 60 },

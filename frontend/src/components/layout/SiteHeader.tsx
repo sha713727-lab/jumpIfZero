@@ -17,7 +17,7 @@ export function SiteHeader() {
         >
           <Image
             src="/images/jumpIfZeroLogo.png"
-            alt={site.name}
+            alt={`${site.name} logo`}
             width={40}
             height={38}
             className="h-7 w-auto drop-shadow-[0_6px_18px_rgba(249,161,55,0.22)] md:h-8 md:w-auto"

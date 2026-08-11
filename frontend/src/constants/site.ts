@@ -2,6 +2,8 @@ export const site = {
   name: "JZ Enterprises",
   legalName: "JZ Enterprises",
   tagline: "Jump If Zero",
+  description:
+    "JZ Enterprises designs end-to-end digital systems — websites, software, apps, SEO, and growth — around your goals, not generic templates.",
 } as const;
 
 export const navLinks = [

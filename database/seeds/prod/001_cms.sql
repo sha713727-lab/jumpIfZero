@@ -23,7 +23,10 @@ SELECT v.title, v.slug, v.category, v.summary, v.image_path, now()
 FROM (VALUES
   ('Growth-stage brand site', 'growth-stage-brand-site', 'Website Development', 'Architecture, UX, and front-end as one conversion system.', '/images/services/website.jpg'),
   ('Internal ops platform', 'internal-ops-platform', 'Software Development', 'Workflow-mapped product with maintainable APIs.', '/images/services/software.jpg'),
-  ('Retention-first mobile app', 'retention-first-mobile-app', 'App Development', 'Clear journeys and launch-ready builds.', '/images/services/app.jpg')
+  ('Retention-first mobile app', 'retention-first-mobile-app', 'App Development', 'Clear journeys and launch-ready builds.', '/images/services/app.jpg'),
+  ('Intent-led SEO program', 'intent-led-seo-program', 'SEO', 'Rank where customers already search.', '/images/services/seo.jpg'),
+  ('Social growth system', 'social-growth-system', 'Digital Marketing', 'Attention that turns into action.', '/images/services/smm.jpg'),
+  ('Premium brand identity', 'premium-brand-identity', 'Graphic Designing', 'Design that speaks before you do.', '/images/services/design.jpg')
 ) AS v(title, slug, category, summary, image_path)
 WHERE NOT EXISTS (
   SELECT 1 FROM portfolio_items_active p WHERE p.slug = v.slug

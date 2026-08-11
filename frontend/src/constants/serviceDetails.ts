@@ -136,7 +136,14 @@ export const serviceDetails: readonly ServiceDetail[] = [
 export function getServiceDetailBySlug(
   slug: string,
 ): ServiceDetail | undefined {
-  return serviceDetails.find((item) => item.slug === slug);
+  const aliases: Readonly<Record<string, string>> = {
+    "graphic-design": "graphic-designing",
+    "cyber-security": "network-security",
+    "network-security": "network-security",
+    "graphic-designing": "graphic-designing",
+  };
+  const resolved = aliases[slug] ?? slug;
+  return serviceDetails.find((item) => item.slug === resolved);
 }
 
 export function getServiceDetail(

@@ -10,6 +10,7 @@ import { cmsMediaSrc } from "@/lib/cmsMedia";
 import {
   portfolioCopy,
   portfolioMarqueeImages,
+  portfolioProjects,
 } from "@/constants/portfolio";
 
 export type PortfolioGsapProject = {
@@ -52,16 +53,63 @@ function toPortfolioDetail(row: PortfolioItemRow): PortfolioDetail {
   };
 }
 
+function staticPortfolioProjects(): readonly PortfolioGsapProject[] {
+  return portfolioProjects.map((item) => ({
+    slug: item.slug,
+    title: item.title,
+    img: item.img,
+    link: `/portfolio/${item.slug}`,
+    leftText: item.leftText,
+    description: item.description,
+  }));
+}
+
+function mergePortfolioProjects(
+  cmsItems: readonly PortfolioGsapProject[],
+): readonly PortfolioGsapProject[] {
+  if (cmsItems.length >= portfolioProjects.length) {
+    return cmsItems;
+  }
+  const seen = new Set(cmsItems.map((item) => item.slug));
+  const extras = staticPortfolioProjects().filter(
+    (item) => !seen.has(item.slug),
+  );
+  return [...cmsItems, ...extras];
+}
+
+function staticPortfolioDetail(slug: string): PortfolioDetail | undefined {
+  const item = portfolioProjects.find((entry) => entry.slug === slug);
+  if (!item) {
+    return undefined;
+  }
+  return {
+    slug: item.slug,
+    title: item.title,
+    category: item.leftText,
+    summary: item.description,
+    image: item.img,
+  };
+}
+
 export async function getPortfolioProjects(): Promise<
   readonly PortfolioGsapProject[]
 > {
-  const response = await gatewayBackendRequest({
-    method: "GET",
-    path: "/content/portfolio",
-    query: { limit: "100", publishedOnly: "true", sort: "updated_at", dir: "desc" },
-    outputSchema: portfolioListResponseSchema,
-  });
-  return response.items.map(toPortfolioProject);
+  try {
+    const response = await gatewayBackendRequest({
+      method: "GET",
+      path: "/content/portfolio",
+      query: {
+        limit: "100",
+        publishedOnly: "true",
+        sort: "updated_at",
+        dir: "desc",
+      },
+      outputSchema: portfolioListResponseSchema,
+    });
+    return mergePortfolioProjects(response.items.map(toPortfolioProject));
+  } catch {
+    return staticPortfolioProjects();
+  }
 }
 
 export async function getPortfolioSlugs(): Promise<readonly string[]> {
@@ -80,6 +128,6 @@ export async function getPortfolioBySlug(
     });
     return toPortfolioDetail(row);
   } catch {
-    return undefined;
+    return staticPortfolioDetail(slug);
   }
 }

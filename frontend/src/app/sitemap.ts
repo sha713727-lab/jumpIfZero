@@ -21,11 +21,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ];
 
-  const [blogSlugs, portfolioSlugs, serviceSlugs] = await Promise.all([
+  const [blogResult, portfolioResult, serviceResult] = await Promise.allSettled([
     getBlogSlugs(),
     getPortfolioSlugs(),
     getServiceSlugs(),
   ]);
+
+  const blogSlugs =
+    blogResult.status === "fulfilled" ? blogResult.value : [];
+  const portfolioSlugs =
+    portfolioResult.status === "fulfilled" ? portfolioResult.value : [];
+  const serviceSlugs =
+    serviceResult.status === "fulfilled" ? serviceResult.value : [];
 
   const blogRoutes: MetadataRoute.Sitemap = blogSlugs.map((slug) => ({
     url: `${base}/blog/${slug}`,

@@ -6,12 +6,14 @@ import {
   getSitePrinciples,
 } from "@/lib/data/siteSections";
 import { getTeamMembers } from "@/lib/data/team";
+import { pageMetadata } from "@/lib/pageMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "About",
   description:
     "JZ Enterprises designs end-to-end digital systems around your goals — strategy, design, development, and growth as one system.",
-};
+  path: "/about",
+});
 
 export default async function AboutPage() {
   const [teamMembers, studioGallery, principles, siteContact] =

@@ -77,18 +77,22 @@ function toBlogPostPreview(row: BlogPostListRow): BlogPost {
 }
 
 export async function getBlogPosts(): Promise<readonly BlogPost[]> {
-  const response = await gatewayBackendRequest({
-    method: "GET",
-    path: "/content/blog",
-    query: {
-      limit: "100",
-      publishedOnly: "true",
-      sort: "published_at",
-      dir: "desc",
-    },
-    outputSchema: blogListResponseSchema,
-  });
-  return response.items.map(toBlogPostPreview);
+  try {
+    const response = await gatewayBackendRequest({
+      method: "GET",
+      path: "/content/blog",
+      query: {
+        limit: "100",
+        publishedOnly: "true",
+        sort: "published_at",
+        dir: "desc",
+      },
+      outputSchema: blogListResponseSchema,
+    });
+    return response.items.map(toBlogPostPreview);
+  } catch {
+    return [];
+  }
 }
 
 export async function getBlogPost(slug: string): Promise<BlogPost | undefined> {

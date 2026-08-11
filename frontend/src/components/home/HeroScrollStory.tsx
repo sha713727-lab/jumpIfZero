@@ -300,7 +300,7 @@ export function HeroScrollStory() {
           >
             <Image
               src="/images/jumpIfZeroLogo.png"
-              alt={site.name}
+              alt={`${site.name} logo`}
               width={180}
               height={168}
               className="logo-shadow mb-7 h-auto w-[clamp(6rem,15vw,9.5rem)]"

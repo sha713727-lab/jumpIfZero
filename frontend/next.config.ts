@@ -35,6 +35,78 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  redirects: async () => [
+    {
+      source: "/about-us",
+      destination: "/about",
+      permanent: true,
+    },
+    {
+      source: "/about-us/",
+      destination: "/about",
+      permanent: true,
+    },
+    {
+      source: "/services-2",
+      destination: "/services",
+      permanent: true,
+    },
+    {
+      source: "/services-2/",
+      destination: "/services",
+      permanent: true,
+    },
+    {
+      source: "/search-engine-optimization",
+      destination: "/services",
+      permanent: true,
+    },
+    {
+      source: "/search-engine-optimization/",
+      destination: "/services",
+      permanent: true,
+    },
+    {
+      source: "/social-media-marketing",
+      destination: "/services",
+      permanent: true,
+    },
+    {
+      source: "/social-media-marketing/",
+      destination: "/services",
+      permanent: true,
+    },
+    {
+      source: "/website-development-services",
+      destination: "/services",
+      permanent: true,
+    },
+    {
+      source: "/website-development-services/",
+      destination: "/services",
+      permanent: true,
+    },
+    {
+      source: "/landing-page-services",
+      destination: "/services",
+      permanent: true,
+    },
+    {
+      source: "/landing-page-services/",
+      destination: "/services",
+      permanent: true,
+    },
+    {
+      source: "/the-role-of-digital-marketing",
+      destination: "/blog",
+      permanent: true,
+    },
+    {
+      source: "/the-role-of-digital-marketing/",
+      destination: "/blog",
+      permanent: true,
+    },
+  ],
   headers: async () => {
     const isDev = process.env.NODE_ENV === "development";
     const isProd = process.env.NODE_ENV === "production";

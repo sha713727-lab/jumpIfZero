@@ -9,6 +9,7 @@ import {
   ContactMessageForm,
 } from "@/components/contact/ContactForm";
 import { contactCopy } from "@/constants/contact";
+import { site } from "@/constants/site";
 import type { SiteContactDetails } from "@/lib/data/siteContact";
 import { applyHeaderTone } from "@/lib/headerTone";
 
@@ -79,8 +80,7 @@ export function ContactPageClient({
           <div className="relative">
             <Image
               src="/images/jumpIfZeroLogo.png"
-              alt=""
-              aria-hidden="true"
+              alt={`${site.name} logo`}
               width={54}
               height={52}
               className="mx-auto h-12 w-auto"

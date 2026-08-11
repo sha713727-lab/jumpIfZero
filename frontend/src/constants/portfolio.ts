@@ -34,54 +34,55 @@ export const portfolioMarqueeImages = [
   "/images/services/design-b.jpg",
 ] as const;
 
-export type PortfolioGsapProject = {
+export type PortfolioCatalogItem = {
+  readonly slug: string;
   readonly title: string;
   readonly img: string;
-  readonly link: string;
   readonly leftText: string;
   readonly description: string;
 };
 
-export const portfolioProjects: readonly PortfolioGsapProject[] = [
+export const portfolioProjects: readonly PortfolioCatalogItem[] = [
   {
-    title: "Conversion website system",
+    slug: "growth-stage-brand-site",
+    title: "Growth-stage brand site",
     img: "/images/services/website.jpg",
-    link: "/contact",
     leftText: "Website Development",
-    description: "A site that sells while the team sleeps.",
+    description:
+      "Architecture, UX, and front-end as one conversion system.",
   },
   {
-    title: "Custom operations platform",
+    slug: "internal-ops-platform",
+    title: "Internal ops platform",
     img: "/images/services/software.jpg",
-    link: "/contact",
     leftText: "Software Development",
-    description: "Workflow software that fits how the team works.",
+    description: "Workflow-mapped product with maintainable APIs.",
   },
   {
-    title: "Mobile product launch",
+    slug: "retention-first-mobile-app",
+    title: "Retention-first mobile app",
     img: "/images/services/app.jpg",
-    link: "/contact",
     leftText: "App Development",
-    description: "Useful in the hand. Strong in the market.",
+    description: "Clear journeys and launch-ready builds.",
   },
   {
+    slug: "intent-led-seo-program",
     title: "Intent-led SEO program",
     img: "/images/services/seo.jpg",
-    link: "/contact",
     leftText: "SEO",
     description: "Rank where customers already search.",
   },
   {
+    slug: "social-growth-system",
     title: "Social growth system",
     img: "/images/services/smm.jpg",
-    link: "/contact",
     leftText: "Digital Marketing",
     description: "Attention that turns into action.",
   },
   {
+    slug: "premium-brand-identity",
     title: "Premium brand identity",
     img: "/images/services/design.jpg",
-    link: "/contact",
     leftText: "Graphic Designing",
     description: "Design that speaks before you do.",
   },

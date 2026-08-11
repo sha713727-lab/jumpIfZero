@@ -162,7 +162,7 @@ export function HeaderMobileNav() {
               onClick={closeMenu}
             >
               <ProfileIcon className="size-5 shrink-0" />
-              Account
+              Client Login
             </Link>
           </nav>
         </aside>
@@ -174,7 +174,7 @@ export function HeaderMobileNav() {
     <>
       <Link
         href={heroCopy.loginHref}
-        aria-label="Account"
+        aria-label="Client Login"
         className={`inline-flex size-9 items-center justify-center transition-colors ${styles.ink} ${styles.ring} ${styles.readable}`}
       >
         <ProfileIcon className="size-5" />

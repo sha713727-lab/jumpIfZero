@@ -48,8 +48,7 @@ export function SiteFooter() {
           >
             <Image
               src="/images/jumpIfZeroLogo.png"
-              alt=""
-              aria-hidden="true"
+              alt={`${site.name} logo`}
               width={40}
               height={38}
               className="h-8 w-auto md:h-9 md:w-auto"

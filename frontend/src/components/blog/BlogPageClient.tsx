@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react";
 import { MagneticLink } from "@/components/landingAlt/MagneticLink";
 import styles from "@/components/landingAlt/landingAlt.module.css";
 import { blogCopy } from "@/constants/blog";
+import { site } from "@/constants/site";
 import type { BlogPost } from "@/lib/data/blog";
 import { applyHeaderTone } from "@/lib/headerTone";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -80,8 +81,7 @@ export function BlogPageClient({
           <div className="relative">
             <Image
               src="/images/jumpIfZeroLogo.png"
-              alt=""
-              aria-hidden="true"
+              alt={`${site.name} logo`}
               width={54}
               height={52}
               className="mx-auto h-12 w-auto"

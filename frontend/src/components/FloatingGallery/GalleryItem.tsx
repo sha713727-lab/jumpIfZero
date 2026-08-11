@@ -21,7 +21,7 @@ function GalleryItemComponent({ item, itemRef }: GalleryItemProps) {
       <Image
         className={styles.image}
         src={item.src}
-        alt=""
+        alt={item.alt || "JZ Enterprises work"}
         width={item.width}
         height={item.height}
         sizes="(max-width: 768px) 42vw, (max-width: 1200px) 28vw, 22vw"
