@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { site } from "@/constants/site";
 
 export type SalarySlipDocumentModel = {
@@ -96,12 +97,26 @@ export function SalarySlipDocument({ slip }: SalarySlipDocumentProps) {
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className={sectionLabelClass}>Salary slip</p>
-              <h1 className="mt-1 text-[1.55rem] font-extrabold tracking-[-0.02em]">
-                {site.name}
-              </h1>
-              <p className="mt-1 text-[0.84rem] font-semibold tracking-[0.04em] text-black/45 uppercase">
-                {site.tagline}
-              </p>
+              <div className="mt-2 flex items-center gap-3.5">
+                <Image
+                  src="/images/jz-invoice-logo.png"
+                  alt={site.name}
+                  width={413}
+                  height={414}
+                  sizes="64px"
+                  priority
+                  quality={100}
+                  className="h-12 w-12 object-contain md:h-[3.35rem] md:w-[3.35rem]"
+                />
+                <div>
+                  <h1 className="text-[1.55rem] font-extrabold tracking-[-0.02em]">
+                    {site.name}
+                  </h1>
+                  <p className="mt-1 text-[0.84rem] font-semibold tracking-[0.04em] text-black/45 uppercase">
+                    {site.tagline}
+                  </p>
+                </div>
+              </div>
             </div>
             <div className="text-right text-[0.84rem] font-medium text-black/55">
               <p>Date: {formatDate(slip.slipDate)}</p>
@@ -127,66 +142,76 @@ export function SalarySlipDocument({ slip }: SalarySlipDocumentProps) {
             </p>
           </div>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <div className="rounded-lg border border-black/15 p-4">
-              <div className="mb-2 grid grid-cols-[1fr_auto] gap-3 border-b border-black/12 pb-2 text-[0.72rem] font-extrabold tracking-[0.08em] text-[#5c3d18] uppercase">
-                <span>Earnings</span>
-                <span>Amount</span>
-              </div>
-              <ul className="space-y-2 text-[0.9rem]">
-                {earnings.map((row) => (
-                  <li
-                    key={row.label}
-                    className="grid grid-cols-[1fr_auto] gap-3"
-                  >
-                    <span>{row.label}</span>
-                    <span className="font-semibold tabular-nums">
-                      {money(row.value)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-3 grid grid-cols-[1fr_auto] gap-3 border-t border-black/12 pt-3 text-[0.95rem] font-extrabold">
-                <span>Total Earnings</span>
-                <span className="tabular-nums">{money(slip.totalEarnings)}</span>
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-black/15 p-4">
-              <div className="mb-2 grid grid-cols-[1fr_auto] gap-3 border-b border-black/12 pb-2 text-[0.72rem] font-extrabold tracking-[0.08em] text-[#5c3d18] uppercase">
-                <span>Deduction</span>
-                <span>Amount</span>
-              </div>
-              <ul className="space-y-2 text-[0.9rem]">
-                {deductions.map((row) => (
-                  <li
-                    key={row.label}
-                    className="grid grid-cols-[1fr_auto] gap-3"
-                  >
-                    <span>{row.label}</span>
-                    <span className="font-semibold tabular-nums">
-                      {money(row.value)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-3 grid grid-cols-[1fr_auto] gap-3 border-t border-black/12 pt-3 text-[0.95rem] font-extrabold">
-                <span>Total Deduction</span>
-                <span className="tabular-nums">
+          <table className="mt-6 w-full border-collapse text-[0.9rem]">
+            <thead>
+              <tr className="bg-black text-white">
+                <th className="border border-black px-3 py-2 text-left font-extrabold">
+                  Earnings
+                </th>
+                <th className="border border-black px-3 py-2 text-right font-extrabold">
+                  Amount
+                </th>
+                <th className="border border-black px-3 py-2 text-left font-extrabold">
+                  Deduction
+                </th>
+                <th className="border border-black px-3 py-2 text-right font-extrabold">
+                  Amount
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from(
+                {
+                  length: Math.max(earnings.length, deductions.length),
+                },
+                (_, index) => {
+                  const earning = earnings[index];
+                  const deduction = deductions[index];
+                  return (
+                    <tr key={`row-${index}`}>
+                      <td className="border border-black px-3 py-2">
+                        {earning?.label ?? ""}
+                      </td>
+                      <td className="border border-black px-3 py-2 text-right tabular-nums font-semibold">
+                        {earning ? money(earning.value) : ""}
+                      </td>
+                      <td className="border border-black px-3 py-2">
+                        {deduction?.label ?? ""}
+                      </td>
+                      <td className="border border-black px-3 py-2 text-right tabular-nums font-semibold">
+                        {deduction ? money(deduction.value) : ""}
+                      </td>
+                    </tr>
+                  );
+                },
+              )}
+              <tr className="bg-[#e8e8e8]">
+                <td className="border border-black px-3 py-2 font-extrabold">
+                  Total Earnings
+                </td>
+                <td className="border border-black px-3 py-2 text-right tabular-nums font-extrabold">
+                  {money(slip.totalEarnings)}
+                </td>
+                <td className="border border-black px-3 py-2 font-extrabold">
+                  Total Deduction
+                </td>
+                <td className="border border-black px-3 py-2 text-right tabular-nums font-extrabold">
                   {money(slip.totalDeduction)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 flex items-center justify-between rounded-xl bg-[rgba(92,104,73,0.12)] px-4 py-3">
-            <span className="text-[0.95rem] font-extrabold tracking-[0.04em] uppercase">
-              Net Salary
-            </span>
-            <span className="text-[1.15rem] font-extrabold tabular-nums">
-              {money(slip.netSalary)}
-            </span>
-          </div>
+                </td>
+              </tr>
+              <tr className="bg-black text-white">
+                <td
+                  colSpan={3}
+                  className="border border-black px-3 py-3 text-[1.05rem] font-extrabold"
+                >
+                  Net Salary
+                </td>
+                <td className="border border-black px-3 py-3 text-right text-[1.05rem] font-extrabold tabular-nums">
+                  {money(slip.netSalary)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
           <div className="mt-10 grid gap-10 sm:grid-cols-2">
             <div>
