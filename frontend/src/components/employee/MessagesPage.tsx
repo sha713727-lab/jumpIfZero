@@ -345,15 +345,16 @@ function SalesMessagesPage() {
   const [draft, setDraft] = useState("");
   const markedReadRef = useRef(new Set<string>());
 
-  useEffect(() => {
-    if (peers.length === 0) {
-      setSelectedPeerId("");
-      return;
-    }
-    if (!peers.some((peer) => peer.id === selectedPeerId)) {
-      setSelectedPeerId(peers[0]?.id ?? "");
-    }
-  }, [peers, selectedPeerId]);
+  const resolvedPeerId =
+    peers.length === 0
+      ? ""
+      : peers.some((peer) => peer.id === selectedPeerId)
+        ? selectedPeerId
+        : (peers[0]?.id ?? "");
+
+  if (resolvedPeerId !== selectedPeerId) {
+    setSelectedPeerId(resolvedPeerId);
+  }
 
   const selectedThread = threads.find(
     (thread) => thread.peer.id === selectedPeerId,

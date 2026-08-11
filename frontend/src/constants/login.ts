@@ -57,6 +57,26 @@ export const forgotPasswordCopy = {
   serverError: "Could not send a reset link. Please try again.",
 } as const;
 
+export const resetPasswordCopy = {
+  watermark: "Jump If Zero",
+  title: "Choose a new password",
+  lede: "Enter and confirm your new password to finish resetting.",
+  passwordLabel: "New password",
+  confirmPasswordLabel: "Confirm password",
+  submit: "Update password",
+  submitting: "Updating…",
+  showPassword: "Show password",
+  hidePassword: "Hide password",
+  successTitle: "Password updated",
+  successLede: "You can sign in with your new password.",
+  successCta: "Back to sign in",
+  missingToken: "This reset link is missing or incomplete.",
+  validationPassword: "Password must be at least 8 characters.",
+  validationConfirm: "Passwords must match.",
+  unauthorized: "This reset link is invalid or has expired.",
+  serverError: "Could not update your password. Please try again.",
+} as const;
+
 export type { LoginFormValues, LoginFieldErrors } from "@/schemas/login";
 export type {
   RegisterFormValues,

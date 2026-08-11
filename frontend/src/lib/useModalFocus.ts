@@ -25,7 +25,10 @@ export function useModalFocus(options: {
 }): void {
   const { open, containerRef, initialFocusRef, onClose } = options;
   const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) {

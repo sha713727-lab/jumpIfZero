@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import {
   adminFieldClass,
   adminLabelClass,
@@ -33,30 +33,46 @@ export function ClientOverviewPage() {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
-  const [form, setForm] = useState<ContactForm | null>(null);
 
   const clientId = typeof params.id === "string" ? params.id : "";
   const client = state.clients.find((item) => item.id === clientId);
+  const [formClientId, setFormClientId] = useState(clientId);
+  const [form, setForm] = useState<ContactForm | null>(
+    client
+      ? {
+          name: client.name,
+          email: client.email,
+          company: client.company,
+          phone: client.phone,
+          location: client.location,
+          plan: client.plan,
+          clientContactTitle: client.clientContactTitle,
+          status: client.status,
+          memberSince: client.memberSince,
+        }
+      : null,
+  );
 
-  useEffect(() => {
-    if (!client) {
-      setForm(null);
-      return;
-    }
-    setForm({
-      name: client.name,
-      email: client.email,
-      company: client.company,
-      phone: client.phone,
-      location: client.location,
-      plan: client.plan,
-      clientContactTitle: client.clientContactTitle,
-      status: client.status,
-      memberSince: client.memberSince,
-    });
+  if (clientId !== formClientId) {
+    setFormClientId(clientId);
     setError(null);
     setSaved(false);
-  }, [client]);
+    setForm(
+      client
+        ? {
+            name: client.name,
+            email: client.email,
+            company: client.company,
+            phone: client.phone,
+            location: client.location,
+            plan: client.plan,
+            clientContactTitle: client.clientContactTitle,
+            status: client.status,
+            memberSince: client.memberSince,
+          }
+        : null,
+    );
+  }
 
   if (!client || form === null) {
     return null;

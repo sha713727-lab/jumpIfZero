@@ -10,7 +10,6 @@ import { cmsMediaSrc } from "@/lib/cmsMedia";
 import {
   portfolioCopy,
   portfolioMarqueeImages,
-  portfolioProjects,
 } from "@/constants/portfolio";
 
 export type PortfolioGsapProject = {
@@ -53,44 +52,6 @@ function toPortfolioDetail(row: PortfolioItemRow): PortfolioDetail {
   };
 }
 
-function staticPortfolioProjects(): readonly PortfolioGsapProject[] {
-  return portfolioProjects.map((item) => ({
-    slug: item.slug,
-    title: item.title,
-    img: item.img,
-    link: `/portfolio/${item.slug}`,
-    leftText: item.leftText,
-    description: item.description,
-  }));
-}
-
-function mergePortfolioProjects(
-  cmsItems: readonly PortfolioGsapProject[],
-): readonly PortfolioGsapProject[] {
-  if (cmsItems.length >= portfolioProjects.length) {
-    return cmsItems;
-  }
-  const seen = new Set(cmsItems.map((item) => item.slug));
-  const extras = staticPortfolioProjects().filter(
-    (item) => !seen.has(item.slug),
-  );
-  return [...cmsItems, ...extras];
-}
-
-function staticPortfolioDetail(slug: string): PortfolioDetail | undefined {
-  const item = portfolioProjects.find((entry) => entry.slug === slug);
-  if (!item) {
-    return undefined;
-  }
-  return {
-    slug: item.slug,
-    title: item.title,
-    category: item.leftText,
-    summary: item.description,
-    image: item.img,
-  };
-}
-
 export async function getPortfolioProjects(): Promise<
   readonly PortfolioGsapProject[]
 > {
@@ -106,9 +67,9 @@ export async function getPortfolioProjects(): Promise<
       },
       outputSchema: portfolioListResponseSchema,
     });
-    return mergePortfolioProjects(response.items.map(toPortfolioProject));
+    return response.items.map(toPortfolioProject);
   } catch {
-    return staticPortfolioProjects();
+    return [];
   }
 }
 
@@ -128,6 +89,6 @@ export async function getPortfolioBySlug(
     });
     return toPortfolioDetail(row);
   } catch {
-    return staticPortfolioDetail(slug);
+    return undefined;
   }
 }

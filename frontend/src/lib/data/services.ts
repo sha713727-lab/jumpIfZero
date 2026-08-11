@@ -6,13 +6,9 @@ import type { ServiceRow } from "@jumpifzero/contracts/db-content";
 import { gatewayBackendRequest } from "@/lib/backend/gatewayClient";
 import { cmsMediaSrc } from "@/lib/cmsMedia";
 import {
-  getServiceDetail,
   getServiceDetailBySlug,
 } from "@/constants/serviceDetails";
-import {
-  serviceChapters as staticServiceChapters,
-  servicesIntro,
-} from "@/constants/servicesStory";
+import { servicesIntro } from "@/constants/servicesStory";
 
 export type ServiceChapter = {
   readonly slug: string;
@@ -52,25 +48,6 @@ function toServiceChapter(row: ServiceRow, index: number): ServiceChapter {
   };
 }
 
-function toStaticServiceChapters(): readonly ServiceChapter[] {
-  return staticServiceChapters.map((chapter, index) => {
-    const detail = getServiceDetail(chapter.category);
-    return {
-      slug: detail?.slug ?? `service-${index + 1}`,
-      title: chapter.title,
-      quote: chapter.quote,
-      category: chapter.category,
-      href: chapter.href,
-      tone: chapter.tone,
-      images: {
-        left: chapter.images.left,
-        right: chapter.images.right,
-        bottom: chapter.images.bottom,
-      },
-    };
-  });
-}
-
 export async function getServiceChapters(): Promise<readonly ServiceChapter[]> {
   return getCachedServiceChapters();
 }
@@ -90,11 +67,11 @@ const getCachedServiceChapters = unstable_cache(
         outputSchema: servicesListResponseSchema,
       });
       if (response.items.length === 0) {
-        return toStaticServiceChapters();
+        return [];
       }
       return response.items.map(toServiceChapter);
     } catch {
-      return toStaticServiceChapters();
+      return [];
     }
   },
   ["public-service-chapters"],

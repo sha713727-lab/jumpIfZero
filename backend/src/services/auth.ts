@@ -18,11 +18,14 @@ import {
 } from "@jumpifzero/contracts";
 import { withTransaction } from "../db/transaction.ts";
 import { sha256Hex } from "../lib/crypto.ts";
+import { env } from "../config/env.ts";
 import {
   ConflictError,
+  InternalError,
   RateLimitError,
   UnauthorizedError,
 } from "../lib/errors.ts";
+import { sendPasswordResetEmail } from "../lib/mail.ts";
 import {
   generateOpaqueToken,
   hashOpaqueToken,
@@ -256,6 +259,17 @@ export async function forgotPassword(
     tokenHash: hashOpaqueToken(resetToken),
     expiresAt: new Date(Date.now() + PASSWORD_RESET_TTL_MS),
   });
+
+  const origin = env.CORS_ORIGIN.replace(/\/$/, "");
+  const resetUrl = `${origin}/reset-password?token=${encodeURIComponent(resetToken)}`;
+  try {
+    await sendPasswordResetEmail({
+      to: user.email,
+      resetUrl,
+    });
+  } catch {
+    throw new InternalError("Password reset email failed");
+  }
 
   return { accepted: true, resetToken };
 }

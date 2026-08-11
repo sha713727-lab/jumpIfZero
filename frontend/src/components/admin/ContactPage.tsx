@@ -337,7 +337,10 @@ function ViewContactModal({
   const CloseIcon = adminIcons.close;
   const TrashIcon = adminIcons.trash;
   const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) {
