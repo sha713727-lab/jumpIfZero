@@ -4,6 +4,7 @@ export type AdminNavId =
   | "projects"
   | "messages"
   | "invoices"
+  | "salaries"
   | "files"
   | "services"
   | "portfolio"
@@ -43,6 +44,7 @@ export const adminNavGroups: readonly AdminNavGroup[] = [
       { id: "projects", name: "Projects", href: "/admin/projects" },
       { id: "messages", name: "Messages", href: "/admin/messages" },
       { id: "invoices", name: "Invoices", href: "/admin/invoices" },
+      { id: "salaries", name: "Salaries", href: "/admin/salaries" },
       { id: "files", name: "Files", href: "/admin/files" },
     ],
   },

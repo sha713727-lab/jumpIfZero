@@ -142,6 +142,13 @@ import * as invoicesIdPatch from "./api/invoices/[id]/patch.ts";
 import * as invoicesIdArchivePost from "./api/invoices/[id]/archive/post.ts";
 import * as invoicesIdRestorePost from "./api/invoices/[id]/restore/post.ts";
 
+import * as salarySlipsGet from "./api/salary-slips/get.ts";
+import * as salarySlipsPost from "./api/salary-slips/post.ts";
+import * as salarySlipsIdGet from "./api/salary-slips/[id]/get.ts";
+import * as salarySlipsIdPatch from "./api/salary-slips/[id]/patch.ts";
+import * as salarySlipsIdArchivePost from "./api/salary-slips/[id]/archive/post.ts";
+import * as salarySlipsIdRestorePost from "./api/salary-slips/[id]/restore/post.ts";
+
 import * as messagesGet from "./api/messages/get.ts";
 import * as messagesPost from "./api/messages/post.ts";
 import * as messagesIdGet from "./api/messages/[id]/get.ts";
@@ -630,6 +637,38 @@ export const routes: readonly CompiledRoute[] = [
     "/invoices/[id]/restore",
     "invoices.restore",
     mod(invoicesIdRestorePost),
+  ),
+
+  compileRoute("GET", "/salary-slips", "salarySlips.list", mod(salarySlipsGet)),
+  compileRoute(
+    "POST",
+    "/salary-slips",
+    "salarySlips.create",
+    mod(salarySlipsPost),
+  ),
+  compileRoute(
+    "GET",
+    "/salary-slips/[id]",
+    "salarySlips.get",
+    mod(salarySlipsIdGet),
+  ),
+  compileRoute(
+    "PATCH",
+    "/salary-slips/[id]",
+    "salarySlips.update",
+    mod(salarySlipsIdPatch),
+  ),
+  compileRoute(
+    "POST",
+    "/salary-slips/[id]/archive",
+    "salarySlips.archive",
+    mod(salarySlipsIdArchivePost),
+  ),
+  compileRoute(
+    "POST",
+    "/salary-slips/[id]/restore",
+    "salarySlips.restore",
+    mod(salarySlipsIdRestorePost),
   ),
 
   compileRoute("GET", "/messages", "messages.list", mod(messagesGet)),

@@ -6,6 +6,8 @@ import {
   filesListResponseSchema,
   invoicePublicSchema,
   invoicesListResponseSchema,
+  salarySlipPublicSchema,
+  salarySlipsListResponseSchema,
   messagePublicSchema,
   messagesListResponseSchema,
   passwordChangeResponseSchema,
@@ -16,6 +18,7 @@ import {
   type ClientPublic,
   type FilePublic,
   type InvoicePublic,
+  type SalarySlipPublic,
   type MessagePublic,
   type ProjectPublic,
   type UserPublic,
@@ -26,6 +29,7 @@ import type {
   AdminClient,
   AdminFile,
   AdminInvoice,
+  AdminSalarySlip,
   AdminMessage,
   AdminProject,
 } from "@jumpifzero/contracts/admin";
@@ -95,6 +99,22 @@ export function toAdminInvoice(row: InvoicePublic): AdminInvoice {
     title: row.title,
     amount: row.amount,
     billToCompany: row.billToCompany,
+    status: row.statusCode,
+    version: row.version,
+    updatedAt: formatUpdatedAt(row.updatedAt),
+  };
+}
+
+export function toAdminSalarySlip(row: SalarySlipPublic): AdminSalarySlip {
+  return {
+    id: row.id,
+    employeeId: row.employeeId,
+    employeeName: row.employeeName,
+    designation: row.designation,
+    slipDate: row.slipDate,
+    salaryMonth: row.salaryMonth,
+    netSalary: row.netSalary,
+    currency: row.currency,
     status: row.statusCode,
     version: row.version,
     updatedAt: formatUpdatedAt(row.updatedAt),
@@ -216,6 +236,31 @@ export async function listAdminInvoices(
     outputSchema: invoicesListResponseSchema,
   });
   return response.items.map(toAdminInvoice);
+}
+
+export async function listAdminSalarySlips(
+  actor: Actor,
+): Promise<AdminSalarySlip[]> {
+  const response = await backendRequest({
+    method: "GET",
+    path: "/salary-slips",
+    query: { limit: "100" },
+    actor,
+    outputSchema: salarySlipsListResponseSchema,
+  });
+  return response.items.map(toAdminSalarySlip);
+}
+
+export async function getAdminSalarySlip(
+  actor: Actor,
+  id: string,
+): Promise<SalarySlipPublic> {
+  return backendRequest({
+    method: "GET",
+    path: `/salary-slips/${id}`,
+    actor,
+    outputSchema: salarySlipPublicSchema,
+  });
 }
 
 export async function listAdminMessagesForClients(
@@ -372,6 +417,128 @@ export async function archiveAdminInvoice(
     body: { version: input.version },
     actor,
     outputSchema: invoicePublicSchema,
+  });
+}
+
+export async function createAdminSalarySlip(
+  actor: Actor,
+  input: {
+    readonly employeeId: string;
+    readonly designation?: string;
+    readonly slipDate: string;
+    readonly salaryMonth: string;
+    readonly basicSalary: string;
+    readonly punctuality: string;
+    readonly medicalAllowance: string;
+    readonly incentives: string;
+    readonly bonus: string;
+    readonly advance: string;
+    readonly incomeTax: string;
+    readonly whTax: string;
+    readonly fuelAdvances: string;
+    readonly currency: string;
+    readonly statusCode: "draft" | "issued";
+    readonly fromCompany: string;
+    readonly fromEmail: string;
+    readonly fromPhone: string;
+    readonly idempotencyKey: string;
+  },
+): Promise<AdminSalarySlip> {
+  const row = await backendRequest({
+    method: "POST",
+    path: "/salary-slips",
+    body: {
+      employeeId: input.employeeId,
+      designation: input.designation,
+      slipDate: input.slipDate,
+      salaryMonth: input.salaryMonth,
+      basicSalary: input.basicSalary,
+      punctuality: input.punctuality,
+      medicalAllowance: input.medicalAllowance,
+      incentives: input.incentives,
+      bonus: input.bonus,
+      advance: input.advance,
+      incomeTax: input.incomeTax,
+      whTax: input.whTax,
+      fuelAdvances: input.fuelAdvances,
+      currency: input.currency,
+      statusCode: input.statusCode,
+      fromCompany: input.fromCompany,
+      fromEmail: input.fromEmail,
+      fromPhone: input.fromPhone,
+    },
+    headers: { "Idempotency-Key": input.idempotencyKey },
+    actor,
+    outputSchema: salarySlipPublicSchema,
+  });
+  return toAdminSalarySlip(row);
+}
+
+export async function updateAdminSalarySlip(
+  actor: Actor,
+  input: {
+    readonly id: string;
+    readonly version: number;
+    readonly employeeName: string;
+    readonly designation: string;
+    readonly slipDate: string;
+    readonly salaryMonth: string;
+    readonly basicSalary: string;
+    readonly punctuality: string;
+    readonly medicalAllowance: string;
+    readonly incentives: string;
+    readonly bonus: string;
+    readonly advance: string;
+    readonly incomeTax: string;
+    readonly whTax: string;
+    readonly fuelAdvances: string;
+    readonly currency: string;
+    readonly statusCode: "draft" | "issued";
+    readonly fromCompany: string;
+    readonly fromEmail: string;
+    readonly fromPhone: string;
+  },
+): Promise<AdminSalarySlip> {
+  const row = await backendRequest({
+    method: "PATCH",
+    path: `/salary-slips/${input.id}`,
+    body: {
+      version: input.version,
+      employeeName: input.employeeName,
+      designation: input.designation,
+      slipDate: input.slipDate,
+      salaryMonth: input.salaryMonth,
+      basicSalary: input.basicSalary,
+      punctuality: input.punctuality,
+      medicalAllowance: input.medicalAllowance,
+      incentives: input.incentives,
+      bonus: input.bonus,
+      advance: input.advance,
+      incomeTax: input.incomeTax,
+      whTax: input.whTax,
+      fuelAdvances: input.fuelAdvances,
+      currency: input.currency,
+      statusCode: input.statusCode,
+      fromCompany: input.fromCompany,
+      fromEmail: input.fromEmail,
+      fromPhone: input.fromPhone,
+    },
+    actor,
+    outputSchema: salarySlipPublicSchema,
+  });
+  return toAdminSalarySlip(row);
+}
+
+export async function archiveAdminSalarySlip(
+  actor: Actor,
+  input: { readonly id: string; readonly version: number },
+): Promise<void> {
+  await backendRequest({
+    method: "POST",
+    path: `/salary-slips/${input.id}/archive`,
+    body: { version: input.version },
+    actor,
+    outputSchema: salarySlipPublicSchema,
   });
 }
 

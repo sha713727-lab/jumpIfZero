@@ -5,6 +5,7 @@ export { projectStatusSchema };
 
 export const clientStatusSchema = z.enum(["active", "paused"]);
 export const invoiceStatusSchema = z.enum(["draft", "sent", "paid"]);
+export const salarySlipStatusSchema = z.enum(["draft", "issued"]);
 
 export const moneyAmountSchema = z
   .string()
@@ -68,6 +69,19 @@ export const invoicesListQuerySchema = z.object({
   status: invoiceStatusSchema.optional(),
   archived: listArchivedFilterSchema,
   sort: z.enum(["created_at", "updated_at", "number", "due_date"]).default("created_at"),
+  dir: sortDirSchema.default("desc"),
+});
+
+export const salarySlipsListQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  offset: z.coerce.number().int().min(0).max(100_000).default(0),
+  q: z.string().trim().max(200).optional(),
+  employeeId: z.uuid().optional(),
+  status: salarySlipStatusSchema.optional(),
+  archived: listArchivedFilterSchema,
+  sort: z
+    .enum(["created_at", "updated_at", "slip_date", "salary_month"])
+    .default("created_at"),
   dir: sortDirSchema.default("desc"),
 });
 
@@ -293,6 +307,87 @@ export const invoiceArchiveSchema = z.object({
 
 export const invoiceRestoreSchema = invoiceArchiveSchema;
 
+export const salarySlipMoneyFieldsSchema = z.object({
+  basicSalary: moneyAmountSchema.default("0"),
+  punctuality: moneyAmountSchema.default("0"),
+  medicalAllowance: moneyAmountSchema.default("0"),
+  incentives: moneyAmountSchema.default("0"),
+  bonus: moneyAmountSchema.default("0"),
+  advance: moneyAmountSchema.default("0"),
+  incomeTax: moneyAmountSchema.default("0"),
+  whTax: moneyAmountSchema.default("0"),
+  fuelAdvances: moneyAmountSchema.default("0"),
+});
+
+export const salarySlipFromFieldsSchema = z.object({
+  fromCompany: z.string().trim().max(200).default(""),
+  fromEmail: z.string().trim().max(320).default(""),
+  fromPhone: z.string().trim().max(64).default(""),
+});
+
+export const salarySlipPublicSchema = z.object({
+  id: z.uuid(),
+  employeeId: z.uuid(),
+  employeeName: z.string().min(1).max(200),
+  designation: z.string().max(200),
+  slipDate: z.iso.date(),
+  salaryMonth: z.string().min(1).max(64),
+  basicSalary: moneyAmountSchema,
+  punctuality: moneyAmountSchema,
+  medicalAllowance: moneyAmountSchema,
+  incentives: moneyAmountSchema,
+  bonus: moneyAmountSchema,
+  advance: moneyAmountSchema,
+  incomeTax: moneyAmountSchema,
+  whTax: moneyAmountSchema,
+  fuelAdvances: moneyAmountSchema,
+  totalEarnings: moneyAmountSchema,
+  totalDeduction: moneyAmountSchema,
+  netSalary: moneyAmountSchema,
+  currency: currencySchema,
+  statusCode: salarySlipStatusSchema,
+  fromCompany: z.string().max(200),
+  fromEmail: z.string().max(320),
+  fromPhone: z.string().max(64),
+  version: z.number().int().min(1),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+  archivedAt: z.iso.datetime().nullable(),
+});
+
+export const salarySlipCreateSchema = z
+  .object({
+    employeeId: z.uuid(),
+    designation: z.string().trim().max(200).optional(),
+    slipDate: z.iso.date(),
+    salaryMonth: z.string().trim().min(1).max(64),
+    currency: currencySchema.default("PKR"),
+    statusCode: salarySlipStatusSchema.default("draft"),
+  })
+  .merge(salarySlipMoneyFieldsSchema)
+  .merge(salarySlipFromFieldsSchema);
+
+export const salarySlipUpdateSchema = z
+  .object({
+    id: z.uuid(),
+    version: z.number().int().min(1),
+    employeeName: z.string().trim().min(1).max(200),
+    designation: z.string().trim().max(200),
+    slipDate: z.iso.date(),
+    salaryMonth: z.string().trim().min(1).max(64),
+    currency: currencySchema,
+    statusCode: salarySlipStatusSchema,
+  })
+  .merge(salarySlipMoneyFieldsSchema)
+  .merge(salarySlipFromFieldsSchema);
+
+export const salarySlipArchiveSchema = z.object({
+  id: z.uuid(),
+  version: z.number().int().min(1),
+});
+
+export const salarySlipRestoreSchema = salarySlipArchiveSchema;
+
 export const messageAttachmentPublicSchema = z.object({
   fileId: z.uuid(),
   originalName: z.string().min(1).max(500),
@@ -371,6 +466,9 @@ export const projectsListResponseSchema = listResponseMetaSchema.extend({
 export const invoicesListResponseSchema = listResponseMetaSchema.extend({
   items: z.array(invoicePublicSchema),
 });
+export const salarySlipsListResponseSchema = listResponseMetaSchema.extend({
+  items: z.array(salarySlipPublicSchema),
+});
 export const messagesListResponseSchema = listResponseMetaSchema.extend({
   items: z.array(messagePublicSchema),
 });
@@ -384,6 +482,7 @@ export const assignmentsListResponseSchema = z.object({
 export type ClientPublic = z.infer<typeof clientPublicSchema>;
 export type ProjectPublic = z.infer<typeof projectPublicSchema>;
 export type InvoicePublic = z.infer<typeof invoicePublicSchema>;
+export type SalarySlipPublic = z.infer<typeof salarySlipPublicSchema>;
 export type MessageAttachmentPublic = z.infer<
   typeof messageAttachmentPublicSchema
 >;

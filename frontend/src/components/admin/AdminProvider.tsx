@@ -20,6 +20,7 @@ import {
   type AdminFaq,
   type AdminFile,
   type AdminInvoice,
+  type AdminSalarySlip,
   type AdminLead,
   type AdminLeadFollowUp,
   type AdminMessage,
@@ -74,6 +75,7 @@ type AdminContextValue = {
   readonly setProjects: (items: AdminProject[]) => void;
   readonly setMessages: (items: AdminMessage[]) => void;
   readonly setInvoices: (items: AdminInvoice[]) => void;
+  readonly setSalarySlips: (items: AdminSalarySlip[]) => void;
   readonly setFiles: (items: AdminFile[]) => void;
   readonly setCallbacks: (items: AdminCallback[]) => void;
   readonly setContactMessages: (items: AdminContactMessage[]) => void;
@@ -175,6 +177,7 @@ export function AdminProvider({
       ...(payload.clients ? { clients: [...payload.clients] } : {}),
       ...(payload.projects ? { projects: [...payload.projects] } : {}),
       ...(payload.invoices ? { invoices: [...payload.invoices] } : {}),
+      ...(payload.salarySlips ? { salarySlips: [...payload.salarySlips] } : {}),
       ...(payload.messages ? { messages: [...payload.messages] } : {}),
       ...(payload.files ? { files: [...payload.files] } : {}),
       ...(payload.employees ? { employees: [...payload.employees] } : {}),
@@ -264,6 +267,8 @@ export function AdminProvider({
         setState((current) => ({ ...current, messages })),
       setInvoices: (invoices) =>
         setState((current) => ({ ...current, invoices })),
+      setSalarySlips: (salarySlips) =>
+        setState((current) => ({ ...current, salarySlips })),
       setFiles: (files) => setState((current) => ({ ...current, files })),
       setCallbacks: (callbacks) =>
         setState((current) => ({ ...current, callbacks })),

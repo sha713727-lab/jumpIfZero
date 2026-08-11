@@ -3,6 +3,7 @@
 import { actorSchema } from "@jumpifzero/contracts/content";
 import type {
   AdminInvoice,
+  AdminSalarySlip,
   AdminMessage,
   AdminProject,
   AdminFile,
@@ -11,11 +12,14 @@ import { BackendRequestError } from "@/lib/backend/client";
 import {
   archiveAdminFile,
   archiveAdminInvoice,
+  archiveAdminSalarySlip,
   changeAdminProjectStatus,
   createAdminInvoice,
+  createAdminSalarySlip,
   createAdminMessage,
   createAdminProject,
   putClientAssignments,
+  updateAdminSalarySlip,
   uploadAdminFile,
 } from "@/lib/data/adminOperations";
 import { requireSession, type SessionPayload } from "@/lib/session";
@@ -150,6 +154,120 @@ export async function archiveInvoiceAction(input: {
   try {
     const session = await requireSession("admin");
     await archiveAdminInvoice(actorFromSession(session), input);
+    return { ok: true };
+  } catch (error) {
+    return mapBackendError(error);
+  }
+}
+
+function normalizeMoneyInput(value: string): string {
+  const cleaned = value.replace(/[^\d.]/g, "");
+  if (cleaned.length === 0) {
+    return "0";
+  }
+  return cleaned;
+}
+
+export async function createSalarySlipAction(input: {
+  readonly employeeId: string;
+  readonly designation?: string;
+  readonly slipDate: string;
+  readonly salaryMonth: string;
+  readonly basicSalary: string;
+  readonly punctuality: string;
+  readonly medicalAllowance: string;
+  readonly incentives: string;
+  readonly bonus: string;
+  readonly advance: string;
+  readonly incomeTax: string;
+  readonly whTax: string;
+  readonly fuelAdvances: string;
+  readonly currency?: string;
+  readonly statusCode?: "draft" | "issued";
+  readonly fromCompany: string;
+  readonly fromEmail: string;
+  readonly fromPhone: string;
+}): Promise<OpsActionResult<AdminSalarySlip>> {
+  try {
+    const session = await requireSession("admin");
+    const data = await createAdminSalarySlip(actorFromSession(session), {
+      employeeId: input.employeeId,
+      ...(input.designation !== undefined
+        ? { designation: input.designation }
+        : {}),
+      slipDate: input.slipDate,
+      salaryMonth: input.salaryMonth,
+      basicSalary: normalizeMoneyInput(input.basicSalary),
+      punctuality: normalizeMoneyInput(input.punctuality),
+      medicalAllowance: normalizeMoneyInput(input.medicalAllowance),
+      incentives: normalizeMoneyInput(input.incentives),
+      bonus: normalizeMoneyInput(input.bonus),
+      advance: normalizeMoneyInput(input.advance),
+      incomeTax: normalizeMoneyInput(input.incomeTax),
+      whTax: normalizeMoneyInput(input.whTax),
+      fuelAdvances: normalizeMoneyInput(input.fuelAdvances),
+      currency: input.currency ?? "PKR",
+      statusCode: input.statusCode ?? "draft",
+      fromCompany: input.fromCompany,
+      fromEmail: input.fromEmail,
+      fromPhone: input.fromPhone,
+      idempotencyKey: crypto.randomUUID(),
+    });
+    return { ok: true, data };
+  } catch (error) {
+    return mapBackendError(error);
+  }
+}
+
+export async function updateSalarySlipAction(input: {
+  readonly id: string;
+  readonly version: number;
+  readonly employeeName: string;
+  readonly designation: string;
+  readonly slipDate: string;
+  readonly salaryMonth: string;
+  readonly basicSalary: string;
+  readonly punctuality: string;
+  readonly medicalAllowance: string;
+  readonly incentives: string;
+  readonly bonus: string;
+  readonly advance: string;
+  readonly incomeTax: string;
+  readonly whTax: string;
+  readonly fuelAdvances: string;
+  readonly currency: string;
+  readonly statusCode: "draft" | "issued";
+  readonly fromCompany: string;
+  readonly fromEmail: string;
+  readonly fromPhone: string;
+}): Promise<OpsActionResult<AdminSalarySlip>> {
+  try {
+    const session = await requireSession("admin");
+    const data = await updateAdminSalarySlip(actorFromSession(session), {
+      ...input,
+      basicSalary: normalizeMoneyInput(input.basicSalary),
+      punctuality: normalizeMoneyInput(input.punctuality),
+      medicalAllowance: normalizeMoneyInput(input.medicalAllowance),
+      incentives: normalizeMoneyInput(input.incentives),
+      bonus: normalizeMoneyInput(input.bonus),
+      advance: normalizeMoneyInput(input.advance),
+      incomeTax: normalizeMoneyInput(input.incomeTax),
+      whTax: normalizeMoneyInput(input.whTax),
+      fuelAdvances: normalizeMoneyInput(input.fuelAdvances),
+    });
+    return { ok: true, data };
+  } catch (error) {
+    return mapBackendError(error);
+  }
+}
+
+export async function archiveSalarySlipAction(input: {
+  readonly id: string;
+  readonly version: number;
+}): Promise<OpsActionResult> {
+  try {
+    const session = await requireSession("admin");
+    await archiveAdminSalarySlip(actorFromSession(session), input);
     return { ok: true };
   } catch (error) {
     return mapBackendError(error);

@@ -9,6 +9,7 @@ import type {
   AdminFaq,
   AdminFile,
   AdminInvoice,
+  AdminSalarySlip,
   AdminLead,
   AdminLeadFollowUp,
   AdminMessage,
@@ -60,6 +61,7 @@ export type AdminDomainPayload = {
   readonly clients?: readonly AdminClient[];
   readonly projects?: readonly AdminProject[];
   readonly invoices?: readonly AdminInvoice[];
+  readonly salarySlips?: readonly AdminSalarySlip[];
   readonly messages?: readonly AdminMessage[];
   readonly files?: readonly AdminFile[];
   readonly employees?: readonly AdminEmployee[];
@@ -135,6 +137,7 @@ export async function loadAdminDomainAction(
       clients: data.clients,
       projects: data.projects,
       invoices: data.invoices,
+      salarySlips: data.salarySlips,
       messages: data.messages,
       files: data.files,
       employees: data.employees,

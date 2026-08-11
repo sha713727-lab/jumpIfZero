@@ -71,6 +71,40 @@ export const invoiceRowSchema = z.object({
   archived_at: z.coerce.date().nullable(),
 });
 
+export const salarySlipRowSchema = z.object({
+  id: z.uuid(),
+  employee_id: z.uuid(),
+  employee_name: z.string().min(1).max(200),
+  designation: z.string().max(200),
+  slip_date: z.coerce.date(),
+  salary_month: z.string().min(1).max(64),
+  basic_salary: z.union([z.string(), z.number()]).transform((v) => String(v)),
+  punctuality: z.union([z.string(), z.number()]).transform((v) => String(v)),
+  medical_allowance: z
+    .union([z.string(), z.number()])
+    .transform((v) => String(v)),
+  incentives: z.union([z.string(), z.number()]).transform((v) => String(v)),
+  bonus: z.union([z.string(), z.number()]).transform((v) => String(v)),
+  advance: z.union([z.string(), z.number()]).transform((v) => String(v)),
+  income_tax: z.union([z.string(), z.number()]).transform((v) => String(v)),
+  wh_tax: z.union([z.string(), z.number()]).transform((v) => String(v)),
+  fuel_advances: z.union([z.string(), z.number()]).transform((v) => String(v)),
+  total_earnings: z.union([z.string(), z.number()]).transform((v) => String(v)),
+  total_deduction: z
+    .union([z.string(), z.number()])
+    .transform((v) => String(v)),
+  net_salary: z.union([z.string(), z.number()]).transform((v) => String(v)),
+  currency: z.string().length(3),
+  status_code: z.enum(["draft", "issued"]),
+  from_company: z.string().max(200),
+  from_email: z.string().max(320),
+  from_phone: z.string().max(64),
+  version: z.number().int().min(1),
+  created_at: z.coerce.date(),
+  updated_at: z.coerce.date(),
+  archived_at: z.coerce.date().nullable(),
+});
+
 export const messageRowSchema = z.object({
   id: z.uuid(),
   client_id: z.uuid(),
@@ -116,6 +150,7 @@ export type ClientRow = z.infer<typeof clientRowSchema>;
 export type AssignmentRow = z.infer<typeof assignmentRowSchema>;
 export type ProjectRow = z.infer<typeof projectRowSchema>;
 export type InvoiceRow = z.infer<typeof invoiceRowSchema>;
+export type SalarySlipRow = z.infer<typeof salarySlipRowSchema>;
 export type MessageRow = z.infer<typeof messageRowSchema>;
 export type FileRow = z.infer<typeof fileRowSchema>;
 export type IdempotencyKeyRow = z.infer<typeof idempotencyKeyRowSchema>;

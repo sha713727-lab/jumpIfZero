@@ -232,6 +232,20 @@ export const adminInvoiceSchema = z.object({
   updatedAt: z.string(),
 });
 
+export const adminSalarySlipSchema = z.object({
+  id: z.string(),
+  employeeId: z.string(),
+  employeeName: z.string(),
+  designation: z.string(),
+  slipDate: z.string(),
+  salaryMonth: z.string(),
+  netSalary: z.string(),
+  currency: z.string(),
+  status: z.enum(["draft", "issued"]),
+  version: z.number().int().min(1),
+  updatedAt: z.string(),
+});
+
 export const adminFileSchema = z.object({
   id: z.string(),
   clientId: z.string(),
@@ -329,6 +343,7 @@ export const adminDemoStateSchema = z.object({
   projects: z.array(adminProjectSchema),
   messages: z.array(adminMessageSchema),
   invoices: z.array(adminInvoiceSchema),
+  salarySlips: z.array(adminSalarySlipSchema),
   files: z.array(adminFileSchema),
   callbacks: z.array(adminCallbackSchema),
   contactMessages: z.array(adminContactMessageSchema),
@@ -360,6 +375,7 @@ export type AdminClient = z.infer<typeof adminClientSchema>;
 export type AdminProject = z.infer<typeof adminProjectSchema>;
 export type AdminMessage = z.infer<typeof adminMessageSchema>;
 export type AdminInvoice = z.infer<typeof adminInvoiceSchema>;
+export type AdminSalarySlip = z.infer<typeof adminSalarySlipSchema>;
 export type AdminFile = z.infer<typeof adminFileSchema>;
 export type AdminCallback = z.infer<typeof adminCallbackSchema>;
 export type AdminContactMessage = z.infer<typeof adminContactMessageSchema>;
