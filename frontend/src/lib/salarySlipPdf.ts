@@ -85,13 +85,16 @@ export function buildSalarySlipPdf(
     50,
     9,
   );
-  if (slip.footer.phone) {
-    text(slip.footer.phone, 50, 9);
-  }
-  if (slip.footer.email) {
-    text(slip.footer.email, 50, 9);
-  }
-  for (const line of slip.footer.locationLines) {
+  const footerPhone = slip.footer.phone.trim() || "-";
+  const footerEmail = slip.footer.email.trim() || "-";
+  const addressLines =
+    slip.footer.locationLines.length > 0
+      ? slip.footer.locationLines
+      : ["-"];
+  text(`Phone: ${footerPhone}`, 50, 9);
+  text(`Email: ${footerEmail}`, 50, 9);
+  text(`Location: ${addressLines[0] ?? "-"}`, 50, 9);
+  for (const line of addressLines.slice(1)) {
     text(line, 50, 9);
   }
 

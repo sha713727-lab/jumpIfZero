@@ -277,7 +277,7 @@ export function SalariesPage() {
                     href={`/admin/salaries/${slip.id}/print`}
                     className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[0.8rem] font-semibold text-brand"
                   >
-                    Print
+                    View
                   </a>
                   <button
                     type="button"

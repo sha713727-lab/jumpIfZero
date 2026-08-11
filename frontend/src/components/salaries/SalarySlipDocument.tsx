@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { site } from "@/constants/site";
 
 export type SalarySlipDocumentModel = {
@@ -67,7 +66,6 @@ type SalarySlipDocumentProps = {
 };
 
 export function SalarySlipDocument({ slip }: SalarySlipDocumentProps) {
-  const brandName = slip.company.legalName || site.name;
   const money = (value: string) => formatMoney(value, slip.currency);
   const footerPhone = slip.footer.phone.trim() || "—";
   const footerEmail = slip.footer.email.trim() || "—";
@@ -94,31 +92,20 @@ export function SalarySlipDocument({ slip }: SalarySlipDocumentProps) {
   return (
     <article className="mx-auto w-full max-w-[760px] bg-white text-[#0d120b]">
       <div className="relative overflow-hidden border border-black/10 bg-white print:border-black/20">
-        <div className="relative h-[88px] w-full overflow-hidden bg-[#f7f5f0]">
-          <Image
-            src="/images/jz-invoice-letterhead.png"
-            alt=""
-            fill
-            unoptimized
-            className="object-cover object-left"
-            sizes="760px"
-            priority
-          />
-        </div>
-
         <div className="px-8 pb-8 pt-6 md:px-10">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className={sectionLabelClass}>Salary slip</p>
               <h1 className="mt-1 text-[1.55rem] font-extrabold tracking-[-0.02em]">
-                {brandName}
+                {site.name}
               </h1>
-              <p className="mt-1 text-[0.84rem] font-medium text-black/50">
-                {slip.salaryMonth}
+              <p className="mt-1 text-[0.84rem] font-semibold tracking-[0.04em] text-black/45 uppercase">
+                {site.tagline}
               </p>
             </div>
             <div className="text-right text-[0.84rem] font-medium text-black/55">
               <p>Date: {formatDate(slip.slipDate)}</p>
+              <p className="mt-1">{slip.salaryMonth}</p>
               <p className="mt-1 capitalize">{slip.status}</p>
             </div>
           </div>
@@ -140,8 +127,8 @@ export function SalarySlipDocument({ slip }: SalarySlipDocumentProps) {
             </p>
           </div>
 
-          <div className="mt-6 grid gap-6 md:grid-cols-2">
-            <div>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="rounded-lg border border-black/15 p-4">
               <div className="mb-2 grid grid-cols-[1fr_auto] gap-3 border-b border-black/12 pb-2 text-[0.72rem] font-extrabold tracking-[0.08em] text-[#5c3d18] uppercase">
                 <span>Earnings</span>
                 <span>Amount</span>
@@ -165,7 +152,7 @@ export function SalarySlipDocument({ slip }: SalarySlipDocumentProps) {
               </div>
             </div>
 
-            <div>
+            <div className="rounded-lg border border-black/15 p-4">
               <div className="mb-2 grid grid-cols-[1fr_auto] gap-3 border-b border-black/12 pb-2 text-[0.72rem] font-extrabold tracking-[0.08em] text-[#5c3d18] uppercase">
                 <span>Deduction</span>
                 <span>Amount</span>
@@ -218,13 +205,16 @@ export function SalarySlipDocument({ slip }: SalarySlipDocumentProps) {
             {disclaimer}
           </p>
 
-          <div className="mt-6 border-t border-black/10 pt-4 text-[0.78rem] font-medium text-black/50">
-            <p>{footerPhone}</p>
-            <p>{footerEmail}</p>
-            {footerLocationLines.map((line) => (
-              <p key={line}>{line}</p>
-            ))}
-          </div>
+          <footer className="mt-6 grid grid-cols-1 gap-3 border-t border-black/10 pt-4 text-[0.78rem] font-extrabold leading-[1.35] text-black/55 sm:grid-cols-3 sm:items-end sm:gap-3">
+            <p>Phone: {footerPhone}</p>
+            <p className="sm:text-center">Email: {footerEmail}</p>
+            <div className="sm:text-right">
+              <p>Location: {footerLocationLines[0]}</p>
+              {footerLocationLines.slice(1).map((line) => (
+                <p key={line}>{line}</p>
+              ))}
+            </div>
+          </footer>
         </div>
       </div>
     </article>
