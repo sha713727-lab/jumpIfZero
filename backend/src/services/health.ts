@@ -7,6 +7,14 @@ export const EXPECTED_MIGRATIONS = [
   "0004_phase5_cms",
   "0005_site_sections",
   "0006_phase_x_indexes",
+  "0007_message_attachments",
+  "0008_site_contact",
+  "0009_invoice_party_snapshot",
+  "0010_invoice_optional_client",
+  "0011_user_image_path",
+  "0012_salary_slips",
+  "0013_public_cms_nap",
+  "0014_site_contact_socials",
 ] as const;
 
 export async function getMigrationStatus(): Promise<{

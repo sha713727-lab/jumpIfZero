@@ -1,26 +1,26 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-test("readiness EXPECTED_MIGRATIONS includes 0005_site_sections", () => {
-  const file = path.join(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "../../src/services/health.ts",
+test("readiness EXPECTED_MIGRATIONS matches every *.up.sql migration", () => {
+  const unitDir = path.dirname(fileURLToPath(import.meta.url));
+  const root = path.join(unitDir, "../../..");
+  const migrationsDir = path.join(root, "database", "migrations");
+  const onDisk = readdirSync(migrationsDir)
+    .filter((name) => name.endsWith(".up.sql"))
+    .map((name) => name.replace(/\.up\.sql$/, ""))
+    .sort();
+
+  const healthSrc = readFileSync(
+    path.join(unitDir, "../../src/services/health.ts"),
+    "utf8",
   );
-  const src = readFileSync(file, "utf8");
-  const match = src.match(/EXPECTED_MIGRATIONS = \[([\s\S]*?)\] as const/);
-  assert.ok(match);
-  assert.match(match[1] ?? "", /0005_site_sections/);
-  for (const version of [
-    "0001_init",
-    "0002_jz_app_select_soft_delete",
-    "0003_password_reset_tokens",
-    "0004_phase5_cms",
-    "0005_site_sections",
-    "0006_phase_x_indexes",
-  ]) {
-    assert.match(match[1] ?? "", new RegExp(`"${version}"`));
-  }
+  const block = healthSrc.match(
+    /export const EXPECTED_MIGRATIONS = \[([\s\S]*?)\] as const;/,
+  );
+  assert.ok(block, "EXPECTED_MIGRATIONS block missing");
+  const listed = [...block[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]).sort();
+  assert.deepEqual(listed, onDisk);
 });

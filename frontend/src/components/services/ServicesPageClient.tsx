@@ -9,6 +9,7 @@ import {
   serviceFanCards,
   servicesPageCopy,
 } from "@/constants/servicesPage";
+import { serviceDetails } from "@/constants/serviceDetails";
 import { bindHeaderSectionSync } from "@/lib/headerSectionSync";
 import type { ServiceChapter } from "@/lib/data/services";
 
@@ -71,6 +72,7 @@ export function ServicesPageClient({
 }: Readonly<{
   serviceChapters: readonly ServiceChapter[];
 }>) {
+  const offeringsRef = useRef<HTMLElement | null>(null);
   const processRef = useRef<HTMLElement | null>(null);
   const ctaRef = useRef<HTMLElement | null>(null);
 
@@ -97,6 +99,62 @@ export function ServicesPageClient({
       >
         <AltServices chapters={serviceChapters} />
       </DeferredMount>
+
+      <section
+        ref={offeringsRef}
+        aria-label="Service offerings"
+        data-header-tone="light"
+        data-header-bg={CREAM_BG}
+        className="bg-cream px-5 py-20 md:px-8 md:py-28"
+      >
+        <div className="relative mx-auto w-full max-w-[1360px]">
+          <div className="relative mx-auto max-w-3xl text-center">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-[clamp(2.4rem,8vw,5.5rem)] font-extrabold tracking-[0.08em] text-logo-gradient opacity-20 uppercase select-none"
+            >
+              Offerings
+            </span>
+            <h2 className="relative z-[1] text-[clamp(1.55rem,3.4vw,2.55rem)] leading-[1.15] font-extrabold tracking-[-0.02em] text-black uppercase">
+              {servicesPageCopy.offeringsTitle}
+            </h2>
+            <p className="relative mx-auto mt-4 max-w-xl text-[clamp(0.95rem,1.8vw,1.12rem)] leading-[1.55] font-medium text-black/55 italic">
+              {servicesPageCopy.offeringsLede}
+            </p>
+          </div>
+
+          <ul className="mt-14 grid gap-8 md:mt-16 md:grid-cols-2 lg:grid-cols-3">
+            {serviceDetails.map((service) => (
+              <li key={service.slug}>
+                <article className="h-full border-t border-black/12 pt-5">
+                  <p className="text-[0.72rem] font-extrabold tracking-[0.18em] text-[#5c3d18] uppercase">
+                    {service.category}
+                  </p>
+                  <h3 className="mt-3 text-[1.15rem] leading-[1.25] font-extrabold tracking-[-0.02em] text-black">
+                    {service.title}
+                  </h3>
+                  <p className="mt-3 text-[0.9rem] leading-[1.55] font-medium text-black/55">
+                    {service.body}
+                  </p>
+                  <ul className="mt-4 space-y-2">
+                    {service.highlights.map((item) => (
+                      <li
+                        key={item}
+                        className="text-[0.84rem] leading-[1.45] font-medium text-black/70"
+                      >
+                        <span className="mr-2 text-brand" aria-hidden="true">
+                          —
+                        </span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
 
       <section
         ref={processRef}

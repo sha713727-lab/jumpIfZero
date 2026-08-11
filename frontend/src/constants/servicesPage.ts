@@ -3,6 +3,9 @@ export const servicesPageCopy = {
   heroRest: "One growth system.",
   heroSupport:
     "Strategy, creative, and technology — built so your business grows smarter.",
+  offeringsTitle: "What you can hire us for",
+  offeringsLede:
+    "Concrete offerings first — then how engagements run from brief to launch.",
   processTitle: "How engagements run",
   processLede: "Clear ownership from first brief to launch.",
   process: [

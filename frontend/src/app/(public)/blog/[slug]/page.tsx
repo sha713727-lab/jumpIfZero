@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogDetailClient } from "@/components/blog/BlogDetailClient";
+import { BlogArticleJsonLd } from "@/components/seo/BlogArticleJsonLd";
 import { getBlogPost, getRelatedPosts } from "@/lib/data/blog";
 import { pageMetadata } from "@/lib/pageMetadata";
 
@@ -41,5 +42,10 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
     notFound();
   }
 
-  return <BlogDetailClient post={post} related={related} />;
+  return (
+    <>
+      <BlogArticleJsonLd post={post} />
+      <BlogDetailClient post={post} related={related} />
+    </>
+  );
 }
