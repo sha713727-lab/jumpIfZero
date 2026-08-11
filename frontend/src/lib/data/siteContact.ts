@@ -13,6 +13,10 @@ export type SiteContactDetails = {
   readonly addressLines: readonly string[];
   readonly locationLede: string;
   readonly mapEmbedUrl: string;
+  readonly socialLinkedinUrl: string;
+  readonly socialInstagramUrl: string;
+  readonly socialFacebookUrl: string;
+  readonly socialXUrl: string;
 };
 
 function digitsOnly(value: string): string {
@@ -69,6 +73,10 @@ function toDetails(row: SiteContactPublic): SiteContactDetails {
     addressLines: row.addressLines,
     locationLede: row.locationLede,
     mapEmbedUrl: row.mapEmbedUrl,
+    socialLinkedinUrl: row.socialLinkedinUrl.trim(),
+    socialInstagramUrl: row.socialInstagramUrl.trim(),
+    socialFacebookUrl: row.socialFacebookUrl.trim(),
+    socialXUrl: row.socialXUrl.trim(),
   };
 }
 

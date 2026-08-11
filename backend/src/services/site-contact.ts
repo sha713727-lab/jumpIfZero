@@ -25,6 +25,10 @@ function toPublic(row: SiteContactRow): SiteContactPublic {
     addressLines: lines,
     locationLede: row.location_lede,
     mapEmbedUrl: row.map_embed_url,
+    socialLinkedinUrl: row.social_linkedin_url,
+    socialInstagramUrl: row.social_instagram_url,
+    socialFacebookUrl: row.social_facebook_url,
+    socialXUrl: row.social_x_url,
     version: row.version,
     updatedAt: row.updated_at.toISOString(),
   });
@@ -68,6 +72,10 @@ export async function updateSiteContact(
     addressLine3: body.addressLine3,
     locationLede: body.locationLede,
     mapEmbedUrl: body.mapEmbedUrl,
+    socialLinkedinUrl: body.socialLinkedinUrl,
+    socialInstagramUrl: body.socialInstagramUrl,
+    socialFacebookUrl: body.socialFacebookUrl,
+    socialXUrl: body.socialXUrl,
   });
   if (updated === null) {
     const existing = await siteContactRepo.getSiteContact();

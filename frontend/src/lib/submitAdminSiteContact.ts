@@ -62,6 +62,10 @@ export async function updateAdminSiteContactAction(input: {
   readonly addressLine3: string;
   readonly locationLede: string;
   readonly mapEmbedUrl: string;
+  readonly socialLinkedinUrl: string;
+  readonly socialInstagramUrl: string;
+  readonly socialFacebookUrl: string;
+  readonly socialXUrl: string;
 }): Promise<SiteContactActionResult> {
   try {
     const session = await requireSession("admin");
@@ -80,6 +84,7 @@ export async function updateAdminSiteContactAction(input: {
     revalidateTag("site-contact", "max");
     revalidatePath("/contact");
     revalidatePath("/about");
+    revalidatePath("/");
     return { ok: true, data };
   } catch (error) {
     return mapBackendError(error);

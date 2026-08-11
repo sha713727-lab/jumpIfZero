@@ -34,6 +34,10 @@ type SiteContactForm = {
   addressLine3: string;
   locationLede: string;
   mapEmbedUrl: string;
+  socialLinkedinUrl: string;
+  socialInstagramUrl: string;
+  socialFacebookUrl: string;
+  socialXUrl: string;
 };
 
 function toForm(data: SiteContactPublic): SiteContactForm {
@@ -47,6 +51,10 @@ function toForm(data: SiteContactPublic): SiteContactForm {
     addressLine3: data.addressLines[2] ?? "",
     locationLede: data.locationLede,
     mapEmbedUrl: data.mapEmbedUrl,
+    socialLinkedinUrl: data.socialLinkedinUrl,
+    socialInstagramUrl: data.socialInstagramUrl,
+    socialFacebookUrl: data.socialFacebookUrl,
+    socialXUrl: data.socialXUrl,
   };
 }
 
@@ -111,7 +119,7 @@ function SiteContactEditor() {
             Public contact details
           </h2>
           <p className="mt-1 text-[0.85rem] font-medium text-black/45">
-            Shown on Contact, About, and invoices.
+            Shown on Contact, About, footer, and invoices.
           </p>
         </div>
         <button
@@ -240,6 +248,63 @@ function SiteContactEditor() {
                 setForm({ ...form, mapEmbedUrl: e.target.value })
               }
               className={adminFieldClass}
+            />
+          </label>
+
+          <div className="md:col-span-2 border-t border-black/8 pt-4">
+            <h3 className="text-[0.92rem] font-extrabold tracking-[-0.02em] text-[#0d120b]">
+              Social links
+            </h3>
+            <p className="mt-1 text-[0.82rem] font-medium text-black/45">
+              Footer icons appear only when a URL is set.
+            </p>
+          </div>
+          <label className="block">
+            <span className={adminLabelClass}>LinkedIn URL</span>
+            <input
+              type="url"
+              value={form.socialLinkedinUrl}
+              onChange={(e) =>
+                setForm({ ...form, socialLinkedinUrl: e.target.value })
+              }
+              className={adminFieldClass}
+              placeholder="https://linkedin.com/company/..."
+            />
+          </label>
+          <label className="block">
+            <span className={adminLabelClass}>Instagram URL</span>
+            <input
+              type="url"
+              value={form.socialInstagramUrl}
+              onChange={(e) =>
+                setForm({ ...form, socialInstagramUrl: e.target.value })
+              }
+              className={adminFieldClass}
+              placeholder="https://instagram.com/..."
+            />
+          </label>
+          <label className="block">
+            <span className={adminLabelClass}>Facebook URL</span>
+            <input
+              type="url"
+              value={form.socialFacebookUrl}
+              onChange={(e) =>
+                setForm({ ...form, socialFacebookUrl: e.target.value })
+              }
+              className={adminFieldClass}
+              placeholder="https://facebook.com/..."
+            />
+          </label>
+          <label className="block">
+            <span className={adminLabelClass}>X URL</span>
+            <input
+              type="url"
+              value={form.socialXUrl}
+              onChange={(e) =>
+                setForm({ ...form, socialXUrl: e.target.value })
+              }
+              className={adminFieldClass}
+              placeholder="https://x.com/..."
             />
           </label>
         </div>

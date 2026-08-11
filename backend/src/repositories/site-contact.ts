@@ -9,7 +9,9 @@ import { parseRow } from "./_parse.ts";
 const SITE_CONTACT_COLUMNS = `
   id, singleton_key, email, phone, phone_href,
   address_label, address_line_1, address_line_2, address_line_3,
-  location_lede, map_embed_url, version, created_at, updated_at
+  location_lede, map_embed_url,
+  social_linkedin_url, social_instagram_url, social_facebook_url, social_x_url,
+  version, created_at, updated_at
 `;
 
 export async function getSiteContact(
@@ -44,6 +46,10 @@ export async function updateSiteContact(
     readonly addressLine3: string;
     readonly locationLede: string;
     readonly mapEmbedUrl: string;
+    readonly socialLinkedinUrl: string;
+    readonly socialInstagramUrl: string;
+    readonly socialFacebookUrl: string;
+    readonly socialXUrl: string;
   },
   client?: DbQueryable,
 ): Promise<SiteContactRow | null> {
@@ -60,6 +66,10 @@ export async function updateSiteContact(
         address_line_3 = $8,
         location_lede = $9,
         map_embed_url = $10,
+        social_linkedin_url = $11,
+        social_instagram_url = $12,
+        social_facebook_url = $13,
+        social_x_url = $14,
         version = version + 1,
         updated_at = now()
       WHERE singleton_key = 'default'
@@ -77,6 +87,10 @@ export async function updateSiteContact(
       input.addressLine3,
       input.locationLede,
       input.mapEmbedUrl,
+      input.socialLinkedinUrl,
+      input.socialInstagramUrl,
+      input.socialFacebookUrl,
+      input.socialXUrl,
     ],
     client,
   );

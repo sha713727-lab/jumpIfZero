@@ -444,9 +444,25 @@ export const siteContactPublicSchema = z.object({
   addressLines: z.array(z.string().max(300)).max(3),
   locationLede: z.string().max(500),
   mapEmbedUrl: z.string().max(2000),
+  socialLinkedinUrl: z.string().max(500),
+  socialInstagramUrl: z.string().max(500),
+  socialFacebookUrl: z.string().max(500),
+  socialXUrl: z.string().max(500),
   version: z.number().int().min(1),
   updatedAt: z.iso.datetime(),
 });
+
+const optionalHttpUrlSchema = z
+  .string()
+  .trim()
+  .max(500)
+  .default("")
+  .refine(
+    (value) =>
+      value.length === 0 ||
+      /^https?:\/\/.+/i.test(value),
+    { message: "Must be empty or an http(s) URL" },
+  );
 
 export const siteContactUpdateSchema = z.object({
   version: z.number().int().min(1),
@@ -459,6 +475,10 @@ export const siteContactUpdateSchema = z.object({
   addressLine3: z.string().trim().max(300).default(""),
   locationLede: z.string().trim().max(500).default(""),
   mapEmbedUrl: z.string().trim().max(2000).default(""),
+  socialLinkedinUrl: optionalHttpUrlSchema,
+  socialInstagramUrl: optionalHttpUrlSchema,
+  socialFacebookUrl: optionalHttpUrlSchema,
+  socialXUrl: optionalHttpUrlSchema,
 });
 
 export type ContentListQuery = z.infer<typeof contentListQuerySchema>;
