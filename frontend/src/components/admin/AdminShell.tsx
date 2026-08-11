@@ -140,7 +140,6 @@ function AdminShellInner({
               width={32}
               height={31}
               style={logoStyle}
-              priority
             />
             <div className="min-w-0">
               <p className="truncate text-[0.82rem] font-extrabold tracking-[-0.01em]">
