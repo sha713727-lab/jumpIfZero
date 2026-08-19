@@ -144,7 +144,8 @@ const ScrollFrameSequence = dynamic(
     loading: () => (
       <section
         id="home"
-        className="h-screen w-full bg-[#2f3a28]"
+        className="h-screen w-full"
+        style={{ background: "linear-gradient(180deg, #3d402e 0%, #4a5038 55%, #5c6147 100%)" }}
         aria-label="JZ Enterprises"
       />
     ),

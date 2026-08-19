@@ -19,6 +19,17 @@ export type SiteContactDetails = {
   readonly socialXUrl: string;
 };
 
+function normalizeString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function normalizeStringArray(value: unknown): readonly string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.filter((item): item is string => typeof item === "string");
+}
+
 function digitsOnly(value: string): string {
   return value.replace(/\D/g, "");
 }
@@ -66,17 +77,22 @@ function formatPakistanPhoneHref(phone: string, phoneHref: string): string {
 
 function toDetails(row: SiteContactPublic): SiteContactDetails {
   return {
-    email: row.email,
-    phone: formatPakistanPhoneDisplay(row.phone),
-    phoneHref: formatPakistanPhoneHref(row.phone, row.phoneHref),
-    addressLabel: row.addressLabel,
-    addressLines: row.addressLines,
-    locationLede: row.locationLede,
-    mapEmbedUrl: row.mapEmbedUrl,
-    socialLinkedinUrl: row.socialLinkedinUrl.trim(),
-    socialInstagramUrl: row.socialInstagramUrl.trim(),
-    socialFacebookUrl: row.socialFacebookUrl.trim(),
-    socialXUrl: row.socialXUrl.trim(),
+    email: normalizeString(row.email),
+    phone: formatPakistanPhoneDisplay(normalizeString(row.phone)),
+    phoneHref: formatPakistanPhoneHref(
+      normalizeString(row.phone),
+      normalizeString(row.phoneHref),
+    ),
+    addressLabel: normalizeString(row.addressLabel),
+    addressLines: normalizeStringArray(row.addressLines).filter(
+      (line) => line.trim().length > 0,
+    ),
+    locationLede: normalizeString(row.locationLede),
+    mapEmbedUrl: normalizeString(row.mapEmbedUrl),
+    socialLinkedinUrl: normalizeString(row.socialLinkedinUrl),
+    socialInstagramUrl: normalizeString(row.socialInstagramUrl),
+    socialFacebookUrl: normalizeString(row.socialFacebookUrl),
+    socialXUrl: normalizeString(row.socialXUrl),
   };
 }
 

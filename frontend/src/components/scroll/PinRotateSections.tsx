@@ -51,7 +51,7 @@ export function PinRotateSection({
             : "relative flex min-h-[100svh] w-full flex-col justify-center border-b border-black/15 bg-cream px-[6vw] py-[8vh] md:flex-row md:items-center md:justify-between md:gap-10 md:px-[8vw] md:py-[10vh]"
         }
       >
-        <div className="relative z-[1] flex w-full flex-col md:flex-row md:items-center md:justify-between md:gap-10">
+        <div className="relative z-[1] flex w-full flex-col items-center md:flex-row md:items-center md:justify-between md:gap-10">
           {children}
         </div>
       </div>

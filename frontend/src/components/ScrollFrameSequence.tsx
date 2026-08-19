@@ -2,11 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { heroCopy, site } from "@/constants/site";
+import { heroDisplay } from "@/lib/fonts";
 import { applyHeaderTone } from "@/lib/headerTone";
 
-const FRAME_DIR = "/images/JZ_Frames_30FPS";
-const FRAME_COUNT = 239;
+const FRAME_DIR = "/images/JZ_Frames_Video_24FPS";
+const FRAME_COUNT = 192;
 const FRAME_PAD = 4;
+const FRAME_VERSION = "video-v1";
 const SCROLL_DISTANCE = 4800;
 const STRIDE_DESKTOP = 4;
 const STRIDE_MOBILE = 8;
@@ -29,15 +31,20 @@ const FRAME_END = 0.78;
 const GLOW_START = 0.76;
 const GLOW_SPARK_SHARE = 0.06;
 const WASH_START = 0.9;
-const STAGE_BG = "#2f3a28";
+const STAGE_TOP = "#3d402e";
+const STAGE_MID = "#4a5038";
+const STAGE_BOTTOM = "#5c6147";
+const STAGE_GRADIENT = `linear-gradient(180deg, ${STAGE_TOP} 0%, ${STAGE_MID} 55%, ${STAGE_BOTTOM} 100%)`;
+const FRAME_WIDTH = 960;
+const FRAME_HEIGHT = 540;
 const STORY_BG = "#f7f5f0";
 const HEADER_BG = "#5c6849";
-const FRAME_VEIL = "rgba(47, 58, 40, 0.62)";
+const FRAME_VEIL = "rgba(61, 64, 46, 0.5)";
 const LOGO_GRADIENT =
   "linear-gradient(172deg, #ffe27a 0%, #ffc250 32%, #ffa040 64%, #ef8a1f 100%)";
 
 function frameSrc(index: number): string {
-  return `${FRAME_DIR}/frame_${String(index).padStart(FRAME_PAD, "0")}.webp`;
+  return `${FRAME_DIR}/frame_${String(index).padStart(FRAME_PAD, "0")}.webp?v=${FRAME_VERSION}`;
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -242,6 +249,59 @@ async function preloadFrames(
   });
 }
 
+type FrameLayout = {
+  readonly drawWidth: number;
+  readonly drawHeight: number;
+  readonly x: number;
+  readonly y: number;
+  readonly portrait: boolean;
+};
+
+function computeFrameLayout(
+  width: number,
+  height: number,
+  imageWidth: number,
+  imageHeight: number,
+): FrameLayout {
+  const imageAspect = imageWidth / imageHeight;
+  const canvasAspect = width / height;
+  const portrait = canvasAspect < 1;
+  const fitWidth =
+    canvasAspect < CONTAIN_BELOW_ASPECT && canvasAspect < imageAspect;
+  const scale = portrait
+    ? Math.min(width / imageWidth, height / imageHeight)
+    : fitWidth
+      ? (width / imageWidth) * PORTRAIT_ZOOM
+      : Math.max(width / imageWidth, height / imageHeight);
+  const drawWidth = imageWidth * scale;
+  const drawHeight = imageHeight * scale;
+  const x = (width - drawWidth) / 2;
+  const y = (height - drawHeight) / 2;
+
+  return { drawWidth, drawHeight, x, y, portrait };
+}
+
+function stageBackground(
+  height: number,
+  layout: FrameLayout,
+): string {
+  if (!layout.portrait || height <= 0) {
+    return STAGE_GRADIENT;
+  }
+
+  const topPct = Math.max(0, Math.min(100, (layout.y / height) * 100));
+  const bottomPct = Math.max(
+    topPct,
+    Math.min(100, ((layout.y + layout.drawHeight) / height) * 100),
+  );
+
+  if (bottomPct - topPct >= 99.5) {
+    return STAGE_GRADIENT;
+  }
+
+  return `linear-gradient(180deg, ${STAGE_TOP} 0%, ${STAGE_TOP} ${topPct}%, ${STAGE_BOTTOM} ${bottomPct}%, ${STAGE_BOTTOM} 100%)`;
+}
+
 function drawFrame(
   context: CanvasRenderingContext2D,
   image: HTMLImageElement,
@@ -250,46 +310,21 @@ function drawFrame(
 ): void {
   context.imageSmoothingEnabled = true;
   context.imageSmoothingQuality = "medium";
-  const imageAspect = image.naturalWidth / image.naturalHeight;
-  const canvasAspect = width / height;
-  const fitWidth =
-    canvasAspect < CONTAIN_BELOW_ASPECT && canvasAspect < imageAspect;
-  const scale = fitWidth
-    ? (width / image.naturalWidth) * PORTRAIT_ZOOM
-    : Math.max(width / image.naturalWidth, height / image.naturalHeight);
-  const drawWidth = image.naturalWidth * scale;
-  const drawHeight = image.naturalHeight * scale;
-  const x = (width - drawWidth) / 2;
-  const y = (height - drawHeight) / 2;
+  const layout = computeFrameLayout(
+    width,
+    height,
+    image.naturalWidth,
+    image.naturalHeight,
+  );
 
   context.clearRect(0, 0, width, height);
-
-  if (y > 0) {
-    context.drawImage(
-      image,
-      0,
-      0,
-      image.naturalWidth,
-      1,
-      x,
-      0,
-      drawWidth,
-      y + 1,
-    );
-    context.drawImage(
-      image,
-      0,
-      image.naturalHeight - 1,
-      image.naturalWidth,
-      1,
-      x,
-      y + drawHeight - 1,
-      drawWidth,
-      height - y - drawHeight + 1,
-    );
-  }
-
-  context.drawImage(image, x, y, drawWidth, drawHeight);
+  context.drawImage(
+    image,
+    Math.round(layout.x),
+    Math.round(layout.y),
+    Math.round(layout.drawWidth),
+    Math.round(layout.drawHeight),
+  );
 }
 
 export function ScrollFrameSequence() {
@@ -354,7 +389,7 @@ export function ScrollFrameSequence() {
       return;
     }
 
-    const context = canvas.getContext("2d", { alpha: false });
+    const context = canvas.getContext("2d", { alpha: true });
     if (!context) {
       return;
     }
@@ -367,6 +402,19 @@ export function ScrollFrameSequence() {
 
     const syncHeader = (light = false) => {
       applyHeaderTone(light, light ? STORY_BG : HEADER_BG);
+    };
+
+    const syncStageBackground = () => {
+      const frame = framesRef.current[0];
+      const imageWidth = frame?.naturalWidth ?? FRAME_WIDTH;
+      const imageHeight = frame?.naturalHeight ?? FRAME_HEIGHT;
+      const layout = computeFrameLayout(
+        size.width,
+        size.height,
+        imageWidth,
+        imageHeight,
+      );
+      section.style.background = stageBackground(size.height, layout);
     };
 
     const paint = (index: number) => {
@@ -392,6 +440,7 @@ export function ScrollFrameSequence() {
       canvas.style.width = `${size.width}px`;
       canvas.style.height = `${size.height}px`;
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      syncStageBackground();
       paint(frameIndexRef.current);
     };
 
@@ -546,7 +595,7 @@ export function ScrollFrameSequence() {
           timeline.to(
             veilRef.current,
             {
-              backgroundColor: "rgba(47, 58, 40, 0.2)",
+              backgroundColor: "rgba(61, 64, 46, 0.18)",
               ease: "power1.out",
               duration: 1 - GLOW_START,
             },
@@ -586,7 +635,7 @@ export function ScrollFrameSequence() {
       id="home"
       aria-label="JZ Enterprises"
       className="relative h-screen w-full overflow-hidden"
-      style={{ backgroundColor: STAGE_BG }}
+      style={{ background: STAGE_GRADIENT }}
     >
       <canvas
         ref={canvasRef}
@@ -599,7 +648,7 @@ export function ScrollFrameSequence() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 z-[6]"
         style={{
-          backgroundColor: ready ? FRAME_VEIL : STAGE_BG,
+          backgroundColor: ready ? FRAME_VEIL : "transparent",
         }}
       />
 
@@ -635,7 +684,7 @@ export function ScrollFrameSequence() {
         <div className="mt-4 inline-block">
           <h1
             ref={markRef}
-            className="bg-clip-text text-[clamp(2.4rem,8.6vw,6.5rem)] leading-[0.98] font-extrabold tracking-[0.01em] text-transparent uppercase opacity-0"
+            className={`${heroDisplay.className} bg-clip-text text-[clamp(2.4rem,8.6vw,6.5rem)] leading-[0.98] font-bold tracking-[0.16em] text-transparent uppercase opacity-0`}
             style={{ backgroundImage: LOGO_GRADIENT }}
           >
             {`${heroCopy.headlineLead} ${heroCopy.headlineRest}`}
@@ -673,7 +722,7 @@ export function ScrollFrameSequence() {
       {failed ? (
         <div
           className="absolute inset-0 z-[5]"
-          style={{ backgroundColor: STAGE_BG }}
+          style={{ background: STAGE_GRADIENT }}
           aria-hidden="true"
         />
       ) : null}

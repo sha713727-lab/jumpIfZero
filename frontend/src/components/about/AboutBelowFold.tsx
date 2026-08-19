@@ -122,14 +122,16 @@ export function AboutBelowFold({
                 key={`${principle.index}-${principle.title}`}
                 className={`${theme.surface} ${theme.border}`}
               >
-                <Image
-                  src="/images/jumpIfZeroLogo.png"
-                  alt=""
-                  aria-hidden="true"
-                  width={240}
-                  height={232}
-                  className="relative z-[1] h-[clamp(7rem,20vw,13rem)] w-auto"
-                />
+                <div className="relative z-[1] flex shrink-0 justify-center self-center">
+                  <Image
+                    src="/images/jumpIfZeroLogo.png"
+                    alt=""
+                    aria-hidden="true"
+                    width={413}
+                    height={414}
+                    className="h-[clamp(7rem,20vw,13rem)] w-auto object-contain"
+                  />
+                </div>
                 <div className="relative z-[1] mt-6 w-full md:mt-0 md:w-[60%] md:flex md:flex-col md:items-start md:justify-start">
                   <div
                     aria-hidden="true"
