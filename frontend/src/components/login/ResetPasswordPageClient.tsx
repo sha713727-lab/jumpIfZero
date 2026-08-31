@@ -151,7 +151,7 @@ export function ResetPasswordPageClient({
 
         {status === "success" ? (
           <Link
-            href="/login"
+            href="/client/login"
             className="inline-flex w-full items-center justify-center rounded-full bg-brand px-6 py-3.5 text-[0.9rem] font-extrabold tracking-[0.04em] text-cream uppercase"
           >
             {resetPasswordCopy.successCta}

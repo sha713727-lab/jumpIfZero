@@ -171,7 +171,7 @@ export function RegisterPageClient() {
         password: values.password,
       });
       if (!loginResult.ok) {
-        router.replace("/login");
+        router.replace("/client/login");
         router.refresh();
         return;
       }
@@ -478,7 +478,7 @@ export function RegisterPageClient() {
             <p className="pt-1 text-center text-[0.84rem] text-black/55">
               {registerCopy.haveAccount}{" "}
               <Link
-                href="/login"
+                href="/client/login"
                 className="font-semibold text-brand transition-colors hover:text-[#2f3a28] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
               >
                 {registerCopy.signIn}

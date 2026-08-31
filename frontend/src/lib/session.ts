@@ -35,7 +35,7 @@ export const SESSION_MAX_AGE_SECONDS = 8 * 60 * 60;
 
 const LOGIN_PATH: Record<SessionRole, string> = {
   admin: "/admin/login",
-  customer: "/login",
+  customer: "/client/login",
   employee: "/employee/login",
 };
 

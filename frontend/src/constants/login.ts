@@ -20,6 +20,38 @@ export const loginCopy = {
   credentialsError: "Invalid email or password.",
 } as const;
 
+export const loginRoleSelectCopy = {
+  watermark: "Jump If Zero",
+  title: "Continue as",
+  lede: "Choose your account type to sign in.",
+  roles: [
+    {
+      id: "admin",
+      title: "Admin",
+      description: "Manage the platform, clients, and operations.",
+      href: "/admin/login",
+    },
+    {
+      id: "employee",
+      title: "Employee",
+      description: "Access assigned projects, leads, and files.",
+      href: "/employee/login",
+    },
+    {
+      id: "client",
+      title: "Client / User",
+      description: "Sign in to your client dashboard.",
+      href: "/client/login",
+    },
+    {
+      id: "guest",
+      title: "Guest",
+      description: "Browse the site without signing in.",
+      href: "/",
+    },
+  ],
+} as const;
+
 export const registerCopy = {
   watermark: "Jump If Zero",
   title: "Create account",
