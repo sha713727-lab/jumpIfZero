@@ -121,7 +121,7 @@ export async function listSalarySlips(input: {
 
 export async function insertSalarySlip(
   input: {
-    readonly employeeId: string;
+    readonly employeeId: string | null;
     readonly employeeName: string;
     readonly designation: string;
     readonly slipDate: string;

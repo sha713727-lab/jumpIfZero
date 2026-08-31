@@ -169,7 +169,8 @@ function normalizeMoneyInput(value: string): string {
 }
 
 export async function createSalarySlipAction(input: {
-  readonly employeeId: string;
+  readonly employeeId: string | null;
+  readonly employeeName: string;
   readonly designation?: string;
   readonly slipDate: string;
   readonly salaryMonth: string;
@@ -192,6 +193,7 @@ export async function createSalarySlipAction(input: {
     const session = await requireSession("admin");
     const data = await createAdminSalarySlip(actorFromSession(session), {
       employeeId: input.employeeId,
+      employeeName: input.employeeName,
       ...(input.designation !== undefined
         ? { designation: input.designation }
         : {}),

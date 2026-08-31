@@ -327,7 +327,7 @@ export const salarySlipFromFieldsSchema = z.object({
 
 export const salarySlipPublicSchema = z.object({
   id: z.uuid(),
-  employeeId: z.uuid(),
+  employeeId: z.uuid().nullable(),
   employeeName: z.string().min(1).max(200),
   designation: z.string().max(200),
   slipDate: z.iso.date(),
@@ -357,7 +357,8 @@ export const salarySlipPublicSchema = z.object({
 
 export const salarySlipCreateSchema = z
   .object({
-    employeeId: z.uuid(),
+    employeeId: z.uuid().nullable().default(null),
+    employeeName: z.string().trim().min(1).max(200),
     designation: z.string().trim().max(200).optional(),
     slipDate: z.iso.date(),
     salaryMonth: z.string().trim().min(1).max(64),

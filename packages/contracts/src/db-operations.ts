@@ -73,7 +73,7 @@ export const invoiceRowSchema = z.object({
 
 export const salarySlipRowSchema = z.object({
   id: z.uuid(),
-  employee_id: z.uuid(),
+  employee_id: z.uuid().nullable(),
   employee_name: z.string().min(1).max(200),
   designation: z.string().max(200),
   slip_date: z.coerce.date(),

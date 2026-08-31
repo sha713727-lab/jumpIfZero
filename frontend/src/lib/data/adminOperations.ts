@@ -423,7 +423,8 @@ export async function archiveAdminInvoice(
 export async function createAdminSalarySlip(
   actor: Actor,
   input: {
-    readonly employeeId: string;
+    readonly employeeId: string | null;
+    readonly employeeName: string;
     readonly designation?: string;
     readonly slipDate: string;
     readonly salaryMonth: string;
@@ -449,6 +450,7 @@ export async function createAdminSalarySlip(
     path: "/salary-slips",
     body: {
       employeeId: input.employeeId,
+      employeeName: input.employeeName,
       designation: input.designation,
       slipDate: input.slipDate,
       salaryMonth: input.salaryMonth,

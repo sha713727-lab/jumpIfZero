@@ -234,7 +234,7 @@ export const adminInvoiceSchema = z.object({
 
 export const adminSalarySlipSchema = z.object({
   id: z.string(),
-  employeeId: z.string(),
+  employeeId: z.string().nullable(),
   employeeName: z.string(),
   designation: z.string(),
   slipDate: z.string(),

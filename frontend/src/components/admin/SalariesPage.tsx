@@ -153,8 +153,11 @@ export function SalariesPage() {
     if (pending) {
       return;
     }
-    if (form.employeeId.length === 0 || form.salaryMonth.trim().length === 0) {
-      setError("Enter a valid employee name and salary month.");
+    if (
+      form.employeeName.trim().length === 0 ||
+      form.salaryMonth.trim().length === 0
+    ) {
+      setError("Enter an employee name and salary month.");
       return;
     }
     if (netSalary < 0) {
@@ -165,7 +168,8 @@ export function SalariesPage() {
     startTransition(async () => {
       setError(null);
       const result = await createSalarySlipAction({
-        employeeId: form.employeeId,
+        employeeId: form.employeeId.length > 0 ? form.employeeId : null,
+        employeeName: form.employeeName.trim(),
         designation: form.designation,
         slipDate: form.slipDate,
         salaryMonth: form.salaryMonth.trim(),
@@ -191,7 +195,7 @@ export function SalariesPage() {
             : result.reason === "conflict"
               ? "A slip already exists for this employee and month."
               : result.reason === "validation"
-                ? "Check the amounts and try again."
+                ? "Check the name and amounts, then try again."
                 : "Could not create salary slip.",
         );
         return;
@@ -236,7 +240,7 @@ export function SalariesPage() {
     <div className="space-y-6">
       <AdminPageHeader
         title="Salaries"
-        lede="Create and print salary slips for employees."
+        lede="Create and print salary slips for anyone — registered employees or custom names."
         actionLabel="Create salary slip"
         onAction={openCreate}
       />
@@ -311,7 +315,7 @@ export function SalariesPage() {
               className={adminFieldClass}
               list="salary-slip-employees"
               value={form.employeeName}
-              placeholder="Type employee name"
+                placeholder="Type any name"
               autoComplete="off"
               onChange={(event) => {
                 const name = event.target.value;

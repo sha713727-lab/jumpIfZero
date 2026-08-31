@@ -137,20 +137,27 @@ export async function createSalarySlip(
       };
     }
 
-    const employee = await employeesRepo.getEmployeeById(body.employeeId, tx);
-    if (employee === null || employee.archived_at !== null) {
-      throw new NotFoundError("Employee not found");
-    }
+    let employeeId: string | null = body.employeeId;
+    let employeeName = body.employeeName.trim();
+    let designation =
+      body.designation !== undefined ? body.designation.trim() : "";
 
-    const employeeName = employee.user_name ?? "Employee";
-    const designation =
-      body.designation !== undefined && body.designation.trim().length > 0
-        ? body.designation.trim()
-        : employee.title;
+    if (employeeId !== null) {
+      const employee = await employeesRepo.getEmployeeById(employeeId, tx);
+      if (employee === null || employee.archived_at !== null) {
+        throw new NotFoundError("Employee not found");
+      }
+      if (employeeName.length === 0) {
+        employeeName = employee.user_name ?? "Employee";
+      }
+      if (designation.length === 0) {
+        designation = employee.title;
+      }
+    }
 
     const row = await salarySlipsRepo.insertSalarySlip(
       {
-        employeeId: body.employeeId,
+        employeeId,
         employeeName,
         designation,
         slipDate: body.slipDate,
