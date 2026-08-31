@@ -11,7 +11,6 @@ const CONTENT_RIGHT = PAGE_W - MARGIN_X;
 const BLACK = { r: 0, g: 0, b: 0 };
 const WHITE = { r: 1, g: 1, b: 1 };
 const GRAY = { r: 0.91, g: 0.91, b: 0.91 };
-const MUTED = { r: 0.36, g: 0.24, b: 0.09 };
 const INK = { r: 0.05, g: 0.07, b: 0.04 };
 const SOFT = { r: 0.35, g: 0.35, b: 0.35 };
 
@@ -295,6 +294,25 @@ function loadLogo(): PngAsset | null {
   return null;
 }
 
+function whitenLogo(logo: PngAsset): PngAsset {
+  const rgb = Buffer.from(logo.rgb);
+  for (let i = 0; i < rgb.length; i += 3) {
+    const pixel = Math.floor(i / 3);
+    const alpha = logo.alpha?.[pixel] ?? 255;
+    if (alpha > 0) {
+      rgb[i] = 255;
+      rgb[i + 1] = 255;
+      rgb[i + 2] = 255;
+    }
+  }
+  return {
+    width: logo.width,
+    height: logo.height,
+    rgb,
+    alpha: logo.alpha,
+  };
+}
+
 type DrawOp = string;
 
 function setFill(color: { r: number; g: number; b: number }): DrawOp {
@@ -354,7 +372,8 @@ export function buildSalarySlipPdf(
   slip: SalarySlipDocumentModel,
 ): { readonly bytes: Uint8Array; readonly filename: string } {
   const money = (v: string) => formatMoney(v, slip.currency);
-  const logo = loadLogo();
+  const logoSource = loadLogo();
+  const logo = logoSource ? whitenLogo(logoSource) : null;
   const ops: DrawOp[] = [];
 
   const earnings = [
@@ -373,10 +392,16 @@ export function buildSalarySlipPdf(
   ] as const;
   const rowCount = Math.max(earnings.length, deductions.length);
 
+  const headerBandH = 118;
+  const footerBandH = 58;
   const logoSize = 50;
-  let y = PAGE_H - 32;
 
-  ops.push(setFill(MUTED));
+  ops.push(setFill(BLACK));
+  ops.push(rect(0, PAGE_H - headerBandH, PAGE_W, headerBandH, "f"));
+  ops.push(rect(0, 0, PAGE_W, footerBandH, "f"));
+
+  let y = PAGE_H - 28;
+  ops.push(setFill(WHITE));
   ops.push(text("SALARY SLIP", MARGIN_X, y, 10, true));
   y -= 16;
 
@@ -386,12 +411,9 @@ export function buildSalarySlipPdf(
     ops.push(image("Im1", MARGIN_X, brandTop - logoSize + 4, logoSize, logoSize));
   }
 
-  ops.push(setFill(INK));
+  ops.push(setFill(WHITE));
   ops.push(text(site.name, brandX, brandTop - 2, 20, true));
-  ops.push(setFill(SOFT));
   ops.push(text(site.tagline.toUpperCase(), brandX, brandTop - 20, 10, true));
-
-  ops.push(setFill(SOFT));
   ops.push(
     textRight(`Date: ${formatDate(slip.slipDate)}`, CONTENT_RIGHT, brandTop - 2, 11),
   );
@@ -405,7 +427,7 @@ export function buildSalarySlipPdf(
     ),
   );
 
-  y = brandTop - Math.max(logo ? logoSize : 38, 38) - 18;
+  y = PAGE_H - headerBandH - 22;
 
   const metaTop = y;
   ops.push(setStroke({ r: 0.82, g: 0.82, b: 0.82 }));
@@ -555,8 +577,8 @@ export function buildSalarySlipPdf(
     );
   }
 
-  const footerY = 36;
-  const disclaimerY = footerY + 36;
+  const footerY = 22;
+  const disclaimerY = footerBandH + 18;
   const signatureLineY = disclaimerY + 34;
   const signatureLabelY = signatureLineY + 48;
 
@@ -581,10 +603,6 @@ export function buildSalarySlipPdf(
     ),
   );
 
-  ops.push(setStroke({ r: 0.82, g: 0.82, b: 0.82 }));
-  ops.push("0.75 w");
-  ops.push(line(MARGIN_X, footerY + 14, CONTENT_RIGHT, footerY + 14));
-
   const footerPhone = slip.footer.phone.trim() || "-";
   const footerEmail = slip.footer.email.trim() || "-";
   const addressLines =
@@ -598,7 +616,7 @@ export function buildSalarySlipPdf(
     ...addressLines.slice(1),
   ];
 
-  ops.push(setFill(SOFT));
+  ops.push(setFill(WHITE));
   ops.push(text(phoneLabel, MARGIN_X, footerY, 9, true));
   const emailWidth = measureWidth(emailLabel, 9, true);
   ops.push(text(emailLabel, (PAGE_W - emailWidth) / 2, footerY, 9, true));
