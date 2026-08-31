@@ -15,6 +15,7 @@ export type SalarySlipDocumentModel = {
   readonly incomeTax: string;
   readonly whTax: string;
   readonly fuelAdvances: string;
+  readonly unpaidDays: string;
   readonly totalEarnings: string;
   readonly totalDeduction: string;
   readonly netSalary: string;
@@ -88,6 +89,7 @@ export function SalarySlipDocument({ slip }: SalarySlipDocumentProps) {
     { label: "Income Tax", value: slip.incomeTax },
     { label: "W.H. Tax", value: slip.whTax },
     { label: "Fuel Advances", value: slip.fuelAdvances },
+    { label: "UnPaid Days", value: slip.unpaidDays },
   ] as const;
 
   return (

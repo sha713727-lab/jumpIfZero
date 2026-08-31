@@ -369,6 +369,7 @@ export function buildSalarySlipPdf(
     { label: "Income Tax", value: slip.incomeTax },
     { label: "W.H. Tax", value: slip.whTax },
     { label: "Fuel Advances", value: slip.fuelAdvances },
+    { label: "UnPaid Days", value: slip.unpaidDays },
   ] as const;
   const rowCount = Math.max(earnings.length, deductions.length);
 

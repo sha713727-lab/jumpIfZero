@@ -16,6 +16,7 @@ export const EXPECTED_MIGRATIONS = [
   "0013_public_cms_nap",
   "0014_site_contact_socials",
   "0015_salary_slip_optional_employee",
+  "0016_salary_slip_unpaid_days",
 ] as const;
 
 export async function getMigrationStatus(): Promise<{

@@ -89,6 +89,7 @@ export const salarySlipRowSchema = z.object({
   income_tax: z.union([z.string(), z.number()]).transform((v) => String(v)),
   wh_tax: z.union([z.string(), z.number()]).transform((v) => String(v)),
   fuel_advances: z.union([z.string(), z.number()]).transform((v) => String(v)),
+  unpaid_days: z.union([z.string(), z.number()]).transform((v) => String(v)),
   total_earnings: z.union([z.string(), z.number()]).transform((v) => String(v)),
   total_deduction: z
     .union([z.string(), z.number()])

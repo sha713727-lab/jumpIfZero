@@ -18,6 +18,7 @@ const SALARY_SLIP_COLUMNS = `
   income_tax::text AS income_tax,
   wh_tax::text AS wh_tax,
   fuel_advances::text AS fuel_advances,
+  unpaid_days::text AS unpaid_days,
   total_earnings::text AS total_earnings,
   total_deduction::text AS total_deduction,
   net_salary::text AS net_salary,
@@ -135,6 +136,7 @@ export async function insertSalarySlip(
     readonly incomeTax: string;
     readonly whTax: string;
     readonly fuelAdvances: string;
+    readonly unpaidDays: string;
     readonly currency: string;
     readonly statusCode: "draft" | "issued";
     readonly fromCompany: string;
@@ -149,14 +151,14 @@ export async function insertSalarySlip(
         INSERT INTO salary_slips (
           employee_id, employee_name, designation, slip_date, salary_month,
           basic_salary, punctuality, medical_allowance, incentives, bonus,
-          advance, income_tax, wh_tax, fuel_advances,
+          advance, income_tax, wh_tax, fuel_advances, unpaid_days,
           currency, status_code, from_company, from_email, from_phone
         )
         VALUES (
           $1, $2, $3, $4::date, $5,
           $6::numeric, $7::numeric, $8::numeric, $9::numeric, $10::numeric,
-          $11::numeric, $12::numeric, $13::numeric, $14::numeric,
-          $15, $16, $17, $18, $19
+          $11::numeric, $12::numeric, $13::numeric, $14::numeric, $15::numeric,
+          $16, $17, $18, $19, $20
         )
         RETURNING id
       `,
@@ -175,6 +177,7 @@ export async function insertSalarySlip(
         input.incomeTax,
         input.whTax,
         input.fuelAdvances,
+        input.unpaidDays,
         input.currency,
         input.statusCode,
         input.fromCompany,
@@ -220,6 +223,7 @@ export async function updateSalarySlip(
     readonly incomeTax: string;
     readonly whTax: string;
     readonly fuelAdvances: string;
+    readonly unpaidDays: string;
     readonly currency: string;
     readonly statusCode: "draft" | "issued";
     readonly fromCompany: string;
@@ -246,11 +250,12 @@ export async function updateSalarySlip(
           income_tax = $13::numeric,
           wh_tax = $14::numeric,
           fuel_advances = $15::numeric,
-          currency = $16,
-          status_code = $17,
-          from_company = $18,
-          from_email = $19,
-          from_phone = $20,
+          unpaid_days = $16::numeric,
+          currency = $17,
+          status_code = $18,
+          from_company = $19,
+          from_email = $20,
+          from_phone = $21,
           version = version + 1,
           updated_at = now()
         WHERE id = $1
@@ -274,6 +279,7 @@ export async function updateSalarySlip(
         input.incomeTax,
         input.whTax,
         input.fuelAdvances,
+        input.unpaidDays,
         input.currency,
         input.statusCode,
         input.fromCompany,

@@ -437,6 +437,7 @@ export async function createAdminSalarySlip(
     readonly incomeTax: string;
     readonly whTax: string;
     readonly fuelAdvances: string;
+    readonly unpaidDays: string;
     readonly currency: string;
     readonly statusCode: "draft" | "issued";
     readonly fromCompany: string;
@@ -463,6 +464,7 @@ export async function createAdminSalarySlip(
       incomeTax: input.incomeTax,
       whTax: input.whTax,
       fuelAdvances: input.fuelAdvances,
+      unpaidDays: input.unpaidDays,
       currency: input.currency,
       statusCode: input.statusCode,
       fromCompany: input.fromCompany,
@@ -494,6 +496,7 @@ export async function updateAdminSalarySlip(
     readonly incomeTax: string;
     readonly whTax: string;
     readonly fuelAdvances: string;
+    readonly unpaidDays: string;
     readonly currency: string;
     readonly statusCode: "draft" | "issued";
     readonly fromCompany: string;
@@ -519,6 +522,7 @@ export async function updateAdminSalarySlip(
       incomeTax: input.incomeTax,
       whTax: input.whTax,
       fuelAdvances: input.fuelAdvances,
+      unpaidDays: input.unpaidDays,
       currency: input.currency,
       statusCode: input.statusCode,
       fromCompany: input.fromCompany,

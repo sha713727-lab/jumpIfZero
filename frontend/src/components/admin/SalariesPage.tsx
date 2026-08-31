@@ -36,6 +36,7 @@ type SalaryForm = {
   incomeTax: string;
   whTax: string;
   fuelAdvances: string;
+  unpaidDays: string;
   currency: string;
   status: "draft" | "issued";
   fromCompany: string;
@@ -69,6 +70,7 @@ const emptyForm: SalaryForm = {
   incomeTax: "0",
   whTax: "0",
   fuelAdvances: "0",
+  unpaidDays: "0",
   currency: "PKR",
   status: "draft",
   fromCompany: site.legalName,
@@ -146,6 +148,7 @@ export function SalariesPage() {
     form.incomeTax,
     form.whTax,
     form.fuelAdvances,
+    form.unpaidDays,
   ]);
   const netSalary = totalEarnings - totalDeduction;
 
@@ -182,6 +185,7 @@ export function SalariesPage() {
         incomeTax: form.incomeTax,
         whTax: form.whTax,
         fuelAdvances: form.fuelAdvances,
+        unpaidDays: form.unpaidDays,
         currency: form.currency.trim().toUpperCase() || "PKR",
         statusCode: form.status,
         fromCompany: form.fromCompany,
@@ -446,6 +450,7 @@ export function SalariesPage() {
                 ["incomeTax", "Income tax"],
                 ["whTax", "W.H. tax"],
                 ["fuelAdvances", "Fuel advances"],
+                ["unpaidDays", "UnPaid Days"],
               ] as const
             ).map(([key, label]) => (
               <label key={key} className="block">

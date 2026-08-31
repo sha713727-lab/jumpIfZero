@@ -317,6 +317,7 @@ export const salarySlipMoneyFieldsSchema = z.object({
   incomeTax: moneyAmountSchema.default("0"),
   whTax: moneyAmountSchema.default("0"),
   fuelAdvances: moneyAmountSchema.default("0"),
+  unpaidDays: moneyAmountSchema.default("0"),
 });
 
 export const salarySlipFromFieldsSchema = z.object({
@@ -341,6 +342,7 @@ export const salarySlipPublicSchema = z.object({
   incomeTax: moneyAmountSchema,
   whTax: moneyAmountSchema,
   fuelAdvances: moneyAmountSchema,
+  unpaidDays: moneyAmountSchema,
   totalEarnings: moneyAmountSchema,
   totalDeduction: moneyAmountSchema,
   netSalary: moneyAmountSchema,

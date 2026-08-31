@@ -26,6 +26,7 @@ export function salarySlipDocumentFromPublic(
     incomeTax: slip.incomeTax,
     whTax: slip.whTax,
     fuelAdvances: slip.fuelAdvances,
+    unpaidDays: slip.unpaidDays,
     totalEarnings: slip.totalEarnings,
     totalDeduction: slip.totalDeduction,
     netSalary: slip.netSalary,

@@ -83,7 +83,8 @@ jobs:
             0012_salary_slips \
             0013_public_cms_nap \
             0014_site_contact_socials \
-            0015_salary_slip_optional_employee
+            0015_salary_slip_optional_employee \
+            0016_salary_slip_unpaid_days
           do
             file="database/migrations/${migration}.up.sql"
             psql -v ON_ERROR_STOP=1 -f "$file"

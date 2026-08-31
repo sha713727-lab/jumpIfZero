@@ -183,6 +183,7 @@ export async function createSalarySlipAction(input: {
   readonly incomeTax: string;
   readonly whTax: string;
   readonly fuelAdvances: string;
+  readonly unpaidDays: string;
   readonly currency?: string;
   readonly statusCode?: "draft" | "issued";
   readonly fromCompany: string;
@@ -208,6 +209,7 @@ export async function createSalarySlipAction(input: {
       incomeTax: normalizeMoneyInput(input.incomeTax),
       whTax: normalizeMoneyInput(input.whTax),
       fuelAdvances: normalizeMoneyInput(input.fuelAdvances),
+      unpaidDays: normalizeMoneyInput(input.unpaidDays),
       currency: input.currency ?? "PKR",
       statusCode: input.statusCode ?? "draft",
       fromCompany: input.fromCompany,
@@ -237,6 +239,7 @@ export async function updateSalarySlipAction(input: {
   readonly incomeTax: string;
   readonly whTax: string;
   readonly fuelAdvances: string;
+  readonly unpaidDays: string;
   readonly currency: string;
   readonly statusCode: "draft" | "issued";
   readonly fromCompany: string;
@@ -256,6 +259,7 @@ export async function updateSalarySlipAction(input: {
       incomeTax: normalizeMoneyInput(input.incomeTax),
       whTax: normalizeMoneyInput(input.whTax),
       fuelAdvances: normalizeMoneyInput(input.fuelAdvances),
+      unpaidDays: normalizeMoneyInput(input.unpaidDays),
     });
     return { ok: true, data };
   } catch (error) {
