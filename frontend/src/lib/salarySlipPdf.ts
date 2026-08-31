@@ -373,9 +373,8 @@ export function buildSalarySlipPdf(
   ] as const;
   const rowCount = Math.max(earnings.length, deductions.length);
 
-  const logoSize = 52;
-  const topY = PAGE_H - 28;
-  let y = topY;
+  const logoSize = 50;
+  let y = PAGE_H - 32;
 
   ops.push(setFill(MUTED));
   ops.push(text("SALARY SLIP", MARGIN_X, y, 10, true));
@@ -406,7 +405,7 @@ export function buildSalarySlipPdf(
     ),
   );
 
-  y = brandTop - Math.max(logo ? logoSize : 38, 38) - 16;
+  y = brandTop - Math.max(logo ? logoSize : 38, 38) - 18;
 
   const metaTop = y;
   ops.push(setStroke({ r: 0.82, g: 0.82, b: 0.82 }));
@@ -427,22 +426,7 @@ export function buildSalarySlipPdf(
   ops.push(setStroke({ r: 0.82, g: 0.82, b: 0.82 }));
   ops.push("0.75 w");
   ops.push(line(MARGIN_X, metaTop - 40, CONTENT_RIGHT, metaTop - 40));
-  y = metaTop - 56;
-
-  const footerBlockH = 78;
-  const signatureBlockH = 78;
-  const gapAfterTable = 28;
-  const tableTop = y;
-  const tableBottomLimit = footerBlockH + signatureBlockH + gapAfterTable + 28;
-  const availableTableH = Math.max(220, tableTop - tableBottomLimit);
-  const headerH = 32;
-  const totalH = 32;
-  const netH = 38;
-  const bodyArea = Math.max(rowCount * 28, availableTableH - headerH - totalH - netH);
-  const bodyH = Math.floor(bodyArea / rowCount);
-  const bodyHeight = bodyH * rowCount;
-  const gridBottom = tableTop - headerH - bodyHeight - totalH;
-  const tableBottom = gridBottom - netH;
+  y = metaTop - 58;
 
   const tableW = CONTENT_RIGHT - MARGIN_X;
   const colW = [
@@ -459,6 +443,14 @@ export function buildSalarySlipPdf(
     MARGIN_X + colW[0] + colW[1] + colW[2],
   ] as const;
   const padX = 10;
+  const headerH = 32;
+  const bodyH = 30;
+  const totalH = 32;
+  const netH = 36;
+  const tableTop = y;
+  const bodyHeight = rowCount * bodyH;
+  const gridBottom = tableTop - headerH - bodyHeight - totalH;
+  const tableBottom = gridBottom - netH;
 
   ops.push(setFill(BLACK));
   ops.push(rect(MARGIN_X, tableTop - headerH, tableW, headerH, "f"));
@@ -499,7 +491,7 @@ export function buildSalarySlipPdf(
 
   for (let row = 0; row < rowCount; row += 1) {
     const bottom = tableTop - headerH - (row + 1) * bodyH;
-    const textY = bottom + Math.max(8, Math.floor(bodyH / 2) - 4);
+    const textY = bottom + 9;
     const earning = earnings[row];
     const deduction = deductions[row];
     ops.push(setFill(INK));
@@ -555,7 +547,7 @@ export function buildSalarySlipPdf(
   }
 
   {
-    const textY = tableBottom + 12;
+    const textY = tableBottom + 11;
     ops.push(setFill(WHITE));
     ops.push(text("Net Salary", MARGIN_X + padX, textY, 13, true));
     ops.push(
@@ -564,9 +556,9 @@ export function buildSalarySlipPdf(
   }
 
   const footerY = 36;
-  const disclaimerY = footerY + 34;
-  const signatureLineY = disclaimerY + 28;
-  const signatureLabelY = signatureLineY + 22;
+  const disclaimerY = footerY + 36;
+  const signatureLineY = disclaimerY + 34;
+  const signatureLabelY = signatureLineY + 48;
 
   const sigRight = MARGIN_X + 220;
   const sig2Left = midX;
