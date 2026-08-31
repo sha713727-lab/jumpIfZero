@@ -373,12 +373,13 @@ export function buildSalarySlipPdf(
   ] as const;
   const rowCount = Math.max(earnings.length, deductions.length);
 
-  const logoSize = 44;
-  let y = PAGE_H - 36;
+  const logoSize = 52;
+  const topY = PAGE_H - 28;
+  let y = topY;
 
   ops.push(setFill(MUTED));
-  ops.push(text("SALARY SLIP", MARGIN_X, y, 9, true));
-  y -= 14;
+  ops.push(text("SALARY SLIP", MARGIN_X, y, 10, true));
+  y -= 16;
 
   const brandTop = y;
   const brandX = logo ? MARGIN_X + logoSize + 12 : MARGIN_X;
@@ -387,25 +388,25 @@ export function buildSalarySlipPdf(
   }
 
   ops.push(setFill(INK));
-  ops.push(text(site.name, brandX, brandTop - 2, 18, true));
+  ops.push(text(site.name, brandX, brandTop - 2, 20, true));
   ops.push(setFill(SOFT));
-  ops.push(text(site.tagline.toUpperCase(), brandX, brandTop - 18, 9, true));
+  ops.push(text(site.tagline.toUpperCase(), brandX, brandTop - 20, 10, true));
 
   ops.push(setFill(SOFT));
   ops.push(
-    textRight(`Date: ${formatDate(slip.slipDate)}`, CONTENT_RIGHT, brandTop - 2, 10),
+    textRight(`Date: ${formatDate(slip.slipDate)}`, CONTENT_RIGHT, brandTop - 2, 11),
   );
-  ops.push(textRight(slip.salaryMonth, CONTENT_RIGHT, brandTop - 16, 10));
+  ops.push(textRight(slip.salaryMonth, CONTENT_RIGHT, brandTop - 18, 11));
   ops.push(
     textRight(
       slip.status.charAt(0).toUpperCase() + slip.status.slice(1),
       CONTENT_RIGHT,
-      brandTop - 30,
-      10,
+      brandTop - 34,
+      11,
     ),
   );
 
-  y = brandTop - Math.max(logo ? logoSize : 34, 34) - 18;
+  y = brandTop - Math.max(logo ? logoSize : 38, 38) - 16;
 
   const metaTop = y;
   ops.push(setStroke({ r: 0.82, g: 0.82, b: 0.82 }));
@@ -415,18 +416,33 @@ export function buildSalarySlipPdf(
   const midX = MARGIN_X + (CONTENT_RIGHT - MARGIN_X) / 2 + 8;
   ops.push(setFill(INK));
   ops.push(
-    text(`Employee Name: ${slip.employeeName}`, MARGIN_X, metaTop - 4, 10),
+    text(`Employee Name: ${slip.employeeName}`, MARGIN_X, metaTop - 4, 11),
   );
   ops.push(
-    text(`Designation: ${slip.designation || "-"}`, midX, metaTop - 4, 10),
+    text(`Designation: ${slip.designation || "-"}`, midX, metaTop - 4, 11),
   );
-  ops.push(text(`Salary Month: ${slip.salaryMonth}`, MARGIN_X, metaTop - 22, 10));
-  ops.push(text(`Date: ${formatDate(slip.slipDate)}`, midX, metaTop - 22, 10));
+  ops.push(text(`Salary Month: ${slip.salaryMonth}`, MARGIN_X, metaTop - 24, 11));
+  ops.push(text(`Date: ${formatDate(slip.slipDate)}`, midX, metaTop - 24, 11));
 
   ops.push(setStroke({ r: 0.82, g: 0.82, b: 0.82 }));
   ops.push("0.75 w");
-  ops.push(line(MARGIN_X, metaTop - 36, CONTENT_RIGHT, metaTop - 36));
-  y = metaTop - 52;
+  ops.push(line(MARGIN_X, metaTop - 40, CONTENT_RIGHT, metaTop - 40));
+  y = metaTop - 56;
+
+  const footerBlockH = 78;
+  const signatureBlockH = 78;
+  const gapAfterTable = 28;
+  const tableTop = y;
+  const tableBottomLimit = footerBlockH + signatureBlockH + gapAfterTable + 28;
+  const availableTableH = Math.max(220, tableTop - tableBottomLimit);
+  const headerH = 32;
+  const totalH = 32;
+  const netH = 38;
+  const bodyArea = Math.max(rowCount * 28, availableTableH - headerH - totalH - netH);
+  const bodyH = Math.floor(bodyArea / rowCount);
+  const bodyHeight = bodyH * rowCount;
+  const gridBottom = tableTop - headerH - bodyHeight - totalH;
+  const tableBottom = gridBottom - netH;
 
   const tableW = CONTENT_RIGHT - MARGIN_X;
   const colW = [
@@ -443,14 +459,6 @@ export function buildSalarySlipPdf(
     MARGIN_X + colW[0] + colW[1] + colW[2],
   ] as const;
   const padX = 10;
-  const headerH = 28;
-  const bodyH = 26;
-  const totalH = 28;
-  const netH = 32;
-  const tableTop = y;
-  const bodyHeight = rowCount * bodyH;
-  const gridBottom = tableTop - headerH - bodyHeight - totalH;
-  const tableBottom = gridBottom - netH;
 
   ops.push(setFill(BLACK));
   ops.push(rect(MARGIN_X, tableTop - headerH, tableW, headerH, "f"));
@@ -481,40 +489,40 @@ export function buildSalarySlipPdf(
   ops.push(setFill(WHITE));
   for (let i = 0; i < 4; i += 1) {
     const label = headers[i]!;
-    const labelY = tableTop - headerH + 8;
+    const labelY = tableTop - headerH + 10;
     if (i % 2 === 1) {
-      ops.push(textRight(label, colX[i]! + colW[i]! - padX, labelY, 10, true));
+      ops.push(textRight(label, colX[i]! + colW[i]! - padX, labelY, 11, true));
     } else {
-      ops.push(text(label, colX[i]! + padX, labelY, 10, true));
+      ops.push(text(label, colX[i]! + padX, labelY, 11, true));
     }
   }
 
   for (let row = 0; row < rowCount; row += 1) {
     const bottom = tableTop - headerH - (row + 1) * bodyH;
-    const textY = bottom + 7;
+    const textY = bottom + Math.max(8, Math.floor(bodyH / 2) - 4);
     const earning = earnings[row];
     const deduction = deductions[row];
     ops.push(setFill(INK));
     if (earning) {
-      ops.push(text(earning.label, colX[0]! + padX, textY, 10));
+      ops.push(text(earning.label, colX[0]! + padX, textY, 11));
       ops.push(
         textRight(
           money(earning.value),
           colX[1]! + colW[1]! - padX,
           textY,
-          10,
+          11,
           true,
         ),
       );
     }
     if (deduction) {
-      ops.push(text(deduction.label, colX[2]! + padX, textY, 10));
+      ops.push(text(deduction.label, colX[2]! + padX, textY, 11));
       ops.push(
         textRight(
           money(deduction.value),
           colX[3]! + colW[3]! - padX,
           textY,
-          10,
+          11,
           true,
         ),
       );
@@ -522,68 +530,68 @@ export function buildSalarySlipPdf(
   }
 
   {
-    const textY = gridBottom + 8;
+    const textY = gridBottom + 10;
     ops.push(setFill(INK));
-    ops.push(text("Total Earnings", colX[0]! + padX, textY, 10, true));
+    ops.push(text("Total Earnings", colX[0]! + padX, textY, 11, true));
     ops.push(
       textRight(
         money(slip.totalEarnings),
         colX[1]! + colW[1]! - padX,
         textY,
-        10,
+        11,
         true,
       ),
     );
-    ops.push(text("Total Deduction", colX[2]! + padX, textY, 10, true));
+    ops.push(text("Total Deduction", colX[2]! + padX, textY, 11, true));
     ops.push(
       textRight(
         money(slip.totalDeduction),
         colX[3]! + colW[3]! - padX,
         textY,
-        10,
+        11,
         true,
       ),
     );
   }
 
   {
-    const textY = tableBottom + 9;
+    const textY = tableBottom + 12;
     ops.push(setFill(WHITE));
-    ops.push(text("Net Salary", MARGIN_X + padX, textY, 12, true));
+    ops.push(text("Net Salary", MARGIN_X + padX, textY, 13, true));
     ops.push(
-      textRight(money(slip.netSalary), CONTENT_RIGHT - padX, textY, 12, true),
+      textRight(money(slip.netSalary), CONTENT_RIGHT - padX, textY, 13, true),
     );
   }
 
-  y = tableBottom - 36;
+  const footerY = 36;
+  const disclaimerY = footerY + 34;
+  const signatureLineY = disclaimerY + 28;
+  const signatureLabelY = signatureLineY + 22;
 
-  const sigRight = MARGIN_X + 200;
+  const sigRight = MARGIN_X + 220;
   const sig2Left = midX;
-  const sig2Right = midX + 200;
+  const sig2Right = midX + 220;
   ops.push(setFill(INK));
-  ops.push(text("Employ Signature:", MARGIN_X, y, 10, true));
-  ops.push(text("Authorised Signatory:", sig2Left, y, 10, true));
-  y -= 26;
+  ops.push(text("Employ Signature:", MARGIN_X, signatureLabelY, 11, true));
+  ops.push(text("Authorised Signatory:", sig2Left, signatureLabelY, 11, true));
   ops.push(setStroke({ r: 0.4, g: 0.4, b: 0.4 }));
   ops.push("0.8 w");
-  ops.push(line(MARGIN_X, y, sigRight, y));
-  ops.push(line(sig2Left, y, sig2Right, y));
+  ops.push(line(MARGIN_X, signatureLineY, sigRight, signatureLineY));
+  ops.push(line(sig2Left, signatureLineY, sig2Right, signatureLineY));
 
-  y -= 26;
   ops.push(setFill(SOFT));
   ops.push(
     text(
       "This is a system-generated salary slip and is valid without a physical signature.",
       MARGIN_X,
-      y,
-      8,
+      disclaimerY,
+      9,
     ),
   );
 
-  y -= 20;
   ops.push(setStroke({ r: 0.82, g: 0.82, b: 0.82 }));
   ops.push("0.75 w");
-  ops.push(line(MARGIN_X, y + 8, CONTENT_RIGHT, y + 8));
+  ops.push(line(MARGIN_X, footerY + 14, CONTENT_RIGHT, footerY + 14));
 
   const footerPhone = slip.footer.phone.trim() || "-";
   const footerEmail = slip.footer.email.trim() || "-";
@@ -599,12 +607,12 @@ export function buildSalarySlipPdf(
   ];
 
   ops.push(setFill(SOFT));
-  ops.push(text(phoneLabel, MARGIN_X, y, 8, true));
-  const emailWidth = measureWidth(emailLabel, 8, true);
-  ops.push(text(emailLabel, (PAGE_W - emailWidth) / 2, y, 8, true));
+  ops.push(text(phoneLabel, MARGIN_X, footerY, 9, true));
+  const emailWidth = measureWidth(emailLabel, 9, true);
+  ops.push(text(emailLabel, (PAGE_W - emailWidth) / 2, footerY, 9, true));
   for (let i = 0; i < locationLines.length; i += 1) {
     ops.push(
-      textRight(locationLines[i] ?? "", CONTENT_RIGHT, y - i * 11, 8, true),
+      textRight(locationLines[i] ?? "", CONTENT_RIGHT, footerY - i * 12, 9, true),
     );
   }
 

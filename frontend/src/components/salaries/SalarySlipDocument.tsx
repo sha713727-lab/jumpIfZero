@@ -92,157 +92,151 @@ export function SalarySlipDocument({ slip }: SalarySlipDocumentProps) {
     { label: "UnPaid Days", value: slip.unpaidDays },
   ] as const;
 
+  const rowCount = Math.max(earnings.length, deductions.length);
+
   return (
-    <article className="mx-auto w-full max-w-[760px] bg-white text-[#0d120b]">
-      <div className="relative overflow-hidden border border-black/10 bg-white print:border-black/20">
-        <div className="px-8 pb-8 pt-6 md:px-10">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className={sectionLabelClass}>Salary slip</p>
-              <div className="mt-2 flex items-center gap-3.5">
-                <Image
-                  src="/images/jz-invoice-logo.png"
-                  alt={site.name}
-                  width={413}
-                  height={414}
-                  sizes="64px"
-                  priority
-                  quality={100}
-                  className="h-12 w-12 object-contain md:h-[3.35rem] md:w-[3.35rem]"
-                />
-                <div>
-                  <h1 className="text-[1.55rem] font-extrabold tracking-[-0.02em]">
-                    {site.name}
-                  </h1>
-                  <p className="mt-1 text-[0.84rem] font-semibold tracking-[0.04em] text-black/45 uppercase">
-                    {site.tagline}
-                  </p>
-                </div>
+    <article
+      className="invoice-document relative mx-auto aspect-[210/297] w-full max-w-[800px] overflow-hidden border border-black/10 bg-white text-[#0d120b] shadow-[0_24px_60px_rgba(47,58,40,0.12)] print:border-black/20 print:shadow-none"
+      aria-label={`Salary slip for ${slip.employeeName}`}
+    >
+      <div className="relative z-10 flex h-full flex-col px-[5.5%] pt-[3.8%] pb-[3.2%]">
+        <header className="flex shrink-0 items-start justify-between gap-4">
+          <div>
+            <p className={sectionLabelClass}>Salary slip</p>
+            <div className="mt-2.5 flex items-center gap-3.5">
+              <Image
+                src="/images/jz-invoice-logo.png"
+                alt={site.name}
+                width={413}
+                height={414}
+                sizes="72px"
+                priority
+                quality={100}
+                className="h-14 w-14 object-contain md:h-16 md:w-16"
+              />
+              <div>
+                <h1 className="text-[1.7rem] font-extrabold tracking-[-0.02em] md:text-[1.9rem]">
+                  {site.name}
+                </h1>
+                <p className="mt-1 text-[0.86rem] font-semibold tracking-[0.04em] text-black/45 uppercase">
+                  {site.tagline}
+                </p>
               </div>
             </div>
-            <div className="text-right text-[0.84rem] font-medium text-black/55">
-              <p>Date: {formatDate(slip.slipDate)}</p>
-              <p className="mt-1">{slip.salaryMonth}</p>
-              <p className="mt-1 capitalize">{slip.status}</p>
-            </div>
           </div>
-
-          <div className="mt-6 grid gap-3 border-y border-black/10 py-4 text-[0.9rem] sm:grid-cols-2">
-            <p>
-              <span className="font-bold">Employee Name:</span>{" "}
-              {slip.employeeName}
-            </p>
-            <p>
-              <span className="font-bold">Designation:</span>{" "}
-              {slip.designation || "—"}
-            </p>
-            <p>
-              <span className="font-bold">Salary Month:</span> {slip.salaryMonth}
-            </p>
-            <p>
-              <span className="font-bold">Date:</span> {formatDate(slip.slipDate)}
-            </p>
+          <div className="text-right text-[0.92rem] font-medium text-black/55">
+            <p>Date: {formatDate(slip.slipDate)}</p>
+            <p className="mt-1.5">{slip.salaryMonth}</p>
+            <p className="mt-1.5 capitalize">{slip.status}</p>
           </div>
+        </header>
 
-          <table className="mt-6 w-full border-collapse text-[0.9rem]">
-            <thead>
-              <tr className="bg-black text-white">
-                <th className="border border-black px-3 py-2 text-left font-extrabold">
-                  Earnings
-                </th>
-                <th className="border border-black px-3 py-2 text-right font-extrabold">
-                  Amount
-                </th>
-                <th className="border border-black px-3 py-2 text-left font-extrabold">
-                  Deduction
-                </th>
-                <th className="border border-black px-3 py-2 text-right font-extrabold">
-                  Amount
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {Array.from(
-                {
-                  length: Math.max(earnings.length, deductions.length),
-                },
-                (_, index) => {
-                  const earning = earnings[index];
-                  const deduction = deductions[index];
-                  return (
-                    <tr key={`row-${index}`}>
-                      <td className="border border-black px-3 py-2">
-                        {earning?.label ?? ""}
-                      </td>
-                      <td className="border border-black px-3 py-2 text-right tabular-nums font-semibold">
-                        {earning ? money(earning.value) : ""}
-                      </td>
-                      <td className="border border-black px-3 py-2">
-                        {deduction?.label ?? ""}
-                      </td>
-                      <td className="border border-black px-3 py-2 text-right tabular-nums font-semibold">
-                        {deduction ? money(deduction.value) : ""}
-                      </td>
-                    </tr>
-                  );
-                },
-              )}
-              <tr className="bg-[#e8e8e8]">
-                <td className="border border-black px-3 py-2 font-extrabold">
-                  Total Earnings
-                </td>
-                <td className="border border-black px-3 py-2 text-right tabular-nums font-extrabold">
-                  {money(slip.totalEarnings)}
-                </td>
-                <td className="border border-black px-3 py-2 font-extrabold">
-                  Total Deduction
-                </td>
-                <td className="border border-black px-3 py-2 text-right tabular-nums font-extrabold">
-                  {money(slip.totalDeduction)}
-                </td>
-              </tr>
-              <tr className="bg-black text-white">
-                <td
-                  colSpan={3}
-                  className="border border-black px-3 py-3 text-[1.05rem] font-extrabold"
-                >
-                  Net Salary
-                </td>
-                <td className="border border-black px-3 py-3 text-right text-[1.05rem] font-extrabold tabular-nums">
-                  {money(slip.netSalary)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div className="mt-10 grid gap-10 sm:grid-cols-2">
-            <div>
-              <p className="text-[0.84rem] font-semibold">Employ Signature:</p>
-              <div className="mt-8 border-b border-black/30" />
-            </div>
-            <div>
-              <p className="text-[0.84rem] font-semibold">
-                Authorised Signatory:
-              </p>
-              <div className="mt-8 border-b border-black/30" />
-            </div>
-          </div>
-
-          <p className="mt-8 text-[0.75rem] font-medium text-black/45">
-            {disclaimer}
+        <div className="mt-5 grid shrink-0 gap-3 border-y border-black/10 py-4 text-[1rem] sm:grid-cols-2">
+          <p>
+            <span className="font-bold">Employee Name:</span> {slip.employeeName}
           </p>
-
-          <footer className="mt-6 grid grid-cols-1 gap-3 border-t border-black/10 pt-4 text-[0.78rem] font-extrabold leading-[1.35] text-black/55 sm:grid-cols-3 sm:items-end sm:gap-3">
-            <p>Phone: {footerPhone}</p>
-            <p className="sm:text-center">Email: {footerEmail}</p>
-            <div className="sm:text-right">
-              <p>Location: {footerLocationLines[0]}</p>
-              {footerLocationLines.slice(1).map((line) => (
-                <p key={line}>{line}</p>
-              ))}
-            </div>
-          </footer>
+          <p>
+            <span className="font-bold">Designation:</span>{" "}
+            {slip.designation || "—"}
+          </p>
+          <p>
+            <span className="font-bold">Salary Month:</span> {slip.salaryMonth}
+          </p>
+          <p>
+            <span className="font-bold">Date:</span> {formatDate(slip.slipDate)}
+          </p>
         </div>
+
+        <div className="mt-5 flex min-h-0 flex-1 flex-col overflow-hidden border border-black">
+          <div className="grid shrink-0 grid-cols-4 bg-black text-[0.95rem] text-white">
+            <div className="border-r border-white/20 px-3 py-3 text-left font-extrabold">
+              Earnings
+            </div>
+            <div className="border-r border-white/20 px-3 py-3 text-right font-extrabold">
+              Amount
+            </div>
+            <div className="border-r border-white/20 px-3 py-3 text-left font-extrabold">
+              Deduction
+            </div>
+            <div className="px-3 py-3 text-right font-extrabold">Amount</div>
+          </div>
+
+          <div className="flex min-h-0 flex-1 flex-col">
+            {Array.from({ length: rowCount }, (_, index) => {
+              const earning = earnings[index];
+              const deduction = deductions[index];
+              return (
+                <div
+                  key={`row-${index}`}
+                  className="grid min-h-0 flex-1 grid-cols-4 border-t border-black text-[0.98rem]"
+                >
+                  <div className="flex items-center border-r border-black px-3 py-2">
+                    {earning?.label ?? ""}
+                  </div>
+                  <div className="flex items-center justify-end border-r border-black px-3 py-2 tabular-nums font-semibold">
+                    {earning ? money(earning.value) : ""}
+                  </div>
+                  <div className="flex items-center border-r border-black px-3 py-2">
+                    {deduction?.label ?? ""}
+                  </div>
+                  <div className="flex items-center justify-end px-3 py-2 tabular-nums font-semibold">
+                    {deduction ? money(deduction.value) : ""}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="grid shrink-0 grid-cols-4 border-t border-black bg-[#e8e8e8] text-[0.98rem]">
+            <div className="border-r border-black px-3 py-3 font-extrabold">
+              Total Earnings
+            </div>
+            <div className="border-r border-black px-3 py-3 text-right tabular-nums font-extrabold">
+              {money(slip.totalEarnings)}
+            </div>
+            <div className="border-r border-black px-3 py-3 font-extrabold">
+              Total Deduction
+            </div>
+            <div className="px-3 py-3 text-right tabular-nums font-extrabold">
+              {money(slip.totalDeduction)}
+            </div>
+          </div>
+
+          <div className="grid shrink-0 grid-cols-4 border-t border-black bg-black text-[1.12rem] text-white">
+            <div className="col-span-3 border-r border-white/20 px-3 py-4 font-extrabold">
+              Net Salary
+            </div>
+            <div className="px-3 py-4 text-right tabular-nums font-extrabold">
+              {money(slip.netSalary)}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 grid shrink-0 gap-10 sm:grid-cols-2">
+          <div>
+            <p className="text-[0.92rem] font-semibold">Employ Signature:</p>
+            <div className="mt-12 border-b border-black/35" />
+          </div>
+          <div>
+            <p className="text-[0.92rem] font-semibold">Authorised Signatory:</p>
+            <div className="mt-12 border-b border-black/35" />
+          </div>
+        </div>
+
+        <p className="mt-6 shrink-0 text-[0.8rem] font-medium text-black/45">
+          {disclaimer}
+        </p>
+
+        <footer className="mt-5 grid shrink-0 grid-cols-1 gap-3 border-t border-black/10 pt-4 text-[0.84rem] font-extrabold leading-[1.35] text-black/55 sm:grid-cols-3 sm:items-end sm:gap-3">
+          <p>Phone: {footerPhone}</p>
+          <p className="sm:text-center">Email: {footerEmail}</p>
+          <div className="sm:text-right">
+            <p>Location: {footerLocationLines[0]}</p>
+            {footerLocationLines.slice(1).map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </div>
+        </footer>
       </div>
     </article>
   );

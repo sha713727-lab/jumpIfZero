@@ -47,7 +47,9 @@ export function SalarySlipDocumentClient({
           </a>
         </div>
       </div>
-      <SalarySlipDocument slip={slip} />
+      <div className="mx-auto w-full max-w-[800px] print:max-w-none print:w-[210mm]">
+        <SalarySlipDocument slip={slip} />
+      </div>
     </div>
   );
 }
