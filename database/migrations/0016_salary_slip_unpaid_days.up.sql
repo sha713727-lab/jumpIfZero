@@ -4,6 +4,8 @@
 
 BEGIN;
 
+DROP VIEW IF EXISTS salary_slips_active;
+
 ALTER TABLE salary_slips
   DROP CONSTRAINT IF EXISTS salary_slips_net_nonneg;
 
@@ -33,5 +35,11 @@ ALTER TABLE salary_slips
     (basic_salary + punctuality + medical_allowance + incentives + bonus)
     - (advance + income_tax + wh_tax + fuel_advances + unpaid_days) >= 0
   );
+
+CREATE VIEW salary_slips_active AS
+  SELECT * FROM salary_slips WHERE archived_at IS NULL;
+
+GRANT SELECT ON salary_slips_active TO jz_app;
+GRANT SELECT ON salary_slips_active TO jz_readonly;
 
 COMMIT;
