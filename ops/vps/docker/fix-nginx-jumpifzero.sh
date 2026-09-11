@@ -25,6 +25,11 @@ if [[ -z "$FRONTEND_ID" ]]; then
   exit 1
 fi
 
+echo "=== listeners on host :80 / :443 ==="
+ss -tlnp 2>/dev/null | grep -E ':80 |:443 ' || netstat -tlnp 2>/dev/null | grep -E ':80 |:443 ' || true
+echo "=== docker port publish ($NGINX_NAME) ==="
+docker port "$NGINX_NAME" || true
+
 echo "=== ensure frontend on proxy network ($PROXY_NETWORK) ==="
 if ! docker exec "$NGINX_ID" getent hosts jumpifzero-frontend >/dev/null 2>&1; then
   docker network disconnect "$PROXY_NETWORK" "$FRONTEND_ID" 2>/dev/null || true
@@ -80,6 +85,9 @@ openssl x509 -in "$CERT_DIR/fullchain.pem" -noout -subject -dates
 HOST_DEFAULT_CONF="$(docker inspect "$NGINX_ID" --format '{{range .Mounts}}{{if eq .Destination "/etc/nginx/conf.d/default.conf"}}{{println .Source}}{{end}}{{end}}' | head -n 1)"
 HOST_CONF_DIR="$(docker inspect "$NGINX_ID" --format '{{range .Mounts}}{{if eq .Destination "/etc/nginx/conf.d"}}{{println .Source}}{{end}}{{end}}' | head -n 1)"
 
+SNIPPET_UNIX="$(mktemp)"
+tr -d '\r' < "$SNIPPET" > "$SNIPPET_UNIX"
+
 strip_managed_block() {
   local src="$1"
   local dest="$2"
@@ -95,15 +103,34 @@ strip_managed_block() {
   fi
 }
 
-# Bind-mounted file: overwrite same inode only. Never mv/docker cp onto the mount path.
+remove_jz_from_foreign_servernames() {
+  local file="$1"
+  local tmp
+  tmp="$(mktemp)"
+  awk -v d="$DOMAIN" '
+    BEGIN { www="www." d }
+    /^[[:space:]]*server_name[[:space:]]/ {
+      line=$0
+      gsub("www\\." d, "", line)
+      gsub(d, "", line)
+      print line
+      next
+    }
+    { print }
+  ' "$file" > "$tmp"
+  cat "$tmp" > "$file"
+  rm -f "$tmp"
+}
+
 overwrite_bind_file() {
   local host_path="$1"
   local content_file="$2"
   cat "$content_file" > "$host_path"
 }
 
-if [[ -n "$HOST_CONF_DIR" && -d "$HOST_CONF_DIR" ]]; then
-  cp "$SNIPPET" "$HOST_CONF_DIR/jumpifzero.conf"
+BAK=""
+if [[ -n "$HOST_CONF_DIR" && -d "$HOST_CONF_DIR" && -z "$HOST_DEFAULT_CONF" ]]; then
+  tr -d '\r' < "$SNIPPET_UNIX" > "$HOST_CONF_DIR/jumpifzero.conf"
   echo "wrote $HOST_CONF_DIR/jumpifzero.conf"
 elif [[ -n "$HOST_DEFAULT_CONF" && -f "$HOST_DEFAULT_CONF" ]]; then
   BAK="${HOST_DEFAULT_CONF}.bak.jz.$(date +%Y%m%d%H%M%S)"
@@ -111,8 +138,11 @@ elif [[ -n "$HOST_DEFAULT_CONF" && -f "$HOST_DEFAULT_CONF" ]]; then
   TMP_BASE="$(mktemp)"
   TMP_OUT="$(mktemp)"
   strip_managed_block "$HOST_DEFAULT_CONF" "$TMP_BASE"
+  tr -d '\r' < "$TMP_BASE" > "${TMP_BASE}.lf"
+  mv "${TMP_BASE}.lf" "$TMP_BASE"
+  remove_jz_from_foreign_servernames "$TMP_BASE"
   {
-    cat "$SNIPPET"
+    cat "$SNIPPET_UNIX"
     echo
     cat "$TMP_BASE"
   } > "$TMP_OUT"
@@ -126,29 +156,75 @@ elif [[ -n "$HOST_DEFAULT_CONF" && -f "$HOST_DEFAULT_CONF" ]]; then
 else
   echo "nginx conf mount not found"
   docker inspect "$NGINX_ID" --format '{{json .Mounts}}'
+  rm -f "$SNIPPET_UNIX"
   exit 1
 fi
+rm -f "$SNIPPET_UNIX"
 
-if ! docker exec "$NGINX_ID" nginx -t; then
-  if [[ -n "${BAK:-}" && -f "$BAK" ]]; then
+echo "=== nginx -t (show conflicts) ==="
+NGINX_TEST="$(docker exec "$NGINX_ID" nginx -t 2>&1)" || true
+echo "$NGINX_TEST"
+if echo "$NGINX_TEST" | grep -qi 'conflicting server name'; then
+  echo "WARN: conflicting server_name detected — first matching block wins"
+fi
+if ! echo "$NGINX_TEST" | grep -qi 'successful'; then
+  if [[ -n "$BAK" && -f "$BAK" ]]; then
     overwrite_bind_file "$HOST_DEFAULT_CONF" "$BAK"
   fi
   exit 1
 fi
 docker exec "$NGINX_ID" nginx -s reload
 
+echo "=== listen/server_name map (port 80) ==="
+docker exec "$NGINX_ID" nginx -T 2>/dev/null | awk '
+  /server[[:space:]]*\{/ { in_server=1; listen=""; names=""; next }
+  in_server && /listen[[:space:]]/ { listen=listen " " $0 }
+  in_server && /server_name[[:space:]]/ { names=names " " $0 }
+  in_server && /^\}/ {
+    if (listen ~ /80/) print listen " |" names
+    in_server=0
+  }
+' | head -n 40
+
 echo "=== nginx -T jumpifzero markers ==="
 docker exec "$NGINX_ID" nginx -T 2>/dev/null | grep -E 'X-JumpIfZero|server_name jumpifzero|jumpifzero-frontend' | head -n 20
 
-echo "=== HTTP Host check (must include X-JumpIfZero) ==="
-HTTP_HEADERS="$(curl -sI -H "Host: ${DOMAIN}" "http://127.0.0.1/" | tr -d '\r')"
-echo "$HTTP_HEADERS" | head -n 25
-if ! echo "$HTTP_HEADERS" | grep -qi '^X-JumpIfZero:'; then
-  echo "FAIL: jumpifzero vhost not active on :80 (requests fall through to default site)"
+echo "=== HTTP check INSIDE nginx container ==="
+IN_HEADERS="$(docker exec "$NGINX_ID" curl -sI -H "Host: ${DOMAIN}" "http://127.0.0.1/" | tr -d '\r' || true)"
+echo "$IN_HEADERS" | head -n 25
+
+NGINX_IP="$(docker inspect "$NGINX_ID" --format '{{range $k,$v := .NetworkSettings.Networks}}{{.IPAddress}}{{println}}{{end}}' | head -n 1)"
+echo "=== HTTP check via container IP (${NGINX_IP}) ==="
+IP_HEADERS=""
+if [[ -n "$NGINX_IP" ]]; then
+  IP_HEADERS="$(curl -sI -H "Host: ${DOMAIN}" "http://${NGINX_IP}/" | tr -d '\r' || true)"
+  echo "$IP_HEADERS" | head -n 25
+fi
+
+echo "=== HTTP check via host 127.0.0.1:80 ==="
+HOST_HEADERS="$(curl -sI -H "Host: ${DOMAIN}" "http://127.0.0.1/" | tr -d '\r' || true)"
+echo "$HOST_HEADERS" | head -n 25
+
+headers_ok() {
+  local h="$1"
+  echo "$h" | grep -qi '^X-JumpIfZero:' && ! echo "$h" | grep -qi 'aviosupportdesk'
+}
+
+if headers_ok "$IN_HEADERS"; then
+  echo "OK: jumpifzero vhost active inside nginx container"
+elif headers_ok "$IP_HEADERS"; then
+  echo "OK: jumpifzero vhost active on container IP"
+else
+  echo "FAIL: jumpifzero vhost not selected inside docker nginx"
+  echo "Paste output of: docker exec $NGINX_NAME nginx -T 2>&1 | head -n 200"
   exit 1
 fi
-if echo "$HTTP_HEADERS" | grep -qi 'aviosupportdesk'; then
-  echo "FAIL: response still references aviosupportdesk for Host ${DOMAIN}"
+
+if ! headers_ok "$HOST_HEADERS"; then
+  echo "FAIL: host :80 is not serving the jumpifzero vhost (different process or publish map)"
+  echo "=== diagnose host vs docker ==="
+  ss -tlnp 2>/dev/null | grep -E ':80 |:443 ' || true
+  docker ps --format 'table {{.Names}}\t{{.Ports}}' | grep -E 'nginx|jumpifzero|avio' || true
   exit 1
 fi
 
