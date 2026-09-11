@@ -47,7 +47,19 @@ curl -sI -H 'Host: jumpifzero.com' http://127.0.0.1 | head
 docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' | grep -E 'jumpifzero|aviosupport'
 ```
 
-Site 1 must still respond on its own domain.
+Expect `X-JumpIfZero: 1`. Site 1 must still respond on its own domain.
+
+## 2a. Fix `NET::ERR_CERT_COMMON_NAME_INVALID`
+
+Symptom: browser shows a privacy error and the live cert is for **another** site on the same VPS (e.g. `aviosupportdesk.com`). Cause: JumpIfZero’s nginx vhost was dropped (often after the shared nginx container was recreated), so SNI falls through to the default certificate.
+
+```bash
+cd /var/www/jumpifzero && git pull origin main
+export JZ_DOMAIN='jumpifzero.com'
+bash /var/www/jumpifzero/ops/vps/docker/fix-nginx-jumpifzero.sh
+```
+
+Then in Cloudflare DNS: `A` `@` and `CNAME` `www` must be **Proxied** (orange cloud) so visitors get Cloudflare’s cert for `jumpifzero.com`. Origin SSL mode: **Full** (self-signed origin OK) or **Full (strict)** with a Cloudflare Origin Certificate / Let’s Encrypt cert for `jumpifzero.com`.
 
 ## 2b. Production bootstrap (users + CMS)
 

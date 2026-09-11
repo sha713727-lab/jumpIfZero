@@ -44,7 +44,23 @@ fi
 
 CERT_DIR="$LE_LIVE_HOST/live/$DOMAIN"
 mkdir -p "$CERT_DIR"
+
+cert_covers_domain() {
+  local pem="$1"
+  [[ -f "$pem" ]] || return 1
+  openssl x509 -in "$pem" -noout -text 2>/dev/null \
+    | grep -E "CN[[:space:]]*=[[:space:]]*${DOMAIN}|DNS:${DOMAIN}(,|$| )" >/dev/null
+}
+
+NEED_CERT=0
 if [[ ! -f "$CERT_DIR/fullchain.pem" || ! -f "$CERT_DIR/privkey.pem" ]]; then
+  NEED_CERT=1
+elif ! cert_covers_domain "$CERT_DIR/fullchain.pem"; then
+  echo "=== existing cert does not cover $DOMAIN — recreating ==="
+  NEED_CERT=1
+fi
+
+if [[ "$NEED_CERT" -eq 1 ]]; then
   echo "=== create origin TLS cert for $DOMAIN ==="
   if ! openssl req -x509 -nodes -newkey rsa:2048 -days 825 \
     -keyout "$CERT_DIR/privkey.pem" \
@@ -58,6 +74,8 @@ if [[ ! -f "$CERT_DIR/fullchain.pem" || ! -f "$CERT_DIR/privkey.pem" ]]; then
   fi
 fi
 chmod 644 "$CERT_DIR/fullchain.pem" "$CERT_DIR/privkey.pem"
+echo "=== origin cert subject ==="
+openssl x509 -in "$CERT_DIR/fullchain.pem" -noout -subject -dates
 
 HOST_DEFAULT_CONF="$(docker inspect "$NGINX_ID" --format '{{range .Mounts}}{{if eq .Destination "/etc/nginx/conf.d/default.conf"}}{{println .Source}}{{end}}{{end}}' | head -n 1)"
 HOST_CONF_DIR="$(docker inspect "$NGINX_ID" --format '{{range .Mounts}}{{if eq .Destination "/etc/nginx/conf.d"}}{{println .Source}}{{end}}{{end}}' | head -n 1)"
@@ -122,14 +140,34 @@ docker exec "$NGINX_ID" nginx -s reload
 echo "=== nginx -T jumpifzero markers ==="
 docker exec "$NGINX_ID" nginx -T 2>/dev/null | grep -E 'X-JumpIfZero|server_name jumpifzero|jumpifzero-frontend' | head -n 20
 
+echo "=== HTTP Host check (must include X-JumpIfZero) ==="
+HTTP_HEADERS="$(curl -sI -H "Host: ${DOMAIN}" "http://127.0.0.1/" | tr -d '\r')"
+echo "$HTTP_HEADERS" | head -n 25
+if ! echo "$HTTP_HEADERS" | grep -qi '^X-JumpIfZero:'; then
+  echo "FAIL: jumpifzero vhost not active on :80 (requests fall through to default site)"
+  exit 1
+fi
+if echo "$HTTP_HEADERS" | grep -qi 'aviosupportdesk'; then
+  echo "FAIL: response still references aviosupportdesk for Host ${DOMAIN}"
+  exit 1
+fi
+
 echo "=== origin SNI check ==="
-curl -skI --resolve "${DOMAIN}:443:127.0.0.1" "https://${DOMAIN}/" | head -n 25
+SNI_HEADERS="$(curl -skI --resolve "${DOMAIN}:443:127.0.0.1" "https://${DOMAIN}/" | tr -d '\r')"
+echo "$SNI_HEADERS" | head -n 25
+if ! echo "$SNI_HEADERS" | grep -qi '^X-JumpIfZero:'; then
+  echo "FAIL: jumpifzero TLS vhost not active on :443"
+  exit 1
+fi
 echo "--- title ---"
 curl -sk --resolve "${DOMAIN}:443:127.0.0.1" "https://${DOMAIN}/" | tr '\n' ' ' | sed 's/.*<title>//;s/<\/title>.*//' | head -c 160
 echo
 echo
-echo "=== cloudflare check ==="
-curl -sI "https://${DOMAIN}/" | head -n 20
+echo "=== public HTTPS check ==="
+curl -sI "https://${DOMAIN}/" | head -n 20 || true
 echo "--- title ---"
-curl -s "https://${DOMAIN}/" | tr '\n' ' ' | sed 's/.*<title>//;s/<\/title>.*//' | head -c 160
+curl -sk "https://${DOMAIN}/" | tr '\n' ' ' | sed 's/.*<title>//;s/<\/title>.*//' | head -c 160
 echo
+echo
+echo "If the browser still warns: enable Cloudflare Proxied (orange cloud) for ${DOMAIN},"
+echo "or install a trusted origin cert (Cloudflare Origin CA / Let's Encrypt)."
