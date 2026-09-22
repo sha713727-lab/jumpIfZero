@@ -13,7 +13,7 @@ import styles from "./landingAlt.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const HEADER_HEIGHT = 72;
+const HEADER_HEIGHT = 80;
 const SECTION_BG = "#f7f5f0";
 const TILT_ANGLE = 8;
 const TILT_PERSPECTIVE = 900;

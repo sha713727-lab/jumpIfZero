@@ -12,7 +12,7 @@ import styles from "./landingAlt.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const HEADER_HEIGHT = 72;
+const HEADER_HEIGHT = 80;
 const SECTION_BG = "#f7f5f0";
 const CLOSING_LINE_INDEX = 5;
 const FINAL_LINE_INDEX = 6;

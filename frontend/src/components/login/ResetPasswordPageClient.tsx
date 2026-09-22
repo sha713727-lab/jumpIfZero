@@ -10,7 +10,7 @@ import { site } from "@/constants/site";
 import { applyHeaderTone } from "@/lib/headerTone";
 import { submitResetPassword } from "@/lib/submitResetPassword";
 
-const HEADER_HEIGHT = 72;
+const HEADER_HEIGHT = 80;
 const PAGE_BG = "#f7f5f0";
 
 const labelClass = adminLabelClass;

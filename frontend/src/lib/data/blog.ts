@@ -118,5 +118,14 @@ export async function getRelatedPosts(
   limit = 3,
 ): Promise<readonly BlogPost[]> {
   const posts = await getBlogPosts();
-  return posts.filter((post) => post.slug !== slug).slice(0, limit);
+  const current = posts.find((post) => post.slug === slug);
+  const others = posts.filter((post) => post.slug !== slug);
+  if (!current) {
+    return others.slice(0, limit);
+  }
+  const sameCategory = others.filter(
+    (post) => post.category === current.category,
+  );
+  const rest = others.filter((post) => post.category !== current.category);
+  return [...sameCategory, ...rest].slice(0, limit);
 }

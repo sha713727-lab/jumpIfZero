@@ -2,11 +2,9 @@
   position: relative;
   z-index: 0;
   width: 100%;
-  overflow: clip;
   background: #f3f5ef;
   color: #000000;
   isolation: isolate;
-  clip-path: inset(0);
 }
 
 .stage {
@@ -16,13 +14,13 @@
   height: 100vh;
   overflow: hidden;
   isolation: isolate;
-  clip-path: inset(0);
-  contain: paint;
 }
 
 .scene {
   position: absolute;
   inset: 0;
+  z-index: 1;
+  overflow: hidden;
   perspective: 1500px;
   perspective-origin: 50% 48%;
   transform-style: preserve-3d;
@@ -50,10 +48,11 @@
   pointer-events: none;
   background:
     radial-gradient(
-      ellipse 48% 36% at 50% 47%,
-      rgba(243, 245, 239, 0.9) 0%,
-      rgba(243, 245, 239, 0.66) 40%,
-      rgba(243, 245, 239, 0.26) 70%,
+      ellipse 58% 46% at 50% 48%,
+      rgba(243, 245, 239, 0.98) 0%,
+      rgba(243, 245, 239, 0.92) 36%,
+      rgba(243, 245, 239, 0.55) 62%,
+      rgba(243, 245, 239, 0.12) 82%,
       rgba(243, 245, 239, 0) 100%
     );
 }
@@ -79,7 +78,7 @@
   filter: grayscale(1) contrast(0.92) brightness(1.18);
   pointer-events: none;
   user-select: none;
-  opacity: 0.92;
+  opacity: 0.72;
 }
 
 .copy {
@@ -95,6 +94,8 @@
 }
 
 .copyInner {
+  position: relative;
+  z-index: 1;
   width: min(38rem, 100%);
   text-align: center;
   transform-style: preserve-3d;
@@ -104,23 +105,23 @@
 .headingStack {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem 0;
+  gap: 0.85rem;
+  padding: 0.5rem 0 0.25rem;
 }
 
 .watermark {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: relative;
+  margin: 0;
   white-space: nowrap;
-  font-size: clamp(2.4rem, 8vw, 5.5rem);
+  font-size: clamp(0.66rem, 1.1vw, 0.75rem);
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.24em;
   line-height: 1;
   text-transform: uppercase;
-  color: rgba(249, 161, 55, 0.18);
+  color: #e8891a;
   user-select: none;
   pointer-events: none;
 }
@@ -134,7 +135,7 @@
   letter-spacing: -0.02em;
   line-height: 1.15;
   text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.88);
+  color: #0d120b;
 }
 
 .paragraph {
@@ -142,7 +143,7 @@
   font-size: clamp(0.98rem, 1.8vw, 1.15rem);
   font-weight: 500;
   line-height: 1.55;
-  color: rgba(0, 0, 0, 0.55);
+  color: rgba(13, 18, 11, 0.78);
 }
 
 .paragraph + .paragraph {
@@ -195,12 +196,16 @@
     padding: 5.5rem 1.25rem 3rem;
   }
 
+  .headingStack {
+    gap: 0.65rem;
+  }
+
   .veil {
     background: radial-gradient(
-      ellipse 82% 30% at 50% 47%,
-      rgba(243, 245, 239, 0.95) 0%,
-      rgba(243, 245, 239, 0.8) 45%,
-      rgba(243, 245, 239, 0.32) 74%,
+      ellipse 90% 42% at 50% 48%,
+      rgba(243, 245, 239, 0.99) 0%,
+      rgba(243, 245, 239, 0.94) 42%,
+      rgba(243, 245, 239, 0.5) 72%,
       rgba(243, 245, 239, 0) 100%
     );
   }
@@ -211,5 +216,6 @@
 
   .image {
     filter: grayscale(1) contrast(0.95) brightness(1.12);
+    opacity: 0.65;
   }
 }

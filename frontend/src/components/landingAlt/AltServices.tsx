@@ -1,11 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ServiceDetailModal } from "@/components/services/ServiceDetailModal";
-import { getServiceDetailBySlug } from "@/constants/serviceDetails";
 import { servicesIntro } from "@/constants/servicesStory";
 import type { ServiceChapter } from "@/lib/data/services";
 import { applyHeaderTone } from "@/lib/headerTone";
@@ -35,7 +34,7 @@ const MOBILE_SETTINGS: CarouselSettings = {
 };
 
 const MOBILE_BREAKPOINT = 767;
-const HEADER_HEIGHT = 72;
+const HEADER_HEIGHT = 80;
 const SECTION_BG = "#0d120b";
 const SCROLL_PER_CARD = 480;
 const FADE_PER_STEP = 0.3;
@@ -64,7 +63,6 @@ export function AltServices({
   const triggerRef = useRef<ScrollTrigger | null>(null);
   const activeRef = useRef(0);
   const [active, setActive] = useState(0);
-  const [detailSlug, setDetailSlug] = useState<string | null>(null);
   const lastIndex = Math.max(chapters.length - 1, 0);
 
   useEffect(() => {
@@ -194,15 +192,12 @@ export function AltServices({
   };
 
   const chapter = chapters[active] ?? chapters.at(0);
-  const openDetail =
-    detailSlug === null ? null : (getServiceDetailBySlug(detailSlug) ?? null);
 
   if (!chapter) {
     return null;
   }
 
   return (
-    <>
     <section
       ref={sectionRef}
       id="services"
@@ -267,20 +262,19 @@ export function AltServices({
               “{chapter.quote}”
             </p>
 
-            <button
-              type="button"
-              onClick={() => setDetailSlug(chapter.slug)}
-              className="mt-9 inline-flex items-center gap-3 rounded-full bg-cream px-7 py-3.5 text-[0.68rem] font-extrabold tracking-[0.2em] text-black italic uppercase focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            <Link
+              href={chapter.href}
+              className="mt-9 inline-flex items-center gap-3 rounded-full bg-cream px-7 py-3.5 text-[0.68rem] font-extrabold tracking-[0.2em] text-black italic uppercase transition-transform duration-300 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             >
               Explore {chapter.category}
               <span aria-hidden="true">→</span>
-            </button>
+            </Link>
           </div>
 
           <div className="mt-10 flex items-center gap-2">
             {chapters.map((service, index) => (
               <button
-                key={service.category}
+                key={service.slug}
                 type="button"
                 aria-label={service.category}
                 aria-current={index === active}
@@ -298,7 +292,7 @@ export function AltServices({
         <div className="relative order-1 h-[44vh] min-h-[18rem] lg:order-2 lg:h-[70vh]">
           {chapters.map((service, index) => (
             <div
-              key={service.category}
+              key={service.slug}
               ref={(node) => {
                 cardRefs.current[index] = node;
               }}
@@ -331,11 +325,5 @@ export function AltServices({
         </div>
       </div>
     </section>
-
-    <ServiceDetailModal
-      detail={openDetail ?? null}
-      onClose={() => setDetailSlug(null)}
-    />
-    </>
   );
 }

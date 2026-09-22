@@ -192,17 +192,7 @@ export function HomePageClient({
       >
         <AltWhy />
       </DeferredMount>
-      <DeferredMount
-        fallback={
-          <section
-            id="about"
-            aria-label="About JZ Enterprises"
-            className="min-h-screen bg-[#f3f5ef] [content-visibility:auto] [contain-intrinsic-size:1px_100vh]"
-          />
-        }
-      >
-        <FloatingGallery imagePaths={aboutGalleryImages} />
-      </DeferredMount>
+      <FloatingGallery imagePaths={aboutGalleryImages} />
       <DeferredMount
         fallback={
           <section className="min-h-[14rem] bg-brand [content-visibility:auto] [contain-intrinsic-size:1px_14rem]" />

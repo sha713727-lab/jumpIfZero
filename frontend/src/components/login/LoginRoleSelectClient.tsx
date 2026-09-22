@@ -7,7 +7,7 @@ import { loginRoleSelectCopy } from "@/constants/login";
 import { site } from "@/constants/site";
 import { applyHeaderTone } from "@/lib/headerTone";
 
-const HEADER_HEIGHT = 72;
+const HEADER_HEIGHT = 80;
 const PAGE_BG = "#f7f5f0";
 
 function AdminIcon({ className }: { readonly className?: string }) {

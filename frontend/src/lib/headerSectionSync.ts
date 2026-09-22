@@ -1,6 +1,6 @@
 import { applyHeaderTone } from "@/lib/headerTone";
 
-const HEADER_HEIGHT = 72;
+const HEADER_HEIGHT = 80;
 
 export function syncHeaderFromSections(
   fallbackLight = false,

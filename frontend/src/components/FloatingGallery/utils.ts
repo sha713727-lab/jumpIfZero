@@ -9,7 +9,7 @@ export const GALLERY_SEED = 0x4a5a4552;
 
 export const GALLERY_DESKTOP: GalleryLayoutConfig = {
   itemCount: 72,
-  scrollDistance: 5000,
+  scrollDistance: 900,
   floatAmplitude: 4,
   pathTravel: 0.5,
   minScale: 0.97,
@@ -23,7 +23,7 @@ export const GALLERY_DESKTOP: GalleryLayoutConfig = {
 
 export const GALLERY_TABLET: GalleryLayoutConfig = {
   itemCount: 52,
-  scrollDistance: 4200,
+  scrollDistance: 780,
   floatAmplitude: 3,
   pathTravel: 0.44,
   minScale: 0.86,
@@ -37,7 +37,7 @@ export const GALLERY_TABLET: GalleryLayoutConfig = {
 
 export const GALLERY_MOBILE: GalleryLayoutConfig = {
   itemCount: 36,
-  scrollDistance: 3200,
+  scrollDistance: 680,
   floatAmplitude: 2,
   pathTravel: 0.38,
   minScale: 0.72,

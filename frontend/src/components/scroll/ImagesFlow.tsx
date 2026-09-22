@@ -9,7 +9,7 @@ import { applyHeaderTone } from "@/lib/headerTone";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const HEADER_HEIGHT = 72;
+const HEADER_HEIGHT = 80;
 const FLOW_BG = "#f3f5ef";
 
 const DEFAULT_POSITIONS = [
@@ -244,7 +244,7 @@ export function ImagesFlow({
         data-header-bg={FLOW_BG}
         className="relative min-h-screen overflow-hidden bg-[#f3f5ef]"
       >
-        <div className="pointer-events-none absolute inset-0 z-[100] flex items-center justify-center px-5">
+        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-5">
           <div className="w-full max-w-[38rem] text-center">
             {flowWatermark || flowTitle || flowParagraphs || flowText ? (
               <>
@@ -296,7 +296,7 @@ export function ImagesFlow({
         </div>
 
         <div
-          className="absolute inset-0 h-full w-full"
+          className="absolute inset-0 z-10 h-full w-full"
           style={{ perspective: 2000, transformStyle: "preserve-3d" }}
         >
           {images.map((src, index) => {

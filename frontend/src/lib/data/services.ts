@@ -1,14 +1,16 @@
 import { unstable_cache } from "next/cache";
 import {
-  servicesListResponseSchema,
-} from "@jumpifzero/contracts/content";
-import type { ServiceRow } from "@jumpifzero/contracts/db-content";
+  servicePageDetailSchema,
+  servicePagesListResponseSchema,
+} from "@jumpifzero/contracts";
+import { serviceNavCategories } from "@/constants/servicesNav";
+import {
+  getServicePillarBlurb,
+  servicePillarBlurbs,
+} from "@/constants/servicesPage";
+import { servicesIntro } from "@/constants/servicesStory";
 import { gatewayBackendRequest } from "@/lib/backend/gatewayClient";
 import { cmsMediaSrc } from "@/lib/cmsMedia";
-import {
-  getServiceDetailBySlug,
-} from "@/constants/serviceDetails";
-import { servicesIntro } from "@/constants/servicesStory";
 
 export type ServiceChapter = {
   readonly slug: string;
@@ -26,26 +28,41 @@ export type ServiceChapter = {
 
 export { servicesIntro };
 
-function toServiceChapter(row: ServiceRow, index: number): ServiceChapter {
-  const overlay = getServiceDetailBySlug(row.slug);
-  const image = cmsMediaSrc(row.image_path);
-  const overlayImage = overlay?.image ?? image;
+function chapterFromNav(
+  slug: string,
+  index: number,
+  enrich?: {
+    readonly image?: string;
+  },
+): ServiceChapter | null {
+  const category = serviceNavCategories.find((item) => item.slug === slug);
+  const blurb = getServicePillarBlurb(slug);
+  if (!category || !blurb) {
+    return null;
+  }
+
+  const image =
+    enrich?.image && enrich.image.length > 0 ? enrich.image : blurb.image;
 
   return {
-    slug: row.slug,
-    title:
-      overlay?.title ??
-      (row.description.length > 0 ? row.description : row.title),
-    quote: overlay?.quote ?? "",
-    category: row.title,
-    href: row.path.length > 0 ? row.path : "/contact",
+    slug: category.slug,
+    title: blurb.title,
+    quote: blurb.quote,
+    category: category.title,
+    href: category.href,
     tone: index % 2 === 0 ? "light" : "dark",
     images: {
-      left: image.length > 0 ? image : overlayImage,
-      right: overlayImage,
-      bottom: overlayImage,
+      left: image,
+      right: image,
+      bottom: image,
     },
   };
+}
+
+function staticChapters(): readonly ServiceChapter[] {
+  return serviceNavCategories
+    .map((category, index) => chapterFromNav(category.slug, index))
+    .filter((item): item is ServiceChapter => item !== null);
 }
 
 export async function getServiceChapters(): Promise<readonly ServiceChapter[]> {
@@ -54,31 +71,74 @@ export async function getServiceChapters(): Promise<readonly ServiceChapter[]> {
 
 const getCachedServiceChapters = unstable_cache(
   async (): Promise<readonly ServiceChapter[]> => {
+    const fallback = staticChapters();
+
     try {
       const response = await gatewayBackendRequest({
         method: "GET",
-        path: "/content/services",
+        path: "/content/service-pages",
         query: {
           limit: "100",
           publishedOnly: "true",
-          sort: "updated_at",
+          sort: "sort_order",
           dir: "asc",
         },
-        outputSchema: servicesListResponseSchema,
+        outputSchema: servicePagesListResponseSchema,
       });
-      if (response.items.length === 0) {
-        return [];
+
+      const pillars = response.items.filter((item) => item.parentId === null);
+      if (pillars.length === 0) {
+        return fallback;
       }
-      return response.items.map(toServiceChapter);
+
+      const bySlug = new Map(pillars.map((item) => [item.slug, item] as const));
+      const chapters: ServiceChapter[] = [];
+
+      for (const [index, category] of serviceNavCategories.entries()) {
+        const listItem = bySlug.get(category.slug);
+        if (!listItem) {
+          const staticChapter = chapterFromNav(category.slug, index);
+          if (staticChapter) {
+            chapters.push(staticChapter);
+          }
+          continue;
+        }
+
+        let enrich:
+          | {
+              readonly image?: string;
+            }
+          | undefined;
+
+        try {
+          const detail = await gatewayBackendRequest({
+            method: "GET",
+            path: `/content/service-pages/by-slug/${encodeURIComponent(category.slug)}`,
+            query: { publishedOnly: "true" },
+            outputSchema: servicePageDetailSchema,
+          });
+          const heroImage = cmsMediaSrc(detail.heroImagePath);
+          enrich =
+            heroImage.length > 0 ? { image: heroImage } : undefined;
+        } catch {
+          enrich = undefined;
+        }
+
+        const chapter = chapterFromNav(category.slug, index, enrich);
+        if (chapter) {
+          chapters.push(chapter);
+        }
+      }
+
+      return chapters.length > 0 ? chapters : fallback;
     } catch {
-      return [];
+      return fallback;
     }
   },
-  ["public-service-chapters"],
-  { revalidate: 60 },
+  ["public-service-chapters-from-nav-v2"],
+  { revalidate: 60, tags: ["service-pages"] },
 );
 
 export async function getServiceSlugs(): Promise<readonly string[]> {
-  const chapters = await getCachedServiceChapters();
-  return chapters.map((chapter) => chapter.slug);
+  return servicePillarBlurbs.map((item) => item.slug);
 }

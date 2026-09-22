@@ -1,11 +1,11 @@
 export const servicesPageCopy = {
-  heroLead: "Eight services.",
-  heroRest: "One growth system.",
+  heroLead: "Software, web, and growth.",
+  heroRest: "One delivery system.",
   heroSupport:
-    "Strategy, creative, and technology — built so your business grows smarter.",
-  offeringsTitle: "What you can hire us for",
+    "Custom software development, web development, mobile apps, SEO, marketing, design, and cyber security — hired as coherent workstreams.",
+  offeringsTitle: "Explore our services",
   offeringsLede:
-    "Concrete offerings first — then how engagements run from brief to launch.",
+    "Start with Custom Development for product build work, then layer SEO, marketing, design, and security where growth needs them.",
   processTitle: "How engagements run",
   processLede: "Clear ownership from first brief to launch.",
   process: [
@@ -36,19 +36,9 @@ export const servicesPageCopy = {
 
 export const serviceFanCards = [
   {
-    title: "Website Development",
-    region: "Convert",
+    title: "Custom Development",
+    region: "Build",
     image: "/images/services/website.jpg",
-  },
-  {
-    title: "Software Development",
-    region: "Scale",
-    image: "/images/services/software.jpg",
-  },
-  {
-    title: "App Development",
-    region: "Mobile",
-    image: "/images/services/app.jpg",
   },
   {
     title: "SEO",
@@ -61,18 +51,97 @@ export const serviceFanCards = [
     image: "/images/services/smm.jpg",
   },
   {
-    title: "Graphic Designing",
-    region: "Brand",
+    title: "Design",
+    region: "Craft",
     image: "/images/services/design.jpg",
   },
   {
-    title: "Network Security",
+    title: "Cyber Security",
     region: "Protect",
     image: "/images/services/security.jpg",
   },
+] as const;
+
+export type ServicePillarBlurb = {
+  readonly slug: string;
+  readonly quote: string;
+  readonly title: string;
+  readonly body: string;
+  readonly image: string;
+  readonly imageAlt: string;
+  readonly highlights: readonly [string, string, string];
+};
+
+export const servicePillarBlurbs: readonly ServicePillarBlurb[] = [
   {
-    title: "Fix Bug & Error",
-    region: "Stabilize",
-    image: "/images/services/bugfix.jpg",
+    slug: "custom-development",
+    quote: "Build once. Own the system.",
+    title: "Custom software and web products built around your workflows.",
+    body: "Web development, mobile apps, and custom software development under one practice — with clear ownership after launch.",
+    image: "/images/services/website.jpg",
+    imageAlt: "Custom software and web development work",
+    highlights: [
+      "Web, mobile, and custom software under one practice",
+      "Architecture that survives the next release",
+      "Handoffs your team can operate",
+    ],
+  },
+  {
+    slug: "seo",
+    quote: "Rank where buyers already search.",
+    title: "Search visibility that turns into real pipeline.",
+    body: "Technical, local, international, commerce, and answer-led SEO — without vanity metrics.",
+    image: "/images/services/seo.jpg",
+    imageAlt: "SEO services",
+    highlights: [
+      "Site health and crawlability",
+      "Intent-led content systems",
+      "Clear reporting tied to business goals",
+    ],
+  },
+  {
+    slug: "digital-marketing",
+    quote: "Attention that earns a next step.",
+    title: "Campaigns that connect presence to action.",
+    body: "Paid, social, content, email, and conversion work measured against real conversations.",
+    image: "/images/services/smm.jpg",
+    imageAlt: "Digital marketing",
+    highlights: [
+      "Channel strategy with clear priorities",
+      "Creative and landing-page alignment",
+      "Loops from attention to action",
+    ],
+  },
+  {
+    slug: "design",
+    quote: "Clarity first. Craft that holds.",
+    title: "Design systems that feel premium and clear.",
+    body: "UI/UX, web, graphic, and brand identity ready for handoff and real use.",
+    image: "/images/services/design.jpg",
+    imageAlt: "Design services",
+    highlights: [
+      "Research-backed flows and layouts",
+      "Visual systems that scale",
+      "Assets ready for web and campaigns",
+    ],
+  },
+  {
+    slug: "cyber-security",
+    quote: "Reduce risk without burying the team.",
+    title: "Practical security that supports growth.",
+    body: "Application security, assessment, hardening, and maintenance — scoped and clear.",
+    image: "/images/services/security.jpg",
+    imageAlt: "Cyber security",
+    highlights: [
+      "Web application security focus",
+      "Assessment and hardening paths",
+      "Maintenance that keeps pace with change",
+    ],
   },
 ] as const;
+
+export function getServicePillarBlurb(
+  slug: string,
+): ServicePillarBlurb | undefined {
+  return servicePillarBlurbs.find((item) => item.slug === slug);
+}

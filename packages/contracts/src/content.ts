@@ -79,6 +79,9 @@ export const portfolioItemCreateSchema = z.object({
   category: z.string().trim().max(128).default(""),
   summary: z.string().max(5000).default(""),
   imagePath: z.string().trim().max(1024).default(""),
+  websiteUrl: z.string().trim().max(2048).default(""),
+  fullPageImagePath: z.string().trim().max(1024).default(""),
+  fullPageImageAlt: z.string().trim().max(300).default(""),
   publishedAt: isoDateTimeNullableSchema.default(null),
 });
 

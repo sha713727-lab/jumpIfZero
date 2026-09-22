@@ -247,10 +247,9 @@ export async function forgotPassword(
     raw,
   ) satisfies PasswordForgotRequest;
 
-  const dummyToken = generateOpaqueToken();
   const user = await findActiveUserByEmail(body.email);
   if (user === null) {
-    return { accepted: true, resetToken: dummyToken };
+    return { accepted: true };
   }
 
   const resetToken = generateOpaqueToken();
@@ -271,7 +270,7 @@ export async function forgotPassword(
     throw new InternalError("Password reset email failed");
   }
 
-  return { accepted: true, resetToken };
+  return { accepted: true };
 }
 
 export async function resetPassword(

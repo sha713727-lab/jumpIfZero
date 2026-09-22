@@ -11,7 +11,7 @@ import type { BlogPost } from "@/lib/data/blog";
 import { applyHeaderTone } from "@/lib/headerTone";
 import { EmptyState } from "@/components/ui/EmptyState";
 
-const HEADER_HEIGHT = 72;
+const HEADER_HEIGHT = 80;
 const HERO_BG = "#5c6849";
 const CREAM_BG = "#f7f5f0";
 
@@ -68,7 +68,7 @@ export function BlogPageClient({
     <main className="bg-cream text-black">
       <section
         ref={heroRef}
-        aria-label="Blog hero"
+        aria-label="Insights hero"
         data-header-tone="dark"
         data-header-bg={HERO_BG}
         className="px-5 pt-28 pb-8 md:px-8 md:pt-32 md:pb-10"
@@ -104,7 +104,7 @@ export function BlogPageClient({
 
       <section
         ref={gridRef}
-        aria-label="Blog posts"
+        aria-label="Insights posts"
         data-header-tone="light"
         data-header-bg={CREAM_BG}
         className="px-5 py-16 md:px-8 md:py-24"
@@ -222,7 +222,7 @@ export function BlogPageClient({
 
       <section
         ref={ctaRef}
-        aria-label="Blog contact CTA"
+        aria-label="Insights contact CTA"
         data-header-tone="dark"
         data-header-bg={HERO_BG}
         className={`px-5 pb-24 md:px-8 md:pb-32 ${styles.scene}`}

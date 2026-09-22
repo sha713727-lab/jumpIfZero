@@ -13,7 +13,7 @@ import { site } from "@/constants/site";
 import type { SiteContactDetails } from "@/lib/data/siteContact";
 import { applyHeaderTone } from "@/lib/headerTone";
 
-const HEADER_HEIGHT = 72;
+const HEADER_HEIGHT = 80;
 const HERO_BG = "#5c6849";
 
 export function ContactPageClient({
@@ -115,14 +115,14 @@ export function ContactPageClient({
         data-header-bg="#f7f5f0"
         className="px-5 pt-8 pb-24 md:px-8 md:pt-12 md:pb-32"
       >
-        <div className="mx-auto grid w-full max-w-[1360px] gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-16 lg:items-start">
-          <div className="order-2 space-y-8 lg:order-1">
+        <div className="mx-auto flex w-full max-w-[1360px] flex-col gap-8 lg:gap-12">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)] lg:items-stretch lg:gap-12">
             <ContactDirect details={details} />
+            <ContactAside />
+          </div>
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-stretch lg:gap-10">
             <ContactMessageForm />
             <CallbackRequestForm />
-          </div>
-          <div className="order-1 lg:order-2">
-            <ContactAside />
           </div>
         </div>
       </section>

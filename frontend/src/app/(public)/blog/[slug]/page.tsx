@@ -17,7 +17,7 @@ export async function generateMetadata({
 
   if (!post) {
     return pageMetadata({
-      title: "Blog",
+      title: "Insights",
       description:
         "Insights from JZ Enterprises on websites, software, brand, SEO, and growth.",
       path: "/blog",

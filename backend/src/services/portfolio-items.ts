@@ -87,6 +87,9 @@ export async function createPortfolioItem(
     category: body.category,
     summary: body.summary,
     imagePath: body.imagePath,
+    websiteUrl: body.websiteUrl,
+    fullPageImagePath: body.fullPageImagePath,
+    fullPageImageAlt: body.fullPageImageAlt,
     publishedAt: toDateOrNull(body.publishedAt),
   });
   audit({
@@ -113,6 +116,9 @@ export async function updatePortfolioItem(
     category: body.category,
     summary: body.summary,
     imagePath: body.imagePath,
+    websiteUrl: body.websiteUrl,
+    fullPageImagePath: body.fullPageImagePath,
+    fullPageImageAlt: body.fullPageImageAlt,
     publishedAt: toDateOrNull(body.publishedAt),
   });
 

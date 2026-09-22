@@ -1,6 +1,10 @@
 import type { Actor } from "@jumpifzero/contracts";
 import { ForbiddenError, UnauthorizedError } from "../lib/errors.ts";
-import { query } from "../db/query.ts";
+import {
+  hasActiveAssignment,
+  listActiveClientIdsByEmployeeId,
+} from "../repositories/client-assignments.ts";
+import { findActiveClientIdByUserId } from "../repositories/clients.ts";
 import { findEmployeeAuthByUserId } from "../repositories/users.ts";
 
 export async function requireDeliveryOrAdmin(actor: Actor): Promise<void> {
@@ -28,20 +32,11 @@ export async function getOwnClientId(actor: Actor): Promise<string> {
   if (actor.role !== "client") {
     throw new ForbiddenError();
   }
-  const result = await query<{ id: string }>(
-    `
-      SELECT id
-      FROM clients_active
-      WHERE user_id = $1
-      LIMIT 1
-    `,
-    [actor.subjectId],
-  );
-  const row = result.rows[0];
-  if (row === undefined) {
+  const clientId = await findActiveClientIdByUserId(actor.subjectId);
+  if (clientId === null) {
     throw new ForbiddenError();
   }
-  return row.id;
+  return clientId;
 }
 
 export async function assertCanAccessClient(
@@ -60,18 +55,8 @@ export async function assertCanAccessClient(
   }
   if (actor.role === "employee" && actor.employeeKind === "delivery") {
     const employeeId = await getDeliveryEmployeeId(actor);
-    const result = await query(
-      `
-        SELECT 1
-        FROM client_employee_assignments a
-        INNER JOIN clients_active c ON c.id = a.client_id
-        WHERE a.client_id = $1
-          AND a.employee_id = $2
-        LIMIT 1
-      `,
-      [clientId, employeeId],
-    );
-    if (result.rows.length === 0) {
+    const allowed = await hasActiveAssignment({ clientId, employeeId });
+    if (!allowed) {
       throw new ForbiddenError();
     }
     return;
@@ -90,16 +75,7 @@ export async function accessibleClientIds(
   }
   if (actor.role === "employee" && actor.employeeKind === "delivery") {
     const employeeId = await getDeliveryEmployeeId(actor);
-    const result = await query<{ client_id: string }>(
-      `
-        SELECT a.client_id
-        FROM client_employee_assignments a
-        INNER JOIN clients_active c ON c.id = a.client_id
-        WHERE a.employee_id = $1
-      `,
-      [employeeId],
-    );
-    return result.rows.map((row) => row.client_id);
+    return listActiveClientIdsByEmployeeId(employeeId);
   }
   throw new ForbiddenError();
 }

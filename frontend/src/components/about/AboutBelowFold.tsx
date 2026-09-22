@@ -9,7 +9,7 @@ import {
   PinRotateSections,
 } from "@/components/scroll/PinRotateSections";
 import { aboutCopy } from "@/constants/about";
-import { aboutFlowCopy } from "@/constants/aboutFlow";
+import { aboutFlowCopy, aboutFlowImages } from "@/constants/aboutFlow";
 import { teamIntro } from "@/constants/team";
 import type { TeamMember } from "@/lib/data/team";
 
@@ -79,6 +79,19 @@ export function AboutBelowFold({
   principles: readonly import("@/lib/data/siteSections").SitePrinciple[];
 }>) {
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const flowImages =
+    studioImages.length > 0 ? studioImages : aboutFlowImages;
+  const workPrinciples =
+    principles.length > 0
+      ? principles
+      : aboutCopy.principles.map((item) => ({
+          index: item.index,
+          title: item.title,
+          body: item.body,
+          accent: item.accent,
+          image: item.image,
+          imageAlt: item.imageAlt,
+        }));
 
   return (
     <>
@@ -88,7 +101,7 @@ export function AboutBelowFold({
         flowParagraphs={aboutFlowCopy.flowParagraphs}
         flowCtaLabel={aboutFlowCopy.flowCtaLabel}
         flowCtaHref={aboutFlowCopy.flowCtaHref}
-        images={studioImages}
+        images={flowImages}
       />
 
       <section
@@ -114,7 +127,7 @@ export function AboutBelowFold({
         </div>
 
         <PinRotateSections>
-          {principles.map((principle) => {
+          {workPrinciples.map((principle) => {
             const theme = PRINCIPLE_SECTION[principle.accent];
 
             return (

@@ -1,7 +1,9 @@
 import { z } from "@jumpifzero/contracts";
 import { InternalError } from "../../../lib/errors.ts";
-import { query } from "../../../db/query.ts";
-import { getMigrationStatus } from "../../../services/health.ts";
+import {
+  assertDatabaseReachable,
+  getMigrationStatus,
+} from "../../../services/health.ts";
 
 export const schema = {
   output: z.object({
@@ -15,7 +17,7 @@ export default async function handle(): Promise<{
   applied: string[];
 }> {
   try {
-    await query("SELECT 1 AS ok");
+    await assertDatabaseReachable();
   } catch {
     throw new InternalError("Database unavailable");
   }

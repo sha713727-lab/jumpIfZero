@@ -8,7 +8,7 @@ import { applyHeaderTone } from "@/lib/headerTone";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const HEADER_HEIGHT = 72;
+const HEADER_HEIGHT = 80;
 const SECTION_BG = "#f7f5f0";
 const FAN_ANGLE = 5;
 
@@ -193,8 +193,8 @@ export function PinnedScrollFan({
           ref={containerRef}
           className="relative flex h-svh w-full overflow-hidden px-4 pt-24 pb-8 md:px-8 md:pt-28 md:pb-10"
         >
-          <div className="relative flex w-full flex-col items-center justify-start">
-            <div className="relative z-20 mt-6 max-w-4xl px-2 text-center md:mt-10">
+          <div className="relative flex h-full w-full flex-col items-center justify-start">
+            <div className="relative z-20 mt-6 max-w-4xl shrink-0 px-2 text-center md:mt-10">
               <p
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-x-0 -top-8 select-none text-[clamp(2.4rem,8vw,5.5rem)] leading-none font-extrabold tracking-[0.08em] text-logo-gradient opacity-20 uppercase"
@@ -210,42 +210,44 @@ export function PinnedScrollFan({
               </p>
             </div>
 
-            <div
-              ref={circlesRef}
-              className="relative mt-[28svh] ml-0 aspect-square w-[220%] max-w-none md:mt-[32svh] md:ml-[-100%] md:w-[300%]"
-            >
-              {cards.map((card, index) => (
-                <div
-                  key={`${card.title}-${index}`}
-                  ref={(node) => {
-                    circleRefs.current[index] = node;
-                  }}
-                  className="absolute inset-0 flex items-start justify-center"
-                >
-                  <article className="relative aspect-[3/4] w-[42vw] min-w-[12rem] max-w-[18rem] -translate-y-1/2 overflow-hidden rounded-[1.75rem] border border-black/10 bg-[#e2e4de] shadow-[0_22px_50px_rgba(47,58,40,0.16)] md:w-[20vw] md:max-w-[20rem]">
-                    <Image
-                      src={card.image}
-                      alt={card.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 42vw, 20vw"
-                      loading="lazy"
-                    />
-                    <div
-                      aria-hidden="true"
-                      className="absolute inset-0 bg-[linear-gradient(to_top,rgba(13,18,11,0.72)_0%,rgba(13,18,11,0.08)_52%,transparent_100%)]"
-                    />
-                    <div className="absolute inset-x-0 bottom-[12%] z-10 px-4 text-center uppercase md:bottom-[14%] md:px-5">
-                      <p className="text-[clamp(1.05rem,2.4vw,1.85rem)] leading-none font-extrabold tracking-[-0.03em] text-cream">
-                        {card.title}
-                      </p>
-                      <span className="mt-2 block text-[0.66rem] font-extrabold tracking-[0.22em] text-logo-gradient md:text-[0.7rem]">
-                        {card.region}
-                      </span>
-                    </div>
-                  </article>
-                </div>
-              ))}
+            <div className="relative mt-[28svh] flex w-full justify-center md:mt-[32svh]">
+              <div
+                ref={circlesRef}
+                className="relative aspect-square w-[220%] max-w-none shrink-0"
+              >
+                {cards.map((card, index) => (
+                  <div
+                    key={`${card.title}-${index}`}
+                    ref={(node) => {
+                      circleRefs.current[index] = node;
+                    }}
+                    className="absolute inset-0 flex items-start justify-center"
+                  >
+                    <article className="relative aspect-[3/4] w-[42vw] min-w-[12rem] max-w-[18rem] -translate-y-1/2 overflow-hidden rounded-[1.75rem] border border-black/10 bg-[#e2e4de] shadow-[0_22px_50px_rgba(47,58,40,0.16)] md:w-[18vw] md:max-w-[18rem]">
+                      <Image
+                        src={card.image}
+                        alt={card.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 42vw, 18vw"
+                        loading="lazy"
+                      />
+                      <div
+                        aria-hidden="true"
+                        className="absolute inset-0 bg-[linear-gradient(to_top,rgba(13,18,11,0.72)_0%,rgba(13,18,11,0.08)_52%,transparent_100%)]"
+                      />
+                      <div className="absolute inset-x-0 bottom-[12%] z-10 px-4 text-center uppercase md:bottom-[14%] md:px-5">
+                        <p className="text-[clamp(0.9rem,1.8vw,1.35rem)] leading-none font-extrabold tracking-[-0.03em] text-cream">
+                          {card.title}
+                        </p>
+                        <span className="mt-2 block text-[0.58rem] font-extrabold tracking-[0.22em] text-logo-gradient md:text-[0.62rem]">
+                          {card.region}
+                        </span>
+                      </div>
+                    </article>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <p className="absolute right-0 bottom-6 left-0 z-20 px-4 text-center text-[0.85rem] font-medium text-[#2f3a28]/65 md:hidden">

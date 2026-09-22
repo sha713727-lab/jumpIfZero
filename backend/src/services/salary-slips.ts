@@ -26,11 +26,14 @@ function dateOnly(value: Date): string {
 }
 
 function normalizeMoney(value: string): string {
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric)) {
+  const match = /^(-?)(\d+)(?:\.(\d+))?$/.exec(value.trim());
+  if (match === null) {
     return value;
   }
-  return numeric.toFixed(2);
+  const sign = match[1] ?? "";
+  const whole = match[2] ?? "0";
+  const fraction = (match[3] ?? "").padEnd(2, "0").slice(0, 2);
+  return `${sign}${whole}.${fraction}`;
 }
 
 function toPublic(row: SalarySlipRow): SalarySlipPublic {

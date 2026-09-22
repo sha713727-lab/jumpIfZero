@@ -29,6 +29,9 @@ type PortfolioForm = {
   category: string;
   summary: string;
   image: string;
+  websiteUrl: string;
+  fullPageImage: string;
+  fullPageImageAlt: string;
   active: boolean;
 };
 
@@ -38,6 +41,9 @@ const emptyForm: PortfolioForm = {
   category: "",
   summary: "",
   image: "",
+  websiteUrl: "",
+  fullPageImage: "",
+  fullPageImageAlt: "",
   active: true,
 };
 
@@ -68,6 +74,9 @@ export function PortfolioPage() {
       category: item.category,
       summary: item.summary,
       image: item.image,
+      websiteUrl: item.websiteUrl,
+      fullPageImage: item.fullPageImage,
+      fullPageImageAlt: item.fullPageImageAlt,
       active: item.active,
     });
     setError(null);
@@ -80,6 +89,13 @@ export function PortfolioPage() {
     if (!title || !slug) {
       return;
     }
+
+    const websiteUrl = form.websiteUrl.trim();
+    const fullPageImage = form.fullPageImage.trim();
+    const fullPageImageAlt =
+      form.fullPageImageAlt.trim().length > 0
+        ? form.fullPageImageAlt.trim()
+        : title;
 
     startTransition(async () => {
       setError(null);
@@ -99,6 +115,9 @@ export function PortfolioPage() {
           category: form.category.trim(),
           summary: form.summary.trim(),
           image: form.image,
+          websiteUrl,
+          fullPageImage,
+          fullPageImageAlt,
           active: form.active,
           publishedAt: existing.publishedAt,
         });
@@ -126,6 +145,9 @@ export function PortfolioPage() {
           category: form.category.trim(),
           summary: form.summary.trim(),
           image: form.image,
+          websiteUrl,
+          fullPageImage,
+          fullPageImageAlt,
           active: form.active,
         });
 
@@ -338,10 +360,50 @@ export function PortfolioPage() {
           </label>
         </div>
         <AdminImageField
-          label="Image"
+          label="Card image"
           value={form.image}
           onChange={(image) => setForm((current) => ({ ...current, image }))}
         />
+        <div>
+          <label className="block">
+            <span className={adminLabelClass}>Website URL</span>
+            <input
+              className={adminFieldClass}
+              type="url"
+              placeholder="https://"
+              value={form.websiteUrl}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  websiteUrl: event.target.value,
+                }))
+              }
+            />
+          </label>
+        </div>
+        <AdminImageField
+          label="Full-page screenshot"
+          value={form.fullPageImage}
+          onChange={(fullPageImage) =>
+            setForm((current) => ({ ...current, fullPageImage }))
+          }
+        />
+        <div>
+          <label className="block">
+            <span className={adminLabelClass}>Screenshot alt text</span>
+            <input
+              className={adminFieldClass}
+              placeholder="Defaults to title if empty"
+              value={form.fullPageImageAlt}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  fullPageImageAlt: event.target.value,
+                }))
+              }
+            />
+          </label>
+        </div>
         <label className="inline-flex items-center gap-2 text-[0.88rem] font-semibold">
           <input
             type="checkbox"

@@ -4,7 +4,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -96,13 +95,6 @@ export function EmployeeProvider({
   const inflightRef = useRef<Partial<Record<"crm" | "delivery", Promise<void>>>>(
     {},
   );
-
-  useEffect(() => {
-    const root = window as Window & { __jzMounts?: Record<string, number> };
-    const counts = root.__jzMounts ?? {};
-    counts.employeeProvider = (counts.employeeProvider ?? 0) + 1;
-    root.__jzMounts = counts;
-  }, []);
 
   const isDomainLoaded = useCallback(
     (domain: "crm" | "delivery") =>

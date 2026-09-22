@@ -81,7 +81,7 @@ export function OverviewPage() {
   const catalogCounts = [
     { label: "Services", value: state.services.filter((s) => s.active).length },
     { label: "Portfolio", value: state.portfolio.filter((p) => p.active).length },
-    { label: "Blog", value: state.blog.filter((b) => b.active).length },
+    { label: "Insights", value: state.blog.filter((b) => b.active).length },
     { label: "FAQs", value: activeFaqs },
   ];
 

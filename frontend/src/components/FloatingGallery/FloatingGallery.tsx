@@ -27,7 +27,7 @@ export function FloatingGallery({
   imagePaths,
 }: FloatingGalleryProps) {
   const itemRefs = useRef<Array<HTMLElement | null>>([]);
-  const sectionRef = useRef<HTMLElement | null>(null);
+  const [sectionEl, setSectionEl] = useState<HTMLElement | null>(null);
   const [stageEl, setStageEl] = useState<HTMLElement | null>(null);
   const [cameraEl, setCameraEl] = useState<HTMLDivElement | null>(null);
   const [copyEl, setCopyEl] = useState<HTMLDivElement | null>(null);
@@ -60,7 +60,7 @@ export function FloatingGallery({
   }, []);
 
   useEffect(() => {
-    const section = sectionRef.current;
+    const section = sectionEl;
     if (!section) {
       return;
     }
@@ -89,7 +89,7 @@ export function FloatingGallery({
       mountObserver.disconnect();
       viewObserver.disconnect();
     };
-  }, []);
+  }, [sectionEl]);
 
   const viewport = useMemo(
     () => resolveViewport(viewportWidth, viewportHeight),
@@ -107,7 +107,9 @@ export function FloatingGallery({
       config,
       viewportWidth,
       viewportHeight,
-      imagePaths ?? [],
+      imagePaths !== undefined && imagePaths.length > 0
+        ? imagePaths
+        : undefined,
     );
   }, [config, imagePaths, nearView, ready, viewportHeight, viewportWidth]);
 
@@ -117,6 +119,7 @@ export function FloatingGallery({
 
   useGalleryAnimation({
     enabled: ready && nearView && items.length > 0,
+    pinRoot: sectionEl,
     stage: stageEl,
     camera: cameraEl,
     copy: copyEl,
@@ -152,7 +155,7 @@ export function FloatingGallery({
 
   return (
     <section
-      ref={sectionRef}
+      ref={setSectionEl}
       id={sectionId}
       className={styles.section}
       aria-label={ariaLabel}
@@ -165,7 +168,7 @@ export function FloatingGallery({
           <div
             ref={setCameraEl}
             className={styles.camera}
-            style={{ visibility: inView ? "visible" : "hidden" }}
+            style={{ visibility: nearView ? "visible" : "hidden" }}
           >
             {items.map((item, index) => (
               <GalleryItem
@@ -181,7 +184,7 @@ export function FloatingGallery({
 
         <div
           className={styles.copy}
-          style={{ visibility: inView ? "visible" : "hidden" }}
+          style={{ visibility: nearView ? "visible" : "hidden" }}
         >
           <div ref={setCopyEl} className={styles.copyInner}>
             <div className={styles.headingStack}>

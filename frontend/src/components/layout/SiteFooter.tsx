@@ -126,12 +126,12 @@ export async function SiteFooter() {
                 <span className="block text-[0.95rem] font-bold tracking-[-0.02em]">
                   {site.name}
                 </span>
-                <span className="mt-0.5 block text-[0.72rem] font-medium tracking-[0.18em] text-cream/70 uppercase">
+                <span className="mt-0.5 block text-[0.72rem] font-medium tracking-[0.18em] text-cream/90 uppercase">
                   {site.tagline}
                 </span>
               </span>
             </Link>
-            <p className="max-w-xs text-[0.88rem] leading-[1.55] font-medium text-cream/70">
+            <p className="max-w-xs text-[0.88rem] leading-[1.55] font-medium text-cream/90">
               {site.description}
             </p>
           </div>
@@ -153,7 +153,7 @@ export async function SiteFooter() {
 
           <div className="space-y-5 md:justify-self-end md:text-right">
             {contact ? (
-              <div className="space-y-2 text-[0.88rem] font-medium text-cream/80">
+              <div className="space-y-2 text-[0.88rem] font-medium text-cream">
                 {contact.phone.trim().length > 0 ? (
                   <p>
                     <a
@@ -206,7 +206,7 @@ export async function SiteFooter() {
         </div>
 
         <div className="mt-12 border-t border-cream/15 pt-6">
-          <p className="text-center text-[0.68rem] font-medium tracking-[0.08em] text-cream/75">
+          <p className="text-center text-[0.68rem] font-medium tracking-[0.08em] text-cream/90">
             © {year} All rights reserved by {site.name}.
           </p>
         </div>

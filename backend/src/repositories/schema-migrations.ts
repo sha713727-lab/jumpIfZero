@@ -7,6 +7,10 @@ import { parseRows } from "./_parse.ts";
 
 const LIST_LIMIT = 1000;
 
+export async function pingDatabase(): Promise<void> {
+  await query("SELECT 1 AS ok");
+}
+
 export async function listSchemaMigrations(): Promise<
   readonly SchemaMigrationRow[]
 > {

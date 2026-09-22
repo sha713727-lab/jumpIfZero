@@ -10,7 +10,7 @@ import type { FaqItem } from "@/lib/data/faqs";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const HEADER_HEIGHT = 72;
+const HEADER_HEIGHT = 80;
 const SECTION_BG = "#f7f5f0";
 
 export function AltFaq({

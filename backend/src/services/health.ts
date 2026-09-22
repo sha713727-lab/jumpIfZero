@@ -1,4 +1,7 @@
-import { listSchemaMigrations } from "../repositories/schema-migrations.ts";
+import {
+  listSchemaMigrations,
+  pingDatabase,
+} from "../repositories/schema-migrations.ts";
 
 export const EXPECTED_MIGRATIONS = [
   "0001_init",
@@ -17,7 +20,15 @@ export const EXPECTED_MIGRATIONS = [
   "0014_site_contact_socials",
   "0015_salary_slip_optional_employee",
   "0016_salary_slip_unpaid_days",
+  "0017_service_pages",
+  "0018_service_page_hierarchy",
+  "0019_services_fan_gallery",
+  "0020_portfolio_full_page_screenshot",
 ] as const;
+
+export async function assertDatabaseReachable(): Promise<void> {
+  await pingDatabase();
+}
 
 export async function getMigrationStatus(): Promise<{
   readonly current: boolean;

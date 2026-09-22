@@ -13,7 +13,11 @@ export function sealTaxId(plaintext: string): Buffer {
 }
 
 export function maskedTaxIdFromCiphertext(ciphertext: Buffer): string {
-  return maskTaxId(decryptTaxId(ciphertext));
+  try {
+    return maskTaxId(decryptTaxId(ciphertext));
+  } catch {
+    return "****";
+  }
 }
 
 export async function readFullTaxId(input: {

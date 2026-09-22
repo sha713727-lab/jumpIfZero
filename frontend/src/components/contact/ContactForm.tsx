@@ -10,7 +10,7 @@ import {
 } from "@/lib/submitPublicContact";
 
 const cardClass =
-  "space-y-5 rounded-[1.75rem] border border-black/8 bg-white/70 p-6 shadow-[0_18px_40px_rgba(47,58,40,0.06)] md:p-8";
+  "flex h-full flex-col space-y-5 rounded-[1.75rem] border border-black/8 bg-white/70 p-6 shadow-[0_18px_40px_rgba(47,58,40,0.06)] md:p-8";
 
 const detailLabelClass =
   "block text-[0.66rem] font-extrabold tracking-[0.18em] text-black/40 uppercase";
@@ -155,7 +155,7 @@ export function ContactMessageForm() {
       <FormFeedback success={success} error={error} />
 
       <form
-        className="space-y-4"
+        className="grid flex-1 grid-cols-1 content-start gap-4 md:grid-cols-2"
         onSubmit={(event) => {
           event.preventDefault();
           onSubmit();
@@ -189,7 +189,7 @@ export function ContactMessageForm() {
             className={fieldClass}
           />
         </div>
-        <div>
+        <div className="md:col-span-2">
           <label htmlFor={`${formId}-subject`} className={fieldLabelClass}>
             Subject
           </label>
@@ -201,7 +201,7 @@ export function ContactMessageForm() {
             className={fieldClass}
           />
         </div>
-        <div>
+        <div className="flex min-h-0 flex-1 flex-col md:col-span-2">
           <label htmlFor={`${formId}-body`} className={fieldLabelClass}>
             Message
           </label>
@@ -211,10 +211,14 @@ export function ContactMessageForm() {
             rows={5}
             value={body}
             onChange={(event) => setBody(event.target.value)}
-            className={`${fieldClass} min-h-[8rem] resize-y`}
+            className={`${fieldClass} min-h-[8rem] flex-1 resize-y`}
           />
         </div>
-        <button type="submit" disabled={pending} className={submitClass}>
+        <button
+          type="submit"
+          disabled={pending}
+          className={`${submitClass} mt-auto md:col-span-2`}
+        >
           {pending ? "Sending…" : contactCopy.messageSubmit}
         </button>
       </form>
@@ -270,7 +274,7 @@ export function CallbackRequestForm() {
       <FormFeedback success={success} error={error} />
 
       <form
-        className="space-y-4"
+        className="grid flex-1 grid-cols-1 content-start gap-4 md:grid-cols-2"
         onSubmit={(event) => {
           event.preventDefault();
           onSubmit();
@@ -304,7 +308,7 @@ export function CallbackRequestForm() {
             className={fieldClass}
           />
         </div>
-        <div>
+        <div className="md:col-span-2">
           <label htmlFor={`${formId}-phone`} className={fieldLabelClass}>
             Phone
           </label>
@@ -317,7 +321,7 @@ export function CallbackRequestForm() {
             className={fieldClass}
           />
         </div>
-        <div>
+        <div className="flex min-h-0 flex-1 flex-col md:col-span-2">
           <label htmlFor={`${formId}-note`} className={fieldLabelClass}>
             Note
           </label>
@@ -326,10 +330,14 @@ export function CallbackRequestForm() {
             rows={4}
             value={note}
             onChange={(event) => setNote(event.target.value)}
-            className={`${fieldClass} min-h-[6rem] resize-y`}
+            className={`${fieldClass} min-h-[6rem] flex-1 resize-y`}
           />
         </div>
-        <button type="submit" disabled={pending} className={submitClass}>
+        <button
+          type="submit"
+          disabled={pending}
+          className={`${submitClass} mt-auto md:col-span-2`}
+        >
           {pending ? "Sending…" : contactCopy.callbackSubmit}
         </button>
       </form>

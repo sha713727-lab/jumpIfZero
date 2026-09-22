@@ -17,15 +17,15 @@ import {
 
 gsap.registerPlugin(ScrollTrigger);
 
-const COPY_FADE_IN_SHARE = 0.14;
-const COPY_HOLD_SHARE = 0.72;
-const COPY_FADE_OUT_SHARE = 0.14;
+const COPY_FADE_IN_SHARE = 0.1;
+const COPY_HOLD_SHARE = 0.9;
 const COPY_DEPTH = 900;
-const Z_INDEX_BASE = 2600;
+const Z_INDEX_BASE = 40;
 const FLOAT_FRAME_SKIP = 2;
 
 type UseGalleryAnimationParams = {
   readonly enabled: boolean;
+  readonly pinRoot: HTMLElement | null;
   readonly stage: HTMLElement | null;
   readonly camera: HTMLElement | null;
   readonly copy: HTMLElement | null;
@@ -70,6 +70,7 @@ function applyItem(
 
 export function useGalleryAnimation({
   enabled,
+  pinRoot,
   stage,
   camera,
   copy,
@@ -80,7 +81,7 @@ export function useGalleryAnimation({
   viewportHeight,
 }: UseGalleryAnimationParams): void {
   useEffect(() => {
-    if (!enabled || !stage || !camera || items.length === 0) {
+    if (!enabled || !pinRoot || !stage || !camera || items.length === 0) {
       return;
     }
 
@@ -208,6 +209,8 @@ export function useGalleryAnimation({
       tickerAttached = false;
     };
 
+    const pinTarget = pinRoot;
+
     const ctx = gsap.context(() => {
       recompute(0);
       paint(false);
@@ -227,19 +230,24 @@ export function useGalleryAnimation({
         return;
       }
 
+      const pinScrollDistance = () =>
+        Math.round(
+          Math.min(config.scrollDistance, window.innerHeight * 0.95),
+        );
+
       gsap.to(proxy, {
         progress: 1,
         ease: "none",
         scrollTrigger: {
-          trigger: stage,
+          trigger: pinTarget,
           start: "top top",
-          end: `+=${config.scrollDistance}`,
+          end: () => `+=${pinScrollDistance()}`,
           pin: true,
           pinSpacing: true,
-          pinType: "fixed",
-          scrub: 1.1,
+          scrub: 0.45,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          fastScrollEnd: true,
           onEnter: () => {
             active = true;
             attachTicker();
@@ -275,10 +283,10 @@ export function useGalleryAnimation({
         z: 80,
         ease: "none",
         scrollTrigger: {
-          trigger: stage,
+          trigger: pinTarget,
           start: "top top",
-          end: `+=${config.scrollDistance}`,
-          scrub: 1.1,
+          end: () => `+=${pinScrollDistance()}`,
+          scrub: 0.45,
         },
       });
 
@@ -288,10 +296,10 @@ export function useGalleryAnimation({
 
       const copyTimeline = gsap.timeline({
         scrollTrigger: {
-          trigger: stage,
+          trigger: pinTarget,
           start: "top top",
-          end: `+=${config.scrollDistance}`,
-          scrub: 1.1,
+          end: () => `+=${pinScrollDistance()}`,
+          scrub: 0.45,
         },
       });
 
@@ -307,15 +315,8 @@ export function useGalleryAnimation({
             force3D: true,
           },
         )
-        .to(copy, { opacity: 1, duration: COPY_HOLD_SHARE })
-        .to(copy, {
-          opacity: 0,
-          z: -COPY_DEPTH,
-          duration: COPY_FADE_OUT_SHARE,
-          ease: "power2.in",
-          force3D: true,
-        });
-    }, stage);
+        .to(copy, { opacity: 1, z: 0, duration: COPY_HOLD_SHARE });
+    }, pinTarget);
 
     const rect = stage.getBoundingClientRect();
     if (rect.top < window.innerHeight && rect.bottom > 0) {
@@ -336,6 +337,7 @@ export function useGalleryAnimation({
     enabled,
     itemNodes,
     items,
+    pinRoot,
     stage,
     viewportHeight,
     viewportWidth,

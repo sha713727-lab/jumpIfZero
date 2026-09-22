@@ -56,7 +56,7 @@ FROM (VALUES
   ('SEO', 'seo', 'SEO that targets intent, not vanity keywords.', '/services', '/images/services/seo.jpg'),
   ('Digital Marketing', 'digital-marketing', 'Social content that earns attention.', '/services', '/images/services/smm.jpg'),
   ('Graphic Design', 'graphic-design', 'Brand systems with sharp visual craft.', '/services', '/images/services/design.jpg'),
-  ('Cyber Security', 'cyber-security', 'Hardening and monitoring that holds.', '/images/services/security.jpg'),
+  ('Cyber Security', 'cyber-security', 'Hardening and monitoring that holds.', '/services', '/images/services/security.jpg'),
   ('Fix Bug & Error', 'fix-bug-error', 'Diagnose, fix, and stabilize production.', '/services', '/images/services/bugfix.jpg')
 ) AS v(title, slug, description, path, image_path)
 WHERE NOT EXISTS (

@@ -7,6 +7,7 @@ export type AdminNavId =
   | "salaries"
   | "files"
   | "services"
+  | "servicePages"
   | "portfolio"
   | "blog"
   | "team"
@@ -53,8 +54,9 @@ export const adminNavGroups: readonly AdminNavGroup[] = [
     label: "Site",
     items: [
       { id: "services", name: "Services", href: "/admin/services" },
+      { id: "servicePages", name: "Service pages", href: "/admin/service-pages" },
       { id: "portfolio", name: "Portfolio", href: "/admin/portfolio" },
-      { id: "blog", name: "Blog", href: "/admin/blog" },
+      { id: "blog", name: "Insights", href: "/admin/blog" },
       { id: "team", name: "Team", href: "/admin/team" },
       { id: "siteSections", name: "Site sections", href: "/admin/site-sections" },
       { id: "faqs", name: "FAQs", href: "/admin/faqs" },

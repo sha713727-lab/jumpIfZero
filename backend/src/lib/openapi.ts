@@ -147,7 +147,6 @@ export function buildOpenApiDocument(
           }
         }
       } catch {
-        // keep default string path params
       }
     }
 
@@ -174,7 +173,6 @@ export function buildOpenApiDocument(
           });
         }
       } catch {
-        // omit broken query schemas
       }
     }
 

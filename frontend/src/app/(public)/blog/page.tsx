@@ -4,9 +4,9 @@ import { pageMetadata } from "@/lib/pageMetadata";
 import { BlogPageClient } from "@/components/blog/BlogPageClient";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Blog",
+  title: "Insights on Software, Web & Mobile",
   description:
-    "Insights from JZ Enterprises on websites, software, brand, SEO, and growth — practical notes for teams who ship outcomes.",
+    "Guides on custom software development, web development, mobile apps, and growth from JZ Enterprises — process, cost, and comparisons for teams who ship.",
   path: "/blog",
 });
 

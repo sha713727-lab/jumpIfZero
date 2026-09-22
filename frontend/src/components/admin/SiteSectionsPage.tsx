@@ -37,7 +37,7 @@ const cardClass =
   "overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";
 
 type TabId = "gallery" | "stories" | "principles";
-type GallerySectionKey = "about_gallery" | "studio_flow";
+type GallerySectionKey = "about_gallery" | "studio_flow" | "services_fan";
 
 type GalleryForm = {
   sectionKey: GallerySectionKey;
@@ -540,16 +540,18 @@ export function SiteSectionsPage() {
     tab === "gallery"
       ? gallerySection === "studio_flow"
         ? "Add Inside the Work image"
-        : "Add About Us image"
+        : gallerySection === "services_fan"
+          ? "Add Services fan image"
+          : "Add About Us image"
       : tab === "stories"
         ? "Add story"
-        : "Add principle";
+        : "Add How we work card";
 
   return (
     <div className="space-y-6">
       <AdminPageHeader
         title="Site sections"
-        lede="Change, add, or remove pictures for About Us spiral, Inside the Work, Client Stories, and principles. Edits show on the public site right away."
+        lede="Edit site pictures here: Services hero fan cards, Inside the Work, How we work, Client Stories, and the Home About Us spiral. Changes show on the public site right away."
         actionLabel={addLabel}
         onAction={openAdd}
       />
@@ -559,7 +561,7 @@ export function SiteSectionsPage() {
           [
             ["gallery", "Gallery images"],
             ["stories", "Client stories"],
-            ["principles", "Principles"],
+            ["principles", "How we work"],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -581,6 +583,7 @@ export function SiteSectionsPage() {
         <div className="flex flex-wrap gap-2">
           {(
             [
+              ["services_fan", "Services hero fan"],
               ["studio_flow", "Inside the Work (About)"],
               ["about_gallery", "About Us spiral (Home)"],
             ] as const
@@ -920,7 +923,7 @@ export function SiteSectionsPage() {
               ? "Edit image"
               : tab === "stories"
                 ? "Edit story"
-                : "Edit principle"
+                : "Edit How we work card"
             : addLabel
         }
         onClose={() => setModalOpen(false)}
@@ -943,7 +946,9 @@ export function SiteSectionsPage() {
               Section:{" "}
               {galleryForm.sectionKey === "studio_flow"
                 ? "Inside the Work (About page)"
-                : "About Us spiral (Home)"}
+                : galleryForm.sectionKey === "services_fan"
+                  ? "Services hero fan (order = card order)"
+                  : "About Us spiral (Home)"}
             </p>
             <div>
               <label className="block">

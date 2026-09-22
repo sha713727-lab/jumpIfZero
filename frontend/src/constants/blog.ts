@@ -1,16 +1,16 @@
 export const blogCopy = {
-  watermark: "Blog",
-  title: "Insights that ship",
-  lede: "Practical notes on websites, software, brand, and growth — written for teams who care about outcomes.",
-  gridTitle: "Latest posts",
-  gridLede: "Clear thinking. No agency fog.",
+  watermark: "Insights",
+  title: "Insights for builders",
+  lede: "Practical guides on custom software development, web development, mobile apps, and growth — written for teams who care about outcomes.",
+  gridTitle: "Latest insights",
+  gridLede: "Process, cost, and comparisons — without agency fog.",
   ctaTitle: "Ready to turn an insight into a build?",
   ctaLede: "Tell us what you are building. We reply with a clear next step.",
   ctaLabel: "Start a scoped engagement",
   ctaHref: "/contact" as const,
-  backLabel: "Back to blog",
+  backLabel: "Back to insights",
   readLabel: "Read",
-  empty: "No posts yet.",
+  empty: "No insights yet.",
 } as const;
 
 export const blogPosts = [

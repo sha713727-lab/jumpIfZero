@@ -4,14 +4,13 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef } from "react";
 import { DeferredMount } from "@/components/DeferredMount";
 import { MagneticLink } from "@/components/landingAlt/MagneticLink";
+import { RevealText } from "@/components/landingAlt/RevealText";
 import styles from "@/components/landingAlt/landingAlt.module.css";
-import {
-  serviceFanCards,
-  servicesPageCopy,
-} from "@/constants/servicesPage";
-import { serviceDetails } from "@/constants/serviceDetails";
+import { ServicesCatalog } from "@/components/services/ServicesCatalog";
+import { servicesPageCopy } from "@/constants/servicesPage";
 import { bindHeaderSectionSync } from "@/lib/headerSectionSync";
 import type { ServiceChapter } from "@/lib/data/services";
+import type { FanCard } from "@/components/scroll/PinnedScrollFan";
 
 const CREAM_BG = "#f7f5f0";
 const BRAND_BG = "#5c6849";
@@ -69,19 +68,64 @@ const AltServices = dynamic(
 
 export function ServicesPageClient({
   serviceChapters,
+  fanCards,
 }: Readonly<{
   serviceChapters: readonly ServiceChapter[];
+  fanCards: readonly FanCard[];
 }>) {
-  const offeringsRef = useRef<HTMLElement | null>(null);
   const processRef = useRef<HTMLElement | null>(null);
   const ctaRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => bindHeaderSectionSync(false, BRAND_BG), []);
 
+  useEffect(() => {
+    const section = processRef.current;
+    if (!section) {
+      return;
+    }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    let cancelled = false;
+    let ctx: { revert: () => void } | null = null;
+
+    void (async () => {
+      const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
+        import("gsap"),
+        import("gsap/ScrollTrigger"),
+      ]);
+      if (cancelled) {
+        return;
+      }
+      gsap.registerPlugin(ScrollTrigger);
+      ctx = gsap.context(() => {
+        const cards = section.querySelectorAll<HTMLElement>("[data-process-card]");
+        gsap.from(cards, {
+          opacity: 0,
+          y: 28,
+          duration: 0.65,
+          stagger: 0.12,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: section,
+            start: "top 80%",
+            once: true,
+          },
+        });
+      }, section);
+    })();
+
+    return () => {
+      cancelled = true;
+      ctx?.revert();
+    };
+  }, []);
+
   return (
     <main className="bg-cream text-black">
       <PinnedScrollFan
-        cards={serviceFanCards}
+        cards={fanCards}
         lead={servicesPageCopy.heroLead}
         rest={servicesPageCopy.heroRest}
         support={servicesPageCopy.heroSupport}
@@ -100,61 +144,7 @@ export function ServicesPageClient({
         <AltServices chapters={serviceChapters} />
       </DeferredMount>
 
-      <section
-        ref={offeringsRef}
-        aria-label="Service offerings"
-        data-header-tone="light"
-        data-header-bg={CREAM_BG}
-        className="bg-cream px-5 py-20 md:px-8 md:py-28"
-      >
-        <div className="relative mx-auto w-full max-w-[1360px]">
-          <div className="relative mx-auto max-w-3xl text-center">
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-[clamp(2.4rem,8vw,5.5rem)] font-extrabold tracking-[0.08em] text-logo-gradient opacity-20 uppercase select-none"
-            >
-              Offerings
-            </span>
-            <h2 className="relative z-[1] text-[clamp(1.55rem,3.4vw,2.55rem)] leading-[1.15] font-extrabold tracking-[-0.02em] text-black uppercase">
-              {servicesPageCopy.offeringsTitle}
-            </h2>
-            <p className="relative mx-auto mt-4 max-w-xl text-[clamp(0.95rem,1.8vw,1.12rem)] leading-[1.55] font-medium text-black/55 italic">
-              {servicesPageCopy.offeringsLede}
-            </p>
-          </div>
-
-          <ul className="mt-14 grid gap-8 md:mt-16 md:grid-cols-2 lg:grid-cols-3">
-            {serviceDetails.map((service) => (
-              <li key={service.slug}>
-                <article className="h-full border-t border-black/12 pt-5">
-                  <p className="text-[0.72rem] font-extrabold tracking-[0.18em] text-[#5c3d18] uppercase">
-                    {service.category}
-                  </p>
-                  <h3 className="mt-3 text-[1.15rem] leading-[1.25] font-extrabold tracking-[-0.02em] text-black">
-                    {service.title}
-                  </h3>
-                  <p className="mt-3 text-[0.9rem] leading-[1.55] font-medium text-black/55">
-                    {service.body}
-                  </p>
-                  <ul className="mt-4 space-y-2">
-                    {service.highlights.map((item) => (
-                      <li
-                        key={item}
-                        className="text-[0.84rem] leading-[1.45] font-medium text-black/70"
-                      >
-                        <span className="mr-2 text-brand" aria-hidden="true">
-                          —
-                        </span>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
+      <ServicesCatalog />
 
       <section
         ref={processRef}
@@ -172,7 +162,7 @@ export function ServicesPageClient({
               Process
             </span>
             <h2 className="relative z-[1] text-[clamp(1.55rem,3.4vw,2.55rem)] leading-[1.15] font-extrabold tracking-[-0.02em] text-black uppercase">
-              {servicesPageCopy.processTitle}
+              <RevealText text={servicesPageCopy.processTitle} />
             </h2>
             <p className="relative mx-auto mt-4 max-w-xl text-[clamp(0.95rem,1.8vw,1.12rem)] leading-[1.55] font-medium text-black/55 italic">
               {servicesPageCopy.processLede}
@@ -184,7 +174,7 @@ export function ServicesPageClient({
               const theme = PROCESS_CARD_THEMES[step.accent];
 
               return (
-                <li key={step.index}>
+                <li key={step.index} data-process-card>
                   <article
                     className={`relative flex h-full min-h-[18rem] flex-col overflow-hidden rounded-[1.75rem] border p-7 shadow-[0_28px_60px_rgba(47,58,40,0.22)] md:min-h-[20rem] md:p-8 ${theme.surface}`}
                   >

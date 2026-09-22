@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { site } from "@/constants/site";
 import { submitSignOut } from "@/lib/submitSignOut";
 import { dashboardIcons } from "@/components/dashboard/DashboardIcons";
@@ -38,13 +38,6 @@ export function DashboardShell({
   const SignOutIcon = dashboardIcons.signOut;
   const MenuIcon = dashboardIcons.menu;
   const CloseIcon = dashboardIcons.close;
-
-  useEffect(() => {
-    const root = window as Window & { __jzMounts?: Record<string, number> };
-    const counts = root.__jzMounts ?? {};
-    counts.dashboardShell = (counts.dashboardShell ?? 0) + 1;
-    root.__jzMounts = counts;
-  }, []);
 
   const onSignOut = async () => {
     if (signingOut) {

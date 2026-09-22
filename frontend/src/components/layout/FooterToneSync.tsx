@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { applyHeaderTone } from "@/lib/headerTone";
 
-const HEADER_HEIGHT = 72;
+const HEADER_HEIGHT = 80;
 const SECTION_BG = "#5c6849";
 
 export function FooterToneSync() {

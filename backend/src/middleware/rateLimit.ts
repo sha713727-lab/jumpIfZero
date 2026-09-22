@@ -22,23 +22,25 @@ export function createRateLimiter(input?: {
     }
 
     const routeKey = ctx.routeKey.length > 0 ? ctx.routeKey : "unresolved";
-    if (
-      routeKey === "health.live" ||
-      routeKey === "health.ready" ||
-      routeKey === "metrics.get"
-    ) {
-      return;
-    }
     const isAuthSensitive =
       routeKey === "auth.login" ||
       routeKey === "auth.register" ||
       routeKey === "auth.password.forgot" ||
       routeKey === "auth.password.reset";
 
+    const isHealthOrMetrics =
+      routeKey === "health.live" ||
+      routeKey === "health.ready" ||
+      routeKey === "metrics.get";
+
     const result = await consumeRateLimitToken({
       bucketKey: `${subjectKey}:${ctx.req.method ?? "GET"}:${routeKey}`,
-      capacity: isAuthSensitive ? 20 : capacity,
-      refillPerSecond: isAuthSensitive ? 0.2 : refillPerSecond,
+      capacity: isHealthOrMetrics ? 120 : isAuthSensitive ? 20 : capacity,
+      refillPerSecond: isHealthOrMetrics
+        ? 2
+        : isAuthSensitive
+          ? 0.2
+          : refillPerSecond,
     });
 
     if (!result.allowed) {

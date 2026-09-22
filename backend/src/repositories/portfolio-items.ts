@@ -11,6 +11,7 @@ import { nextUuidv7 } from "./_write.ts";
 
 const PORTFOLIO_COLUMNS = `
   id, title, slug, category, summary, image_path,
+  website_url, full_page_image_path, full_page_image_alt, screenshot_captured_at,
   published_at, version, created_at, updated_at
 `;
 
@@ -20,6 +21,9 @@ export type PortfolioItemInsert = {
   readonly category: string;
   readonly summary: string;
   readonly imagePath: string;
+  readonly websiteUrl: string;
+  readonly fullPageImagePath: string;
+  readonly fullPageImageAlt: string;
   readonly publishedAt: Date | null;
 };
 
@@ -31,6 +35,9 @@ export type PortfolioItemUpdate = {
   readonly category: string;
   readonly summary: string;
   readonly imagePath: string;
+  readonly websiteUrl: string;
+  readonly fullPageImagePath: string;
+  readonly fullPageImageAlt: string;
   readonly publishedAt: Date | null;
 };
 
@@ -207,9 +214,10 @@ export async function insertPortfolioItem(
     await query(
       `
         INSERT INTO portfolio_items (
-          id, title, slug, category, summary, image_path, published_at
+          id, title, slug, category, summary, image_path,
+          website_url, full_page_image_path, full_page_image_alt, published_at
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       `,
       [
         id,
@@ -218,6 +226,9 @@ export async function insertPortfolioItem(
         input.category,
         input.summary,
         input.imagePath,
+        input.websiteUrl,
+        input.fullPageImagePath,
+        input.fullPageImageAlt,
         input.publishedAt,
       ],
       client,
@@ -246,7 +257,10 @@ export async function updatePortfolioItem(
           category = $5,
           summary = $6,
           image_path = $7,
-          published_at = $8,
+          website_url = $8,
+          full_page_image_path = $9,
+          full_page_image_alt = $10,
+          published_at = $11,
           version = version + 1,
           updated_at = now()
         WHERE id = $1
@@ -261,6 +275,9 @@ export async function updatePortfolioItem(
         input.category,
         input.summary,
         input.imagePath,
+        input.websiteUrl,
+        input.fullPageImagePath,
+        input.fullPageImageAlt,
         input.publishedAt,
       ],
       client,

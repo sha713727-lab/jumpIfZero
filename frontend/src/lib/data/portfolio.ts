@@ -16,6 +16,9 @@ export type PortfolioGsapProject = {
   readonly slug: string;
   readonly title: string;
   readonly img: string;
+  readonly fullPageImg: string;
+  readonly imageAlt: string;
+  readonly websiteUrl: string;
   readonly link: string;
   readonly leftText: string;
   readonly description: string;
@@ -27,15 +30,25 @@ export type PortfolioDetail = {
   readonly category: string;
   readonly summary: string;
   readonly image: string;
+  readonly fullPageImage: string;
+  readonly imageAlt: string;
+  readonly websiteUrl: string;
 };
 
 export { portfolioCopy, portfolioMarqueeImages };
 
 function toPortfolioProject(row: PortfolioItemRow): PortfolioGsapProject {
+  const imageAlt =
+    row.full_page_image_alt.trim().length > 0
+      ? row.full_page_image_alt
+      : row.title;
   return {
     slug: row.slug,
     title: row.title,
     img: cmsMediaSrc(row.image_path),
+    fullPageImg: cmsMediaSrc(row.full_page_image_path),
+    imageAlt,
+    websiteUrl: row.website_url,
     link: `/portfolio/${row.slug}`,
     leftText: row.category,
     description: row.summary,
@@ -43,12 +56,19 @@ function toPortfolioProject(row: PortfolioItemRow): PortfolioGsapProject {
 }
 
 function toPortfolioDetail(row: PortfolioItemRow): PortfolioDetail {
+  const imageAlt =
+    row.full_page_image_alt.trim().length > 0
+      ? row.full_page_image_alt
+      : row.title;
   return {
     slug: row.slug,
     title: row.title,
     category: row.category,
     summary: row.summary,
     image: cmsMediaSrc(row.image_path),
+    fullPageImage: cmsMediaSrc(row.full_page_image_path),
+    imageAlt,
+    websiteUrl: row.website_url,
   };
 }
 

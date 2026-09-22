@@ -12,7 +12,7 @@ import { site } from "@/constants/site";
 import { applyHeaderTone } from "@/lib/headerTone";
 import { submitLogin } from "@/lib/submitLogin";
 
-const HEADER_HEIGHT = 72;
+const HEADER_HEIGHT = 80;
 const PAGE_BG = "#f7f5f0";
 
 const EMPTY_VALUES: LoginFormValues = {

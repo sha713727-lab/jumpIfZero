@@ -35,9 +35,9 @@
 }
 
 .navLink {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.22em;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   transition: color 150ms;
 }
@@ -102,4 +102,265 @@
 
 :global(html[data-hero-light="1"]) .drawerDivider {
   background: rgba(92, 104, 73, 0.14);
+}
+
+.servicesRoot {
+  position: static;
+}
+
+.servicesTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+}
+
+.servicesTriggerOpen {
+  background-image: linear-gradient(
+    105deg,
+    #ffe3a8 0%,
+    #f9a137 38%,
+    #f0b24a 62%,
+    #e8891a 100%
+  );
+  background-clip: text;
+  color: transparent;
+}
+
+.servicesChevron {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex-shrink: 0;
+  color: currentColor;
+  transition: transform 180ms ease;
+}
+
+.servicesTriggerOpen .servicesChevron,
+.servicesChevronOpen {
+  color: #f9a137;
+  background-image: none;
+  -webkit-text-fill-color: currentColor;
+  transform: rotate(180deg);
+}
+
+.servicesPanel {
+  display: none;
+  position: fixed;
+  top: 5rem;
+  left: 0;
+  right: 0;
+  z-index: 70;
+  padding-top: 0.55rem;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-0.35rem);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+@media (min-width: 768px) {
+  .servicesPanel {
+    display: block;
+  }
+}
+
+.servicesPanelOpen {
+  pointer-events: auto;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.servicesPanelInner {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1360px;
+  padding: 1.35rem 1.25rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: none;
+  background: color-mix(in srgb, var(--header-bg, #5c6849) 92%, #0d120b);
+  color: #ffffff;
+  box-shadow: 0 18px 40px rgba(13, 18, 11, 0.22);
+  backdrop-filter: blur(12px);
+}
+
+@media (min-width: 768px) {
+  .servicesPanelInner {
+    padding-inline: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .servicesPanelInner {
+    padding-inline: 2.5rem;
+  }
+}
+
+:global(html[data-hero-light="1"]) .servicesPanelInner {
+  border-color: rgba(92, 104, 73, 0.14);
+  background: #f7f5f0;
+  color: #2f3a28;
+  box-shadow: 0 18px 40px rgba(47, 58, 40, 0.1);
+}
+
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 900px) {
+  .servicesGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .servicesGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1.1rem 1.25rem;
+  }
+}
+
+.servicesColumn {
+  min-width: 0;
+}
+
+.servicesCategory {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.35;
+  color: inherit;
+  transition: color 150ms;
+}
+
+.servicesCategory:hover {
+  color: #f9a137;
+}
+
+:global(html[data-hero-light="1"]) .servicesCategory:hover {
+  color: #e8891a;
+}
+
+.servicesChildren {
+  list-style: none;
+  margin: 0.65rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.servicesChild {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.78);
+  transition: color 150ms;
+  overflow-wrap: anywhere;
+}
+
+.servicesChild:hover {
+  color: #f9a137;
+}
+
+:global(html[data-hero-light="1"]) .servicesChild {
+  color: rgba(47, 58, 40, 0.72);
+}
+
+:global(html[data-hero-light="1"]) .servicesChild:hover {
+  color: #e8891a;
+}
+
+.drawerServicesBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.drawerLink {
+  display: block;
+  width: 100%;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+.drawerServicesToggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.drawerServicesPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.2rem 0 0.45rem 0.35rem;
+  border-left: 1px solid rgba(247, 245, 240, 0.12);
+  margin-left: 0.65rem;
+}
+
+:global(html[data-hero-light="1"]) .drawerServicesPanel {
+  border-left-color: rgba(92, 104, 73, 0.16);
+}
+
+.drawerServicesAll {
+  font-size: 0.78rem !important;
+  letter-spacing: 0.12em !important;
+  opacity: 0.85;
+}
+
+.drawerServicesCategoryBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.drawerServicesCategoryToggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  text-align: left;
+  font-size: 0.8rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase;
+}
+
+.drawerServicesChildren {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.15rem 0 0.35rem 0.55rem;
+}
+
+.drawerServicesChild {
+  display: block;
+  font-size: 0.84rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em !important;
+  text-transform: none !important;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .servicesChevron,
+  .servicesPanel {
+    transition: none;
+  }
 }

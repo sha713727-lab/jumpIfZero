@@ -9,6 +9,7 @@ import type {
   SitePrincipleAccent,
   SiteTestimonialAccent,
 } from "@jumpifzero/contracts/db-content";
+import { testimonials as fallbackTestimonials } from "@/constants/testimonials";
 import { gatewayBackendRequest } from "@/lib/backend/gatewayClient";
 import { cmsMediaSrc } from "@/lib/cmsMedia";
 
@@ -34,6 +35,16 @@ export type SitePrinciple = {
   readonly image: string;
   readonly imageAlt: string;
 };
+
+const FALLBACK_TESTIMONIALS: readonly SiteTestimonial[] =
+  fallbackTestimonials.map((item) => ({
+    quote: item.quote,
+    name: item.name,
+    role: item.role,
+    company: item.company,
+    accent: item.accent,
+    image: item.image,
+  }));
 
 export async function getSiteGalleryImages(
   sectionKey: SiteGallerySectionKey,
@@ -67,7 +78,18 @@ const getCachedSiteGalleryImages = unstable_cache(
   { revalidate: 60, tags: ["site-gallery"] },
 );
 
-export const getSiteTestimonials = unstable_cache(
+export async function getSiteTestimonials(): Promise<
+  readonly SiteTestimonial[]
+> {
+  try {
+    const items = await getCachedSiteTestimonials();
+    return items.length > 0 ? items : FALLBACK_TESTIMONIALS;
+  } catch {
+    return FALLBACK_TESTIMONIALS;
+  }
+}
+
+const getCachedSiteTestimonials = unstable_cache(
   async (): Promise<readonly SiteTestimonial[]> => {
     const response = await gatewayBackendRequest({
       method: "GET",

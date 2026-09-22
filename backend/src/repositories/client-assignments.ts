@@ -78,3 +78,41 @@ export async function countActiveDeliveryEmployees(
   );
   return Number(result.rows[0]?.count ?? 0);
 }
+
+export async function hasActiveAssignment(
+  input: { readonly clientId: string; readonly employeeId: string },
+  client?: DbQueryable,
+): Promise<boolean> {
+  const result = await query(
+    `
+      SELECT 1
+      FROM client_employee_assignments a
+      INNER JOIN clients_active c ON c.id = a.client_id
+      WHERE a.client_id = $1
+        AND a.employee_id = $2
+      LIMIT 1
+    `,
+    [input.clientId, input.employeeId],
+    client,
+  );
+  return result.rows.length > 0;
+}
+
+export async function listActiveClientIdsByEmployeeId(
+  employeeId: string,
+  client?: DbQueryable,
+): Promise<readonly string[]> {
+  const result = await query<{ client_id: string }>(
+    `
+      SELECT a.client_id
+      FROM client_employee_assignments a
+      INNER JOIN clients_active c ON c.id = a.client_id
+      WHERE a.employee_id = $1
+      ORDER BY a.client_id ASC
+      LIMIT 10000
+    `,
+    [employeeId],
+    client,
+  );
+  return result.rows.map((row) => row.client_id);
+}

@@ -63,12 +63,15 @@ export function buildGalleryItems(
   config: GalleryLayoutConfig,
   viewportWidth: number,
   viewportHeight: number,
-  imagePaths: readonly string[] = IMAGE_POOL,
+  imagePaths?: readonly string[],
 ): GalleryItemData[] {
   const random = createSeededRandom(GALLERY_SEED);
   const items: GalleryItemData[] = [];
   const total = config.itemCount;
-  const pool = imagePaths;
+  const pool =
+    imagePaths !== undefined && imagePaths.length > 0
+      ? imagePaths
+      : IMAGE_POOL;
   if (pool.length === 0) {
     return items;
   }

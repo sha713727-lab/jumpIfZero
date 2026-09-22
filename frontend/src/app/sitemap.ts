@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getBlogSlugs } from "@/lib/data/blog";
 import { getPortfolioSlugs } from "@/lib/data/portfolio";
+import { getPublishedServicePagePaths } from "@/lib/data/servicePages";
 import { getServiceSlugs } from "@/lib/data/services";
 import { navLinks } from "@/constants/site";
 import { env } from "@/lib/env";
@@ -21,10 +22,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ];
 
-  const [blogResult, portfolioResult, serviceResult] = await Promise.allSettled([
+  const [
+    blogResult,
+    portfolioResult,
+    serviceResult,
+    servicePageResult,
+  ] = await Promise.allSettled([
     getBlogSlugs(),
     getPortfolioSlugs(),
     getServiceSlugs(),
+    getPublishedServicePagePaths(),
   ]);
 
   const blogSlugs =
@@ -33,6 +40,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     portfolioResult.status === "fulfilled" ? portfolioResult.value : [];
   const serviceSlugs =
     serviceResult.status === "fulfilled" ? serviceResult.value : [];
+  const servicePagePaths =
+    servicePageResult.status === "fulfilled" ? servicePageResult.value : [];
 
   const blogRoutes: MetadataRoute.Sitemap = blogSlugs.map((slug) => ({
     url: `${base}/blog/${slug}`,
@@ -52,5 +61,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
-  return [...staticRoutes, ...blogRoutes, ...portfolioRoutes, ...serviceRoutes];
+  const servicePageRoutes: MetadataRoute.Sitemap = servicePagePaths.map(
+    (path) => ({
+      url: `${base}${path}`,
+      changeFrequency: "monthly" as const,
+      priority: path.split("/").length > 3 ? 0.65 : 0.7,
+    }),
+  );
+
+  return [
+    ...staticRoutes,
+    ...blogRoutes,
+    ...portfolioRoutes,
+    ...servicePageRoutes,
+    ...serviceRoutes,
+  ];
 }

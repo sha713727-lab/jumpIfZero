@@ -44,6 +44,9 @@ export async function createAdminPortfolioAction(input: {
   readonly category: string;
   readonly summary: string;
   readonly image: string;
+  readonly websiteUrl: string;
+  readonly fullPageImage: string;
+  readonly fullPageImageAlt: string;
   readonly active: boolean;
 }): Promise<AdminPortfolioActionResult> {
   try {
@@ -64,6 +67,9 @@ export async function updateAdminPortfolioAction(input: {
   readonly category: string;
   readonly summary: string;
   readonly image: string;
+  readonly websiteUrl: string;
+  readonly fullPageImage: string;
+  readonly fullPageImageAlt: string;
   readonly active: boolean;
   readonly publishedAt: string | null;
 }): Promise<AdminPortfolioActionResult> {

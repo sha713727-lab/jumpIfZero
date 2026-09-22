@@ -3,13 +3,13 @@ export const site = {
   legalName: "JZ Enterprises",
   tagline: "Jump If Zero",
   description:
-    "JZ Enterprises designs end-to-end digital systems — websites, software, apps, SEO, and growth — around your goals, not generic templates.",
+    "JZ Enterprises is a software development company delivering custom software, web development, and mobile apps — plus SEO, marketing, design, and security — built around your goals.",
 } as const;
 
 export const navLinks = [
   { name: "Services", href: "/services" },
   { name: "Portfolio", href: "/portfolio" },
-  { name: "Blog", href: "/blog" },
+  { name: "Insights", href: "/blog" },
   { name: "Contact", href: "/contact" },
   { name: "About", href: "/about" },
 ] as const;
@@ -21,7 +21,7 @@ export const heroCopy = {
   headlineLead: "JZ",
   headlineRest: "Enterprises",
   support:
-    "We design end-to-end digital systems around your goals — not generic templates.",
+    "Custom software development, web development, and digital growth systems — scoped to how you sell and operate.",
   imageSrc: "/images/hero-office.png",
   loginHref: "/dashboard",
 } as const;

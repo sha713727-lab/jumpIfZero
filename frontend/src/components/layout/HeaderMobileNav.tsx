@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { heroCopy, navLinks } from "@/constants/site";
 import styles from "@/components/layout/siteHeader.module.css";
+import { serviceNavCategories } from "@/constants/servicesNav";
+import { heroCopy, navLinks } from "@/constants/site";
 
 function ProfileIcon({ className }: { readonly className?: string }) {
   return (
@@ -59,16 +60,43 @@ function CloseIcon({ className }: { readonly className?: string }) {
   );
 }
 
+function ChevronIcon({ className }: { readonly className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+
 export function HeaderMobileNav() {
   const drawerId = useId();
+  const servicesPanelId = useId();
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const [open, setOpen] = useState(false);
+  const [servicesOpen, setServicesOpen] = useState(false);
+  const [openCategorySlug, setOpenCategorySlug] = useState<string | null>(null);
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
     () => false,
   );
+
+  const closeMenu = () => {
+    menuButtonRef.current?.focus();
+    setOpenCategorySlug(null);
+    setServicesOpen(false);
+    setOpen(false);
+  };
 
   useEffect(() => {
     if (!open) {
@@ -78,6 +106,8 @@ export function HeaderMobileNav() {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         menuButtonRef.current?.focus();
+        setOpenCategorySlug(null);
+        setServicesOpen(false);
         setOpen(false);
       }
     };
@@ -93,16 +123,11 @@ export function HeaderMobileNav() {
     };
   }, [open]);
 
-  const closeMenu = () => {
-    menuButtonRef.current?.focus();
-    setOpen(false);
-  };
-
   const drawer =
     mounted &&
     createPortal(
       <div
-        className={`fixed inset-0 z-[100] md:hidden ${open ? "pointer-events-auto" : "pointer-events-none"}`}
+        className={`fixed inset-0 z-[100] xl:hidden ${open ? "pointer-events-auto" : "pointer-events-none"}`}
         {...(open ? {} : { inert: true })}
       >
         <button
@@ -120,9 +145,9 @@ export function HeaderMobileNav() {
           className={`${styles.drawer} absolute inset-y-0 right-0 flex h-[100dvh] w-[min(22rem,100%)] flex-col shadow-[0_0_48px_rgba(13,18,11,0.28)] transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full"}`}
         >
           <div
-            className={`${styles.drawerHeader} flex h-16 shrink-0 items-center justify-between border-b px-6`}
+            className={`${styles.drawerHeader} flex h-[4.75rem] shrink-0 items-center justify-between border-b px-6`}
           >
-            <p className="text-[0.7rem] font-extrabold tracking-[0.22em] uppercase">
+            <p className={`${styles.navLink}`}>
               Menu
             </p>
             <button
@@ -141,28 +166,136 @@ export function HeaderMobileNav() {
             aria-label="Mobile"
             className="flex flex-1 flex-col gap-1 overflow-y-auto overscroll-contain px-4 py-5"
           >
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                tabIndex={open ? 0 : -1}
-                className={`${styles.drawerLink} rounded-xl px-4 py-3.5 text-[0.95rem] font-extrabold tracking-[0.16em] uppercase transition-colors`}
-                onClick={closeMenu}
-              >
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              if (link.name === "Services") {
+                return (
+                  <div key={link.name} className={styles.drawerServicesBlock}>
+                    <button
+                      type="button"
+                      tabIndex={open ? 0 : -1}
+                      aria-expanded={servicesOpen}
+                      aria-controls={servicesPanelId}
+                      className={`${styles.drawerLink} ${styles.drawerServicesToggle} ${styles.navLink} rounded-xl px-4 py-3`}
+                      onClick={() => {
+                        setServicesOpen((current) => {
+                          if (current) {
+                            setOpenCategorySlug(null);
+                          }
+                          return !current;
+                        });
+                      }}
+                    >
+                      <span>Services</span>
+                      <ChevronIcon
+                        className={`size-4 shrink-0 transition-transform duration-200 ${servicesOpen ? "rotate-180" : ""}`}
+                      />
+                    </button>
+
+                    <div
+                      id={servicesPanelId}
+                      className={styles.drawerServicesPanel}
+                      hidden={!servicesOpen}
+                    >
+                      <Link
+                        href={link.href}
+                        tabIndex={open && servicesOpen ? 0 : -1}
+                        className={`${styles.drawerLink} ${styles.drawerServicesAll} rounded-xl px-4 py-2.5 font-extrabold uppercase transition-colors`}
+                        onClick={closeMenu}
+                      >
+                        All services
+                      </Link>
+
+                      {serviceNavCategories.map((category) => {
+                        const categoryOpen = openCategorySlug === category.slug;
+                        const categoryPanelId = `${servicesPanelId}-${category.slug}`;
+
+                        return (
+                          <div
+                            key={category.slug}
+                            className={styles.drawerServicesCategoryBlock}
+                          >
+                            <button
+                              type="button"
+                              tabIndex={open && servicesOpen ? 0 : -1}
+                              aria-expanded={categoryOpen}
+                              aria-controls={categoryPanelId}
+                              className={`${styles.drawerLink} ${styles.drawerServicesCategoryToggle} rounded-xl px-4 py-2.5 transition-colors`}
+                              onClick={() => {
+                                setOpenCategorySlug((current) =>
+                                  current === category.slug
+                                    ? null
+                                    : category.slug,
+                                );
+                              }}
+                            >
+                              <span>{category.title}</span>
+                              <ChevronIcon
+                                className={`size-3.5 shrink-0 transition-transform duration-200 ${categoryOpen ? "rotate-180" : ""}`}
+                              />
+                            </button>
+
+                            <div
+                              id={categoryPanelId}
+                              className={styles.drawerServicesChildren}
+                              hidden={!categoryOpen}
+                            >
+                              <Link
+                                href={category.href}
+                                tabIndex={
+                                  open && servicesOpen && categoryOpen ? 0 : -1
+                                }
+                                className={`${styles.drawerLink} ${styles.drawerServicesChild} rounded-xl px-4 py-2 transition-colors`}
+                                onClick={closeMenu}
+                              >
+                                Overview
+                              </Link>
+                              {category.children.map((child) => (
+                                <Link
+                                  key={child.slug}
+                                  href={child.href}
+                                  tabIndex={
+                                    open && servicesOpen && categoryOpen
+                                      ? 0
+                                      : -1
+                                  }
+                                  className={`${styles.drawerLink} ${styles.drawerServicesChild} rounded-xl px-4 py-2 transition-colors`}
+                                  onClick={closeMenu}
+                                >
+                                  {child.title}
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  tabIndex={open ? 0 : -1}
+                  className={`${styles.drawerLink} ${styles.navLink} rounded-xl px-4 py-3`}
+                  onClick={closeMenu}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
 
             <div className={`${styles.drawerDivider} my-3 mx-4`} />
 
             <Link
               href={heroCopy.loginHref}
               tabIndex={open ? 0 : -1}
-              className={`${styles.drawerLink} inline-flex items-center gap-3 rounded-xl px-4 py-3.5 text-[0.95rem] font-extrabold tracking-[0.16em] uppercase transition-colors`}
+              className={`${styles.drawerLink} ${styles.navLink} inline-flex items-center gap-3 rounded-xl px-4 py-3`}
               onClick={closeMenu}
             >
-              <ProfileIcon className="size-5 shrink-0" />
               Client Login
+              <ProfileIcon className="size-4 shrink-0" />
             </Link>
           </nav>
         </aside>
@@ -175,9 +308,9 @@ export function HeaderMobileNav() {
       <Link
         href={heroCopy.loginHref}
         aria-label="Client Login"
-        className={`inline-flex size-9 items-center justify-center transition-colors ${styles.ink} ${styles.ring} ${styles.readable}`}
+        className={`inline-flex size-11 items-center justify-center transition-colors ${styles.ink} ${styles.ring} ${styles.readable}`}
       >
-        <ProfileIcon className="size-5" />
+        <ProfileIcon className="size-6" />
       </Link>
 
       <button
@@ -186,7 +319,7 @@ export function HeaderMobileNav() {
         aria-label={open ? "Close menu" : "Open menu"}
         aria-expanded={open}
         aria-controls={drawerId}
-        className={`inline-flex size-9 items-center justify-center md:hidden ${styles.ink} ${styles.ring} ${styles.readable}`}
+        className={`inline-flex size-11 items-center justify-center xl:hidden ${styles.ink} ${styles.ring} ${styles.readable}`}
         onClick={() => {
           if (open) {
             closeMenu();
@@ -196,9 +329,9 @@ export function HeaderMobileNav() {
         }}
       >
         {open ? (
-          <CloseIcon className="size-5" />
+          <CloseIcon className="size-6" />
         ) : (
-          <MenuIcon className="size-5" />
+          <MenuIcon className="size-6" />
         )}
       </button>
 

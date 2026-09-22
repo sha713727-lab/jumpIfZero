@@ -36,6 +36,24 @@ export async function getClientById(
   return parseRow(clientRowSchema, row);
 }
 
+export async function findActiveClientIdByUserId(
+  userId: string,
+  client?: DbQueryable,
+): Promise<string | null> {
+  const result = await query<{ id: string }>(
+    `
+      SELECT id
+      FROM clients_active
+      WHERE user_id = $1
+      LIMIT 1
+    `,
+    [userId],
+    client,
+  );
+  const row = result.rows[0];
+  return row === undefined ? null : row.id;
+}
+
 export async function getActiveClientById(
   id: string,
   client?: DbQueryable,

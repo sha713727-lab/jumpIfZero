@@ -24,6 +24,10 @@ export const portfolioItemRowSchema = z.object({
   category: z.string(),
   summary: z.string(),
   image_path: z.string(),
+  website_url: z.string(),
+  full_page_image_path: z.string(),
+  full_page_image_alt: z.string(),
+  screenshot_captured_at: timestamptzSchema.nullable(),
   published_at: timestamptzSchema.nullable(),
   version: z.number().int(),
   created_at: timestamptzSchema,
@@ -115,6 +119,7 @@ export const callbackRowSchema = z.object({
 export const siteGallerySectionKeySchema = z.enum([
   "about_gallery",
   "studio_flow",
+  "services_fan",
 ]);
 
 export const siteGalleryImageRowSchema = z.object({

@@ -39,6 +39,9 @@ export const adminPortfolioItemSchema = z.object({
   category: z.string(),
   summary: z.string(),
   image: z.string(),
+  websiteUrl: z.string(),
+  fullPageImage: z.string(),
+  fullPageImageAlt: z.string(),
   active: z.boolean(),
   version: z.number().int().min(1),
   publishedAt: z.iso.datetime().nullable(),
@@ -280,6 +283,7 @@ export const adminContactMessageSchema = z.object({
 export const adminSiteGallerySectionKeySchema = z.enum([
   "about_gallery",
   "studio_flow",
+  "services_fan",
 ]);
 
 export const adminSiteGalleryImageSchema = z.object({

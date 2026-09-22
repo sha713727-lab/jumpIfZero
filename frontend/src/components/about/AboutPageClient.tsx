@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
-import { DeferredMount } from "@/components/DeferredMount";
 import { MagneticLink } from "@/components/landingAlt/MagneticLink";
 import { RevealText } from "@/components/landingAlt/RevealText";
 import { aboutCopy } from "@/constants/about";
@@ -222,21 +221,11 @@ export function AboutPageClient({
         </div>
       </section>
 
-      <DeferredMount
-        rootMargin="480px 0px"
-        fallback={
-          <section
-            className="min-h-[80vh] bg-cream [content-visibility:auto] [contain-intrinsic-size:1px_80vh]"
-            aria-hidden="true"
-          />
-        }
-      >
-        <AboutBelowFold
-          members={teamMembers}
-          studioImages={studioImages}
-          principles={principles}
-        />
-      </DeferredMount>
+      <AboutBelowFold
+        members={teamMembers}
+        studioImages={studioImages}
+        principles={principles}
+      />
 
       <section
         ref={locationRef}

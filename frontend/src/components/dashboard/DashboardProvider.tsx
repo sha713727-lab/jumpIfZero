@@ -4,7 +4,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -113,13 +112,6 @@ export function DashboardProvider({
   const inflightRef = useRef<Partial<Record<CustomerDomain, Promise<void>>>>(
     {},
   );
-
-  useEffect(() => {
-    const root = window as Window & { __jzMounts?: Record<string, number> };
-    const counts = root.__jzMounts ?? {};
-    counts.dashboardProvider = (counts.dashboardProvider ?? 0) + 1;
-    root.__jzMounts = counts;
-  }, []);
 
   const isDomainLoaded = useCallback(
     (domain: CustomerDomain) => loaded[domain] === true,

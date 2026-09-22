@@ -111,9 +111,9 @@ export function ServiceDetailModal({
             </p>
 
             <ul className="mt-8 space-y-3 border-t border-black/10 pt-8">
-              {detail.highlights.map((item) => (
+              {detail.highlights.map((item, index) => (
                 <li
-                  key={item}
+                  key={`${detail.slug}-highlight-${index}`}
                   className="flex gap-3 text-[0.92rem] leading-[1.5] font-medium text-[#2f3a28]/85"
                 >
                   <span

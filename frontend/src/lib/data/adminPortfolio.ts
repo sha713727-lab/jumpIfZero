@@ -28,6 +28,9 @@ export function toAdminPortfolioItem(row: PortfolioItemRow): AdminPortfolioItem 
     category: row.category,
     summary: row.summary,
     image: row.image_path,
+    websiteUrl: row.website_url,
+    fullPageImage: row.full_page_image_path,
+    fullPageImageAlt: row.full_page_image_alt,
     active: row.published_at !== null,
     version: row.version,
     publishedAt:
@@ -57,6 +60,9 @@ export async function createAdminPortfolio(
     readonly category: string;
     readonly summary: string;
     readonly image: string;
+    readonly websiteUrl: string;
+    readonly fullPageImage: string;
+    readonly fullPageImageAlt: string;
     readonly active: boolean;
   },
 ): Promise<AdminPortfolioItem> {
@@ -66,6 +72,9 @@ export async function createAdminPortfolio(
     category: input.category,
     summary: input.summary,
     imagePath: input.image,
+    websiteUrl: input.websiteUrl,
+    fullPageImagePath: input.fullPageImage,
+    fullPageImageAlt: input.fullPageImageAlt,
     publishedAt: input.active ? new Date().toISOString() : null,
   });
 
@@ -90,6 +99,9 @@ export async function updateAdminPortfolio(
     readonly category: string;
     readonly summary: string;
     readonly image: string;
+    readonly websiteUrl: string;
+    readonly fullPageImage: string;
+    readonly fullPageImageAlt: string;
     readonly active: boolean;
     readonly publishedAt: string | null;
   },
@@ -102,6 +114,9 @@ export async function updateAdminPortfolio(
     category: input.category,
     summary: input.summary,
     imagePath: input.image,
+    websiteUrl: input.websiteUrl,
+    fullPageImagePath: input.fullPageImage,
+    fullPageImageAlt: input.fullPageImageAlt,
     publishedAt: input.active
       ? (input.publishedAt ?? new Date().toISOString())
       : null,

@@ -87,7 +87,7 @@ export function BlogPage() {
     startTransition(async () => {
       const result = await getAdminBlogPostAction({ id: item.id });
       if (!result.ok || !("post" in result)) {
-        setError("Could not load blog post body.");
+        setError("Could not load insight body.");
         return;
       }
 
@@ -124,7 +124,7 @@ export function BlogPage() {
       if (editingId) {
         const existing = state.blog.find((item) => item.id === editingId);
         if (!existing) {
-          setError("Blog post not found.");
+          setError("Insight not found.");
           return;
         }
 
@@ -147,7 +147,7 @@ export function BlogPage() {
               ? "Save failed."
               : result.reason === "conflict"
                 ? "This post was updated elsewhere. Refresh and try again."
-                : "Could not save blog post.",
+                : "Could not save insight.",
           );
           return;
         }
@@ -169,7 +169,7 @@ export function BlogPage() {
         });
 
         if (!result.ok || !("post" in result)) {
-          setError("Could not create blog post.");
+          setError("Could not create insight.");
           return;
         }
 
@@ -201,7 +201,7 @@ export function BlogPage() {
         setError(
           result.reason === "conflict"
             ? "This post was updated elsewhere. Refresh and try again."
-            : "Could not delete blog post.",
+            : "Could not delete insight.",
         );
         return;
       }
@@ -217,9 +217,9 @@ export function BlogPage() {
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        title="Blog"
-        lede="Manage blog posts shown on the public site."
-        actionLabel="Add post"
+        title="Insights"
+        lede="Manage insights shown on the public site."
+        actionLabel="Add insight"
         onAction={openAdd}
       />
 
@@ -325,7 +325,7 @@ export function BlogPage() {
       <AdminFormModal
         open={modalOpen}
         wide
-        title={editingId ? "Edit blog post" : "Add blog post"}
+        title={editingId ? "Edit insight" : "Add insight"}
         onClose={() => setModalOpen(false)}
         onSubmit={save}
       >
@@ -400,8 +400,8 @@ export function BlogPage() {
 
       <ConfirmDeleteModal
         open={deleteOpen}
-        title="Delete blog post"
-        lede={`Remove "${deleteTarget?.title ?? "this post"}" from the blog?`}
+        title="Delete insight"
+        lede={`Remove "${deleteTarget?.title ?? "this insight"}" from insights?`}
         onClose={() => setDeleteOpen(false)}
         onConfirm={confirmDelete}
       />

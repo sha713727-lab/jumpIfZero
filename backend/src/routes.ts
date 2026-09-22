@@ -40,6 +40,19 @@ import * as servicesIdDelete from "./api/content/services/[id]/delete.ts";
 import * as servicesIdRestorePost from "./api/content/services/[id]/restore/post.ts";
 import * as servicesBySlugGet from "./api/content/services/by-slug/[slug]/get.ts";
 
+import * as servicePagesGet from "./api/content/service-pages/get.ts";
+import * as servicePagesBySlugGet from "./api/content/service-pages/by-slug/[slug]/get.ts";
+import * as servicePagesByPathGet from "./api/content/service-pages/by-path/[pillar]/[child]/get.ts";
+import * as servicePagesIdGet from "./api/content/service-pages/[id]/get.ts";
+import * as servicePagesIdPatch from "./api/content/service-pages/[id]/patch.ts";
+import * as servicePagesIdDelete from "./api/content/service-pages/[id]/delete.ts";
+import * as servicePagesIdRestorePost from "./api/content/service-pages/[id]/restore/post.ts";
+import * as servicePagesIdCollectionPost from "./api/content/service-pages/[id]/[collection]/post.ts";
+import * as servicePagesIdCollectionReorderPut from "./api/content/service-pages/[id]/[collection]/reorder/put.ts";
+import * as servicePagesIdCollectionChildPatch from "./api/content/service-pages/[id]/[collection]/[childId]/patch.ts";
+import * as servicePagesIdCollectionChildDelete from "./api/content/service-pages/[id]/[collection]/[childId]/delete.ts";
+import * as servicePagesIdCollectionChildRestorePost from "./api/content/service-pages/[id]/[collection]/[childId]/restore/post.ts";
+
 import * as portfolioGet from "./api/content/portfolio/get.ts";
 import * as portfolioPost from "./api/content/portfolio/post.ts";
 import * as portfolioIdGet from "./api/content/portfolio/[id]/get.ts";
@@ -335,6 +348,79 @@ export const routes: readonly CompiledRoute[] = [
     "/content/services/[id]/restore",
     "content.services.restore",
     mod(servicesIdRestorePost),
+  ),
+
+  compileRoute(
+    "GET",
+    "/content/service-pages",
+    "content.service-pages.list",
+    mod(servicePagesGet),
+  ),
+  compileRoute(
+    "GET",
+    "/content/service-pages/by-slug/[slug]",
+    "content.service-pages.bySlug",
+    mod(servicePagesBySlugGet),
+  ),
+  compileRoute(
+    "GET",
+    "/content/service-pages/by-path/[pillar]/[child]",
+    "content.service-pages.byPath",
+    mod(servicePagesByPathGet),
+  ),
+  compileRoute(
+    "GET",
+    "/content/service-pages/[id]",
+    "content.service-pages.get",
+    mod(servicePagesIdGet),
+  ),
+  compileRoute(
+    "PATCH",
+    "/content/service-pages/[id]",
+    "content.service-pages.update",
+    mod(servicePagesIdPatch),
+  ),
+  compileRoute(
+    "DELETE",
+    "/content/service-pages/[id]",
+    "content.service-pages.archive",
+    mod(servicePagesIdDelete),
+  ),
+  compileRoute(
+    "POST",
+    "/content/service-pages/[id]/restore",
+    "content.service-pages.restore",
+    mod(servicePagesIdRestorePost),
+  ),
+  compileRoute(
+    "POST",
+    "/content/service-pages/[id]/[collection]",
+    "content.service-pages.child.create",
+    mod(servicePagesIdCollectionPost),
+  ),
+  compileRoute(
+    "PUT",
+    "/content/service-pages/[id]/[collection]/reorder",
+    "content.service-pages.child.reorder",
+    mod(servicePagesIdCollectionReorderPut),
+  ),
+  compileRoute(
+    "PATCH",
+    "/content/service-pages/[id]/[collection]/[childId]",
+    "content.service-pages.child.update",
+    mod(servicePagesIdCollectionChildPatch),
+  ),
+  compileRoute(
+    "DELETE",
+    "/content/service-pages/[id]/[collection]/[childId]",
+    "content.service-pages.child.archive",
+    mod(servicePagesIdCollectionChildDelete),
+  ),
+  compileRoute(
+    "POST",
+    "/content/service-pages/[id]/[collection]/[childId]/restore",
+    "content.service-pages.child.restore",
+    mod(servicePagesIdCollectionChildRestorePost),
   ),
 
   compileRoute("GET", "/content/portfolio", "content.portfolio.list", mod(portfolioGet)),

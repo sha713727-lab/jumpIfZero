@@ -10,9 +10,30 @@ import { blogCopy } from "@/constants/blog";
 import type { BlogPost } from "@/lib/data/blog";
 import { applyHeaderTone } from "@/lib/headerTone";
 
-const HEADER_HEIGHT = 72;
+const HEADER_HEIGHT = 80;
 const HERO_BG = "#5c6849";
 const CREAM_BG = "#f7f5f0";
+
+const RELATED_SERVICE_BY_CATEGORY: Readonly<
+  Record<string, { readonly href: string; readonly label: string }>
+> = {
+  "Custom Software": {
+    href: "/services/custom-development/custom-software-development",
+    label: "Custom software development services",
+  },
+  "Web Development": {
+    href: "/services/custom-development/web-development",
+    label: "Web development services",
+  },
+  Mobile: {
+    href: "/services/custom-development/mobile-app-development",
+    label: "Mobile app development services",
+  },
+  Growth: {
+    href: "/services/seo",
+    label: "SEO services",
+  },
+};
 
 export type BlogDetailClientProps = {
   readonly post: BlogPost;
@@ -24,6 +45,7 @@ export function BlogDetailClient({ post, related }: BlogDetailClientProps) {
   const articleRef = useRef<HTMLElement | null>(null);
   const relatedRef = useRef<HTMLElement | null>(null);
   const ctaRef = useRef<HTMLElement | null>(null);
+  const relatedService = RELATED_SERVICE_BY_CATEGORY[post.category];
 
   useEffect(() => {
     const zones: ReadonlyArray<{
@@ -133,6 +155,18 @@ export function BlogDetailClient({ post, related }: BlogDetailClientProps) {
           <div className="mt-10 border-t border-black/10 pt-10">
             <BlogBodyRenderer blocks={post.body} />
           </div>
+
+          {relatedService ? (
+            <p className="mt-10 text-[1rem] leading-[1.55] font-medium text-black/70">
+              Related service:{" "}
+              <Link
+                href={relatedService.href}
+                className="font-extrabold text-brand underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+              >
+                {relatedService.label}
+              </Link>
+            </p>
+          ) : null}
 
           <div className="mt-12 flex flex-wrap items-center gap-3 border-t border-black/10 pt-10">
             <Link

@@ -14,7 +14,7 @@ const COUNTER_DURATION = 1.8;
 const STACK_DEPTH = 3;
 const SWIPE_THRESHOLD = 110;
 const AUTOPLAY_MS = 3200;
-const HEADER_HEIGHT = 72;
+const HEADER_HEIGHT = 80;
 const SECTION_BG = "#f7f5f0";
 
 const CARD_THEMES = {

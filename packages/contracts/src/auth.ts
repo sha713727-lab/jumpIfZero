@@ -78,7 +78,6 @@ export const passwordForgotRequestSchema = z.object({
 
 export const passwordForgotResponseSchema = z.object({
   accepted: z.literal(true),
-  resetToken: z.string().min(32).max(256),
 });
 
 export const passwordResetRequestSchema = z.object({

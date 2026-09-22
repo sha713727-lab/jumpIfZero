@@ -10,7 +10,7 @@ import { env } from "@/lib/env";
 import { site } from "@/constants/site";
 import { HomePageClient } from "./HomePageClient";
 
-const homeTitle = `${site.name} | ${site.tagline}`;
+const homeTitle = `${site.name} | Software Development Company`;
 
 export const metadata: Metadata = {
   title: {
