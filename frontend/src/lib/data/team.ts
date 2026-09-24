@@ -58,18 +58,22 @@ function toTeamMember(row: TeamMemberWithSocialsRow, index: number): TeamMember 
 
 export const getTeamMembers = unstable_cache(
   async (): Promise<readonly TeamMember[]> => {
-    const response = await gatewayBackendRequest({
-      method: "GET",
-      path: "/content/team",
-      query: {
-        limit: "100",
-        publishedOnly: "true",
-        sort: "sort_order",
-        dir: "asc",
-      },
-      outputSchema: teamListResponseSchema,
-    });
-    return response.items.map(toTeamMember);
+    try {
+      const response = await gatewayBackendRequest({
+        method: "GET",
+        path: "/content/team",
+        query: {
+          limit: "100",
+          publishedOnly: "true",
+          sort: "sort_order",
+          dir: "asc",
+        },
+        outputSchema: teamListResponseSchema,
+      });
+      return response.items.map(toTeamMember);
+    } catch {
+      return [];
+    }
   },
   ["public-team-members"],
   { revalidate: 60 },

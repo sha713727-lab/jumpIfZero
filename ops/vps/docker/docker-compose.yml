@@ -61,11 +61,13 @@ services:
     env_file:
       - /etc/jumpifzero/frontend.env
     environment:
-      BACKEND_BASE_URL: http://backend:3011
+      BACKEND_BASE_URL: http://backend.jumpifzero_jz_internal:3011
     depends_on:
       - backend
     networks:
       jz_internal:
+        aliases:
+          - jumpifzero-frontend-internal
       proxy:
         aliases:
           - jumpifzero-frontend
@@ -81,4 +83,4 @@ networks:
     driver: bridge
   proxy:
     external: true
-    name: ${JZ_PROXY_NETWORK:-aviosupportdesk_default}
+    name: ${JZ_PROXY_NETWORK:-aviosupportdesk_avion}

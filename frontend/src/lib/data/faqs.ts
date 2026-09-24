@@ -21,13 +21,22 @@ function toFaqItem(row: FaqRow): FaqItem {
 }
 
 async function fetchFaqItems(): Promise<readonly FaqItem[]> {
-  const response = await gatewayBackendRequest({
-    method: "GET",
-    path: "/content/faqs",
-    query: { limit: "100", publishedOnly: "true", sort: "sort_order", dir: "asc" },
-    outputSchema: faqsListResponseSchema,
-  });
-  return response.items.map(toFaqItem);
+  try {
+    const response = await gatewayBackendRequest({
+      method: "GET",
+      path: "/content/faqs",
+      query: {
+        limit: "100",
+        publishedOnly: "true",
+        sort: "sort_order",
+        dir: "asc",
+      },
+      outputSchema: faqsListResponseSchema,
+    });
+    return response.items.map(toFaqItem);
+  } catch {
+    return [];
+  }
 }
 
 export const getFaqItems = unstable_cache(fetchFaqItems, ["public-faqs"], {

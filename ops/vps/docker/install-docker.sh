@@ -121,7 +121,7 @@ cat > /etc/jumpifzero/frontend.env <<EOF
 NODE_ENV=production
 NEXT_PUBLIC_SITE_URL=https://${DOMAIN}
 SESSION_SECRET=${JZ_SESSION_SECRET}
-BACKEND_BASE_URL=http://backend:3011
+BACKEND_BASE_URL=http://backend.jumpifzero_jz_internal:3011
 HMAC_SECRET=${JZ_HMAC_SECRET}
 HMAC_KEY_ID=v1
 HMAC_GATEWAY_SUBJECT_ID=${JZ_HMAC_GATEWAY_SUBJECT_ID}
