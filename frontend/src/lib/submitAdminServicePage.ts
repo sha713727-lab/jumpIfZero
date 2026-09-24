@@ -59,14 +59,21 @@ function mapBackendError(error: unknown): AdminServicePageActionResult {
   return { ok: false, reason: "server" };
 }
 
-function revalidateServicePages(slug?: string) {
+function revalidateServicePages(opts?: {
+  readonly slug?: string;
+  readonly href?: string;
+}) {
   revalidateTag("service-pages", "max");
-  revalidatePath("/admin/services");
-  revalidatePath("/admin/service-pages");
-  if (slug) {
-    revalidatePath(`/admin/services/${slug}`);
-    revalidatePath(`/admin/service-pages/${slug}`);
-    revalidatePath(`/services/${slug}`);
+  revalidatePath("/services", "layout");
+  revalidatePath("/admin/services", "layout");
+  revalidatePath("/admin/service-pages", "layout");
+  if (opts?.href && opts.href.length > 0) {
+    revalidatePath(opts.href);
+  }
+  if (opts?.slug) {
+    revalidatePath(`/admin/services/${opts.slug}`);
+    revalidatePath(`/admin/service-pages/${opts.slug}`);
+    revalidatePath(`/services/${opts.slug}`);
   }
 }
 
@@ -140,7 +147,7 @@ export async function updateAdminServicePageAction(input: {
   try {
     const session = await requireSession("admin");
     const page = await updateAdminServicePage(actorFromSession(session), input);
-    revalidateServicePages(input.slug);
+    revalidateServicePages({ slug: input.slug, href: page.href });
     return { ok: true, page };
   } catch (error) {
     return mapBackendError(error);
@@ -155,7 +162,7 @@ export async function archiveAdminServicePageAction(input: {
   try {
     const session = await requireSession("admin");
     await archiveAdminServicePage(actorFromSession(session), input);
-    revalidateServicePages(input.slug);
+    revalidateServicePages({ slug: input.slug });
     return { ok: true };
   } catch (error) {
     return mapBackendError(error);
@@ -173,7 +180,7 @@ export async function restoreAdminServicePageAction(input: {
       actorFromSession(session),
       input,
     );
-    revalidateServicePages(input.slug);
+    revalidateServicePages({ slug: input.slug, href: page.href });
     return { ok: true, page };
   } catch (error) {
     return mapBackendError(error);
@@ -194,7 +201,7 @@ export async function createAdminServicePageChildAction(input: {
       input.servicePageId,
       input.payload,
     );
-    revalidateServicePages(input.slug);
+    revalidateServicePages({ slug: input.slug });
     return { ok: true, child };
   } catch (error) {
     return mapBackendError(error);
@@ -217,7 +224,7 @@ export async function updateAdminServicePageChildAction(input: {
       input.childId,
       input.payload,
     );
-    revalidateServicePages(input.slug);
+    revalidateServicePages({ slug: input.slug });
     return { ok: true, child };
   } catch (error) {
     return mapBackendError(error);
@@ -239,7 +246,7 @@ export async function archiveAdminServicePageChildAction(input: {
       input.servicePageId,
       { id: input.id, version: input.version },
     );
-    revalidateServicePages(input.slug);
+    revalidateServicePages({ slug: input.slug });
     return { ok: true };
   } catch (error) {
     return mapBackendError(error);
@@ -261,7 +268,7 @@ export async function restoreAdminServicePageChildAction(input: {
       input.servicePageId,
       { id: input.id, version: input.version },
     );
-    revalidateServicePages(input.slug);
+    revalidateServicePages({ slug: input.slug });
     return { ok: true, child };
   } catch (error) {
     return mapBackendError(error);
@@ -286,7 +293,7 @@ export async function reorderAdminServicePageChildrenAction(input: {
       input.servicePageId,
       input.items,
     );
-    revalidateServicePages(input.slug);
+    revalidateServicePages({ slug: input.slug });
     return { ok: true };
   } catch (error) {
     return mapBackendError(error);

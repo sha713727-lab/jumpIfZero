@@ -139,12 +139,16 @@ export function PageFieldPanels({
             onChange={(event) => set("ogDescription", event.target.value)}
           />
         </label>
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 space-y-2">
           <AdminImageField
-            label="OG image"
+            label="OG image (social share only)"
             value={form.ogImagePath}
             onChange={(ogImagePath) => set("ogImagePath", ogImagePath)}
           />
+          <p className="text-[0.78rem] font-medium text-black/45">
+            Shown when the link is shared on social apps. It does not appear on
+            the page. To change the large image visitors see, use the Hero tab.
+          </p>
         </div>
       </div>
     );
@@ -213,12 +217,15 @@ export function PageFieldPanels({
             }
           />
         </label>
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 space-y-2">
           <AdminImageField
-            label="Hero image"
+            label="Hero image (shown on page)"
             value={form.heroImagePath}
             onChange={(heroImagePath) => set("heroImagePath", heroImagePath)}
           />
+          <p className="text-[0.78rem] font-medium text-black/45">
+            This is the image visitors see on the live service page.
+          </p>
         </div>
       </div>
     );

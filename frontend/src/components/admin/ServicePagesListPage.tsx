@@ -80,9 +80,19 @@ export function ServicePagesListPage() {
     <div className="space-y-6">
       <AdminPageHeader
         title="Services"
-        lede="Public service pillars and nested pages used on the site."
+        lede="Public service pillars and nested pages. Overlapping cards on /services are under Site sections → Services hero fan."
       />
 
+      <p className="rounded-xl border border-black/8 bg-white px-4 py-3 text-[0.84rem] font-medium text-black/55">
+        To change the /services hero card images and titles, open{" "}
+        <Link
+          href="/admin/site-sections"
+          className="font-semibold text-brand hover:underline"
+        >
+          Site sections → Services hero fan
+        </Link>
+        .
+      </p>
       {error ? (
         <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[0.88rem] font-semibold text-red-700">
           {error}

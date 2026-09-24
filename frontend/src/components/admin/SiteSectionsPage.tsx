@@ -557,7 +557,7 @@ export function SiteSectionsPage() {
     <div className="space-y-6">
       <AdminPageHeader
         title="Site sections"
-        lede="Edit site pictures here: Services hero fan cards, Portfolio hero marquee, Inside the Work, How we work, Client Stories, and the Home About Us spiral. Changes show on the public site right away."
+        lede="Services hero fan cards (/services), Portfolio hero marquee (/portfolio), Inside the Work, How we work, Client Stories, and Home About Us spiral. Publish each image for it to show on the public site."
         actionLabel={addLabel}
         onAction={openAdd}
       />
@@ -956,9 +956,9 @@ export function SiteSectionsPage() {
               {galleryForm.sectionKey === "studio_flow"
                 ? "Inside the Work (About page)"
                 : galleryForm.sectionKey === "services_fan"
-                  ? "Services hero fan (order = card order on /services)"
+                  ? "Services hero fan on /services (order = card order; card title = alt text)"
                   : galleryForm.sectionKey === "portfolio_marquee"
-                    ? "Portfolio hero marquee (order = image order on /portfolio)"
+                    ? "Portfolio hero marquee on /portfolio (order = image order)"
                     : "About Us spiral (Home)"}
             </p>
             <div>

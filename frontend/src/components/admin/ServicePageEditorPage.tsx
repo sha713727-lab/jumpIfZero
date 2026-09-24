@@ -1081,6 +1081,21 @@ export function ServicePageEditorPage({ slug }: ServicePageEditorPageProps) {
           {notice}
         </p>
       ) : null}
+      <p className="rounded-xl border border-black/8 bg-white px-4 py-3 text-[0.84rem] font-medium text-black/55">
+        Overlapping cards on{" "}
+        <a href="/services" className="font-semibold text-brand hover:underline">
+          /services
+        </a>{" "}
+        are edited in{" "}
+        <Link
+          href="/admin/site-sections"
+          className="font-semibold text-brand hover:underline"
+        >
+          Site sections → Services hero fan
+        </Link>
+        . On this page, Hero image is what visitors see; OG image is only for
+        social share previews.
+      </p>
       <div className="flex flex-wrap gap-2">
         {EDITOR_TABS.map((item) => (
           <button

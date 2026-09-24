@@ -68,18 +68,20 @@ function mapBackendError(error: unknown): AdminSiteActionResult {
 
 function revalidateSiteGallery() {
   revalidateTag("site-gallery", "max");
-  revalidatePath("/about");
-  revalidatePath("/");
+  revalidatePath("/", "layout");
+  revalidatePath("/about", "layout");
+  revalidatePath("/services", "layout");
+  revalidatePath("/portfolio", "layout");
 }
 
 function revalidateSiteTestimonials() {
   revalidateTag("site-testimonials", "max");
-  revalidatePath("/");
+  revalidatePath("/", "layout");
 }
 
 function revalidateSitePrinciples() {
   revalidateTag("site-principles", "max");
-  revalidatePath("/about");
+  revalidatePath("/about", "layout");
 }
 
 export async function createAdminSiteGalleryImageAction(input: {
