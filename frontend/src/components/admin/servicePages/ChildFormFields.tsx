@@ -1,5 +1,6 @@
 "use client";
 
+import type { Dispatch, SetStateAction } from "react";
 import { AdminImageField } from "@/components/admin/AdminImageField";
 import {
   adminFieldClass,
@@ -33,16 +34,16 @@ type ChildForms = {
 type ChildFormFieldsProps = {
   readonly collection: ServicePageCollection;
   readonly forms: ChildForms;
-  readonly setOffering: (form: OfferingForm) => void;
-  readonly setBuildItem: (form: BuildItemForm) => void;
-  readonly setProcessStep: (form: ProcessStepForm) => void;
-  readonly setTechnology: (form: TechnologyForm) => void;
-  readonly setBenefit: (form: BenefitForm) => void;
-  readonly setCapability: (form: BenefitForm) => void;
-  readonly setProblem: (form: BenefitForm) => void;
-  readonly setComparisonPoint: (form: BenefitForm) => void;
-  readonly setFaq: (form: FaqForm) => void;
-  readonly setRelated: (form: RelatedForm) => void;
+  readonly setOffering: Dispatch<SetStateAction<OfferingForm>>;
+  readonly setBuildItem: Dispatch<SetStateAction<BuildItemForm>>;
+  readonly setProcessStep: Dispatch<SetStateAction<ProcessStepForm>>;
+  readonly setTechnology: Dispatch<SetStateAction<TechnologyForm>>;
+  readonly setBenefit: Dispatch<SetStateAction<BenefitForm>>;
+  readonly setCapability: Dispatch<SetStateAction<BenefitForm>>;
+  readonly setProblem: Dispatch<SetStateAction<BenefitForm>>;
+  readonly setComparisonPoint: Dispatch<SetStateAction<BenefitForm>>;
+  readonly setFaq: Dispatch<SetStateAction<FaqForm>>;
+  readonly setRelated: Dispatch<SetStateAction<RelatedForm>>;
 };
 
 function TitledChildFields({
@@ -50,7 +51,7 @@ function TitledChildFields({
   onChange,
 }: {
   readonly form: BenefitForm;
-  readonly onChange: (form: BenefitForm) => void;
+  readonly onChange: Dispatch<SetStateAction<BenefitForm>>;
 }) {
   return (
     <>
@@ -59,7 +60,12 @@ function TitledChildFields({
         <input
           className={adminFieldClass}
           value={form.title}
-          onChange={(event) => onChange({ ...form, title: event.target.value })}
+          onChange={(event) =>
+            onChange((current) => ({
+              ...current,
+              title: event.target.value,
+            }))
+          }
         />
       </label>
       <label className="block">
@@ -67,7 +73,12 @@ function TitledChildFields({
         <textarea
           className={`${adminFieldClass} min-h-[5rem] resize-y`}
           value={form.body}
-          onChange={(event) => onChange({ ...form, body: event.target.value })}
+          onChange={(event) =>
+            onChange((current) => ({
+              ...current,
+              body: event.target.value,
+            }))
+          }
         />
       </label>
       <label className="inline-flex items-center gap-2 text-[0.88rem] font-semibold">
@@ -75,7 +86,10 @@ function TitledChildFields({
           type="checkbox"
           checked={form.active}
           onChange={(event) =>
-            onChange({ ...form, active: event.target.checked })
+            onChange((current) => ({
+              ...current,
+              active: event.target.checked,
+            }))
           }
         />
         Active on site
@@ -108,7 +122,10 @@ export function ChildFormFields({
             className={adminFieldClass}
             value={form.title}
             onChange={(event) =>
-              setOffering({ ...form, title: event.target.value })
+              setOffering((current) => ({
+                ...current,
+                title: event.target.value,
+              }))
             }
           />
         </label>
@@ -118,7 +135,10 @@ export function ChildFormFields({
             className={`${adminFieldClass} min-h-[5rem] resize-y`}
             value={form.description}
             onChange={(event) =>
-              setOffering({ ...form, description: event.target.value })
+              setOffering((current) => ({
+                ...current,
+                description: event.target.value,
+              }))
             }
           />
         </label>
@@ -128,7 +148,10 @@ export function ChildFormFields({
             className={adminFieldClass}
             value={form.ctaLabel}
             onChange={(event) =>
-              setOffering({ ...form, ctaLabel: event.target.value })
+              setOffering((current) => ({
+                ...current,
+                ctaLabel: event.target.value,
+              }))
             }
           />
         </label>
@@ -138,21 +161,29 @@ export function ChildFormFields({
             className={adminFieldClass}
             value={form.ctaHref}
             onChange={(event) =>
-              setOffering({ ...form, ctaHref: event.target.value })
+              setOffering((current) => ({
+                ...current,
+                ctaHref: event.target.value,
+              }))
             }
           />
         </label>
         <AdminImageField
           label="Image"
           value={form.imagePath}
-          onChange={(imagePath) => setOffering({ ...form, imagePath })}
+          onChange={(imagePath) =>
+            setOffering((current) => ({ ...current, imagePath }))
+          }
         />
         <label className="inline-flex items-center gap-2 text-[0.88rem] font-semibold">
           <input
             type="checkbox"
             checked={form.active}
             onChange={(event) =>
-              setOffering({ ...form, active: event.target.checked })
+              setOffering((current) => ({
+                ...current,
+                active: event.target.checked,
+              }))
             }
           />
           Active on site
@@ -171,7 +202,10 @@ export function ChildFormFields({
             className={adminFieldClass}
             value={form.label}
             onChange={(event) =>
-              setBuildItem({ ...form, label: event.target.value })
+              setBuildItem((current) => ({
+                ...current,
+                label: event.target.value,
+              }))
             }
           />
         </label>
@@ -180,7 +214,10 @@ export function ChildFormFields({
             type="checkbox"
             checked={form.active}
             onChange={(event) =>
-              setBuildItem({ ...form, active: event.target.checked })
+              setBuildItem((current) => ({
+                ...current,
+                active: event.target.checked,
+              }))
             }
           />
           Active on site
@@ -202,10 +239,10 @@ export function ChildFormFields({
             className={adminFieldClass}
             value={form.stepNumber}
             onChange={(event) =>
-              setProcessStep({
-                ...form,
+              setProcessStep((current) => ({
+                ...current,
                 stepNumber: Number(event.target.value) || 1,
-              })
+              }))
             }
           />
         </label>
@@ -215,7 +252,10 @@ export function ChildFormFields({
             className={adminFieldClass}
             value={form.title}
             onChange={(event) =>
-              setProcessStep({ ...form, title: event.target.value })
+              setProcessStep((current) => ({
+                ...current,
+                title: event.target.value,
+              }))
             }
           />
         </label>
@@ -225,7 +265,10 @@ export function ChildFormFields({
             className={`${adminFieldClass} min-h-[5rem] resize-y`}
             value={form.body}
             onChange={(event) =>
-              setProcessStep({ ...form, body: event.target.value })
+              setProcessStep((current) => ({
+                ...current,
+                body: event.target.value,
+              }))
             }
           />
         </label>
@@ -234,7 +277,10 @@ export function ChildFormFields({
             type="checkbox"
             checked={form.active}
             onChange={(event) =>
-              setProcessStep({ ...form, active: event.target.checked })
+              setProcessStep((current) => ({
+                ...current,
+                active: event.target.checked,
+              }))
             }
           />
           Active on site
@@ -253,10 +299,10 @@ export function ChildFormFields({
             className={adminFieldClass}
             value={form.category}
             onChange={(event) =>
-              setTechnology({
-                ...form,
+              setTechnology((current) => ({
+                ...current,
                 category: event.target.value as TechnologyForm["category"],
-              })
+              }))
             }
           >
             {TECH_CATEGORIES.map((category) => (
@@ -272,7 +318,10 @@ export function ChildFormFields({
             className={adminFieldClass}
             value={form.name}
             onChange={(event) =>
-              setTechnology({ ...form, name: event.target.value })
+              setTechnology((current) => ({
+                ...current,
+                name: event.target.value,
+              }))
             }
           />
         </label>
@@ -281,7 +330,10 @@ export function ChildFormFields({
             type="checkbox"
             checked={form.active}
             onChange={(event) =>
-              setTechnology({ ...form, active: event.target.checked })
+              setTechnology((current) => ({
+                ...current,
+                active: event.target.checked,
+              }))
             }
           />
           Active on site
@@ -327,10 +379,10 @@ export function ChildFormFields({
             className={adminFieldClass}
             value={form.relatedServicePageId}
             onChange={(event) =>
-              setRelated({
-                ...form,
+              setRelated((current) => ({
+                ...current,
                 relatedServicePageId: event.target.value,
-              })
+              }))
             }
             placeholder="UUID"
           />
@@ -340,7 +392,10 @@ export function ChildFormFields({
             type="checkbox"
             checked={form.active}
             onChange={(event) =>
-              setRelated({ ...form, active: event.target.checked })
+              setRelated((current) => ({
+                ...current,
+                active: event.target.checked,
+              }))
             }
           />
           Active on site
@@ -358,7 +413,10 @@ export function ChildFormFields({
           className={adminFieldClass}
           value={form.question}
           onChange={(event) =>
-            setFaq({ ...form, question: event.target.value })
+            setFaq((current) => ({
+              ...current,
+              question: event.target.value,
+            }))
           }
         />
       </label>
@@ -367,7 +425,12 @@ export function ChildFormFields({
         <textarea
           className={`${adminFieldClass} min-h-[5rem] resize-y`}
           value={form.answer}
-          onChange={(event) => setFaq({ ...form, answer: event.target.value })}
+          onChange={(event) =>
+            setFaq((current) => ({
+              ...current,
+              answer: event.target.value,
+            }))
+          }
         />
       </label>
       <label className="inline-flex items-center gap-2 text-[0.88rem] font-semibold">
@@ -375,7 +438,10 @@ export function ChildFormFields({
           type="checkbox"
           checked={form.active}
           onChange={(event) =>
-            setFaq({ ...form, active: event.target.checked })
+            setFaq((current) => ({
+              ...current,
+              active: event.target.checked,
+            }))
           }
         />
         Active on site

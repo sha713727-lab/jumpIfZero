@@ -223,14 +223,32 @@ export const adminMessageSchema = z.object({
   attachments: z.array(adminMessageAttachmentSchema),
 });
 
+export const adminInvoiceLineItemSchema = z.object({
+  id: z.string(),
+  description: z.string(),
+  amount: z.string(),
+  sortOrder: z.number().int(),
+});
+
 export const adminInvoiceSchema = z.object({
   id: z.string(),
   clientId: z.string().nullable(),
   number: z.string(),
   title: z.string(),
   amount: z.string(),
+  currency: z.string(),
   billToCompany: z.string(),
+  billToName: z.string(),
+  billToEmail: z.string(),
+  billToPhone: z.string(),
+  billToLocation: z.string(),
+  fromCompany: z.string(),
+  fromEmail: z.string(),
+  fromPhone: z.string(),
   status: z.enum(["draft", "sent", "paid"]),
+  issuedOn: z.string().nullable(),
+  dueDate: z.string().nullable(),
+  lineItems: z.array(adminInvoiceLineItemSchema),
   version: z.number().int().min(1),
   updatedAt: z.string(),
 });
@@ -284,6 +302,7 @@ export const adminSiteGallerySectionKeySchema = z.enum([
   "about_gallery",
   "studio_flow",
   "services_fan",
+  "portfolio_marquee",
 ]);
 
 export const adminSiteGalleryImageSchema = z.object({

@@ -25,6 +25,10 @@ import {
 import { audit } from "../lib/audit.ts";
 import * as assignmentsRepo from "../repositories/client-assignments.ts";
 import * as clientsRepo from "../repositories/clients.ts";
+import * as filesRepo from "../repositories/files.ts";
+import * as invoicesRepo from "../repositories/invoices.ts";
+import * as messagesRepo from "../repositories/messages.ts";
+import * as projectsRepo from "../repositories/projects.ts";
 import * as usersRepo from "../repositories/users.ts";
 import {
   accessibleClientIds,
@@ -219,18 +223,52 @@ export async function updateClientSelf(
 export async function archiveClient(
   actor: Actor,
   input: unknown,
+  correlationId: string,
 ): Promise<ClientPublic> {
   requireAdmin(actor);
   const body = parseInput(clientArchiveSchema, input);
-  const archived = await clientsRepo.archiveClient({
-    id: body.id,
-    version: body.version,
+
+  const row = await withTransaction(async (tx) => {
+    const archived = await clientsRepo.archiveClient(
+      {
+        id: body.id,
+        version: body.version,
+      },
+      tx,
+    );
+    const clientRow = await resolveVersionWrite({
+      result: archived,
+      lookup: () => clientsRepo.getClientById(body.id, tx),
+      notFoundMessage: "Client not found",
+      conflictMessage: "Client version conflict",
+    });
+
+    await projectsRepo.archiveActiveByClientId(clientRow.id, tx);
+    await invoicesRepo.archiveActiveByClientId(clientRow.id, tx);
+    await messagesRepo.archiveActiveByClientId(clientRow.id, tx);
+    await filesRepo.archiveActiveByClientId(clientRow.id, tx);
+    await assignmentsRepo.deleteAllForClient(clientRow.id, tx);
+
+    const user = await usersRepo.getUserById(clientRow.user_id, tx);
+    if (user !== null && user.archived_at === null) {
+      const archivedUser = await usersRepo.archiveUser({
+        id: user.id,
+        version: user.version,
+        client: tx,
+      });
+      if (archivedUser === null) {
+        throw new ConflictError("User version conflict");
+      }
+    }
+
+    return clientRow;
   });
-  const row = await resolveVersionWrite({
-    result: archived,
-    lookup: () => clientsRepo.getClientById(body.id),
-    notFoundMessage: "Client not found",
-    conflictMessage: "Client version conflict",
+
+  audit({
+    action: "client.archive",
+    correlationId,
+    actorSubjectId: actor.subjectId,
+    route: "clients.archive",
   });
   return toPublic(row);
 }

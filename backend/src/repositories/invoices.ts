@@ -1,11 +1,14 @@
 import {
+  invoiceLineItemRowSchema,
   invoiceRowSchema,
+  type InvoiceLineItemRow,
   type InvoiceRow,
 } from "@jumpifzero/contracts";
 import type { DbQueryable } from "../db/query.ts";
 import { query } from "../db/query.ts";
 import { ConflictError, InternalError } from "../lib/errors.ts";
 import { isPgCode, parseRow } from "./_parse.ts";
+import { nextUuidv7 } from "./_write.ts";
 
 const INVOICE_COLUMNS = `
   id, client_id, number, title, amount::text AS amount, currency,
@@ -300,6 +303,26 @@ export async function archiveInvoice(
   return getInvoiceById(id, client);
 }
 
+export async function archiveActiveByClientId(
+  clientId: string,
+  client?: DbQueryable,
+): Promise<number> {
+  const result = await query(
+    `
+      UPDATE invoices
+      SET
+        archived_at = now(),
+        version = version + 1,
+        updated_at = now()
+      WHERE client_id = $1
+        AND archived_at IS NULL
+    `,
+    [clientId],
+    client,
+  );
+  return result.rowCount ?? 0;
+}
+
 export async function restoreInvoice(
   input: { readonly id: string; readonly version: number },
   client?: DbQueryable,
@@ -324,4 +347,96 @@ export async function restoreInvoice(
     return null;
   }
   return getInvoiceById(id, client);
+}
+
+const LINE_ITEM_COLUMNS = `
+  id, invoice_id, description, amount::text AS amount, sort_order,
+  created_at, updated_at
+`;
+
+export async function listLineItemsByInvoiceId(
+  invoiceId: string,
+  client?: DbQueryable,
+): Promise<readonly InvoiceLineItemRow[]> {
+  const result = await query(
+    `
+      SELECT ${LINE_ITEM_COLUMNS}
+      FROM invoice_line_items
+      WHERE invoice_id = $1
+      ORDER BY sort_order ASC, id ASC
+    `,
+    [invoiceId],
+    client,
+  );
+  return result.rows.map((row) => parseRow(invoiceLineItemRowSchema, row));
+}
+
+export async function listLineItemsByInvoiceIds(
+  invoiceIds: readonly string[],
+  client?: DbQueryable,
+): Promise<ReadonlyMap<string, readonly InvoiceLineItemRow[]>> {
+  const map = new Map<string, InvoiceLineItemRow[]>();
+  if (invoiceIds.length === 0) {
+    return map;
+  }
+  const result = await query(
+    `
+      SELECT ${LINE_ITEM_COLUMNS}
+      FROM invoice_line_items
+      WHERE invoice_id = ANY($1::uuid[])
+      ORDER BY sort_order ASC, id ASC
+    `,
+    [invoiceIds],
+    client,
+  );
+  for (const raw of result.rows) {
+    const row = parseRow(invoiceLineItemRowSchema, raw);
+    const existing = map.get(row.invoice_id);
+    if (existing === undefined) {
+      map.set(row.invoice_id, [row]);
+    } else {
+      existing.push(row);
+    }
+  }
+  return map;
+}
+
+export async function replaceLineItems(
+  input: {
+    readonly invoiceId: string;
+    readonly lines: readonly {
+      readonly description: string;
+      readonly amount: string;
+      readonly sortOrder: number;
+    }[];
+  },
+  client: DbQueryable,
+): Promise<readonly InvoiceLineItemRow[]> {
+  await query(
+    `DELETE FROM invoice_line_items WHERE invoice_id = $1`,
+    [input.invoiceId],
+    client,
+  );
+
+  for (const line of input.lines) {
+    const id = await nextUuidv7(client);
+    await query(
+      `
+        INSERT INTO invoice_line_items (
+          id, invoice_id, description, amount, sort_order
+        )
+        VALUES ($1, $2, $3, $4::numeric, $5)
+      `,
+      [
+        id,
+        input.invoiceId,
+        line.description,
+        line.amount,
+        line.sortOrder,
+      ],
+      client,
+    );
+  }
+
+  return listLineItemsByInvoiceId(input.invoiceId, client);
 }

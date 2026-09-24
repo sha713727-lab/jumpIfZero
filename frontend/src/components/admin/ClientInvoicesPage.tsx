@@ -11,6 +11,11 @@ import {
 } from "@/components/admin/AdminFormModal";
 import { ConfirmDeleteModal } from "@/components/admin/ConfirmDeleteModal";
 import { adminIcons } from "@/components/admin/AdminIcons";
+import {
+  emptyInvoiceLine,
+  InvoiceLineItemsFields,
+  type InvoiceLineFormItem,
+} from "@/components/admin/InvoiceLineItemsFields";
 import { adminEmptyCopy } from "@/constants/admin";
 import { site } from "@/constants/site";
 import type { AdminClient, AdminInvoice } from "@/lib/data/admin";
@@ -18,6 +23,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import {
   archiveInvoiceAction,
   createInvoiceAction,
+  updateInvoiceAction,
 } from "@/lib/submitOps";
 import { getAdminSiteContactAction } from "@/lib/submitAdminSiteContact";
 import { nextInvoiceNumber } from "@/lib/invoiceNumber";
@@ -27,8 +33,6 @@ const cardClass =
 
 type InvoiceForm = {
   number: string;
-  title: string;
-  amount: string;
   currency: string;
   status: AdminInvoice["status"];
   issuedOn: string;
@@ -41,6 +45,7 @@ type InvoiceForm = {
   fromCompany: string;
   fromEmail: string;
   fromPhone: string;
+  lines: InvoiceLineFormItem[];
 };
 
 function todayIso(): string {
@@ -59,8 +64,6 @@ function billToFromClient(client: AdminClient | undefined) {
 
 const emptyForm: InvoiceForm = {
   number: "",
-  title: "",
-  amount: "",
   currency: "USD",
   status: "draft",
   issuedOn: "",
@@ -73,7 +76,33 @@ const emptyForm: InvoiceForm = {
   fromCompany: site.legalName,
   fromEmail: "",
   fromPhone: "",
+  lines: [emptyInvoiceLine()],
 };
+
+function formFromInvoice(invoice: AdminInvoice): InvoiceForm {
+  return {
+    number: invoice.number,
+    currency: invoice.currency,
+    status: invoice.status,
+    issuedOn: invoice.issuedOn ?? "",
+    dueDate: invoice.dueDate ?? "",
+    billToCompany: invoice.billToCompany,
+    billToName: invoice.billToName,
+    billToEmail: invoice.billToEmail,
+    billToPhone: invoice.billToPhone,
+    billToLocation: invoice.billToLocation,
+    fromCompany: invoice.fromCompany,
+    fromEmail: invoice.fromEmail,
+    fromPhone: invoice.fromPhone,
+    lines:
+      invoice.lineItems.length > 0
+        ? invoice.lineItems.map((line) => ({
+            description: line.description,
+            amount: line.amount,
+          }))
+        : [emptyInvoiceLine()],
+  };
+}
 
 const invoiceStatusClass: Record<AdminInvoice["status"], string> = {
   draft: "bg-black/8 text-black/50",
@@ -91,57 +120,138 @@ export function ClientInvoicesPage() {
   const params = useParams();
   const { state, setInvoices } = useAdmin();
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<InvoiceForm>(emptyForm);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const TrashIcon = adminIcons.trash;
+  const EditIcon = adminIcons.edit;
 
   const clientId = typeof params.id === "string" ? params.id : "";
   const invoices = state.invoices.filter((item) => item.clientId === clientId);
 
+  const openCreate = () => {
+    setError(null);
+    setEditingId(null);
+    startTransition(async () => {
+      const client = state.clients.find((item) => item.id === clientId);
+      const contact = await getAdminSiteContactAction();
+      setForm({
+        ...emptyForm,
+        number: nextInvoiceNumber(state.invoices.map((item) => item.number)),
+        issuedOn: todayIso(),
+        ...billToFromClient(client),
+        fromCompany: site.legalName,
+        fromEmail: contact.ok ? contact.data.email : "",
+        fromPhone: contact.ok ? contact.data.phone : "",
+        lines: [emptyInvoiceLine()],
+      });
+      setModalOpen(true);
+    });
+  };
+
+  const openEdit = (invoice: AdminInvoice) => {
+    setError(null);
+    setEditingId(invoice.id);
+    setForm(formFromInvoice(invoice));
+    setModalOpen(true);
+  };
+
   const save = () => {
-    const title = form.title.trim();
     const number = form.number.trim();
-    if (!title || !number || !clientId) {
+    const lines = form.lines
+      .map((line) => ({
+        description: line.description.trim(),
+        amount: line.amount.trim(),
+      }))
+      .filter((line) => line.description.length > 0 || line.amount.length > 0);
+    if (!number || lines.length === 0 || !clientId) {
+      setError("Add at least one line item with a description.");
+      return;
+    }
+    if (lines.some((line) => line.description.length === 0)) {
+      setError("Each line item needs a description.");
       return;
     }
 
     startTransition(async () => {
       setError(null);
-      const result = await createInvoiceAction({
-        clientId,
-        number,
-        title,
-        amount: form.amount.trim() || "0",
-        currency: form.currency.trim() || "USD",
-        statusCode: form.status,
-        issuedOn: form.issuedOn.trim() || null,
-        dueDate: form.dueDate.trim() || null,
-        billToCompany: form.billToCompany,
-        billToName: form.billToName,
-        billToEmail: form.billToEmail,
-        billToPhone: form.billToPhone,
-        billToLocation: form.billToLocation,
-        fromCompany: form.fromCompany,
-        fromEmail: form.fromEmail,
-        fromPhone: form.fromPhone,
-      });
+      if (editingId !== null) {
+        const existing = invoices.find((item) => item.id === editingId);
+        if (!existing) {
+          return;
+        }
+        const result = await updateInvoiceAction({
+          id: existing.id,
+          version: existing.version,
+          currency: form.currency.trim() || "USD",
+          statusCode: form.status,
+          issuedOn: form.issuedOn.trim() || null,
+          dueDate: form.dueDate.trim() || null,
+          lineItems: lines,
+          billToCompany: form.billToCompany,
+          billToName: form.billToName,
+          billToEmail: form.billToEmail,
+          billToPhone: form.billToPhone,
+          billToLocation: form.billToLocation,
+          fromCompany: form.fromCompany,
+          fromEmail: form.fromEmail,
+          fromPhone: form.fromPhone,
+        });
 
-      if (!result.ok || !("data" in result)) {
-        setError(
-          result.ok
-            ? "Create failed."
-            : result.reason === "conflict"
-              ? "Invoice number already exists. Use a different number."
-              : "Could not create invoice.",
+        if (!result.ok || !("data" in result)) {
+          setError(
+            result.ok
+              ? "Update failed."
+              : result.reason === "conflict"
+                ? "This invoice was updated elsewhere. Refresh and try again."
+                : "Could not update invoice.",
+          );
+          return;
+        }
+
+        setInvoices(
+          state.invoices.map((item) =>
+            item.id === editingId ? result.data : item,
+          ),
         );
-        return;
+      } else {
+        const result = await createInvoiceAction({
+          clientId,
+          number,
+          currency: form.currency.trim() || "USD",
+          statusCode: form.status,
+          issuedOn: form.issuedOn.trim() || null,
+          dueDate: form.dueDate.trim() || null,
+          lineItems: lines,
+          billToCompany: form.billToCompany,
+          billToName: form.billToName,
+          billToEmail: form.billToEmail,
+          billToPhone: form.billToPhone,
+          billToLocation: form.billToLocation,
+          fromCompany: form.fromCompany,
+          fromEmail: form.fromEmail,
+          fromPhone: form.fromPhone,
+        });
+
+        if (!result.ok || !("data" in result)) {
+          setError(
+            result.ok
+              ? "Create failed."
+              : result.reason === "conflict"
+                ? "Invoice number already exists. Use a different number."
+                : "Could not create invoice.",
+          );
+          return;
+        }
+
+        setInvoices([...state.invoices, result.data]);
       }
 
-      setInvoices([...state.invoices, result.data]);
       setModalOpen(false);
+      setEditingId(null);
       setForm(emptyForm);
     });
   };
@@ -186,25 +296,7 @@ export function ClientInvoicesPage() {
         title="Invoices"
         lede="Professional billing documents for this client."
         actionLabel="Create invoice"
-        onAction={() => {
-          setError(null);
-          startTransition(async () => {
-            const client = state.clients.find((item) => item.id === clientId);
-            const contact = await getAdminSiteContactAction();
-            setForm({
-              ...emptyForm,
-              number: nextInvoiceNumber(
-                state.invoices.map((item) => item.number),
-              ),
-              issuedOn: todayIso(),
-              ...billToFromClient(client),
-              fromCompany: site.legalName,
-              fromEmail: contact.ok ? contact.data.email : "",
-              fromPhone: contact.ok ? contact.data.phone : "",
-            });
-            setModalOpen(true);
-          });
-        }}
+        onAction={openCreate}
       />
 
       {error ? (
@@ -251,6 +343,15 @@ export function ClientInvoicesPage() {
                   </a>
                   <button
                     type="button"
+                    aria-label="Edit"
+                    disabled={pending}
+                    onClick={() => openEdit(invoice)}
+                    className="inline-flex size-8 items-center justify-center rounded-lg border border-black/10 bg-white disabled:opacity-40"
+                  >
+                    <EditIcon className="size-4" />
+                  </button>
+                  <button
+                    type="button"
                     aria-label="Delete"
                     disabled={pending}
                     onClick={() => {
@@ -270,15 +371,16 @@ export function ClientInvoicesPage() {
 
       <AdminFormModal
         open={modalOpen}
-        title="Create invoice"
+        title={editingId ? "Edit invoice" : "Create invoice"}
         wide
         onClose={() => {
           if (!pending) {
             setModalOpen(false);
+            setEditingId(null);
           }
         }}
         onSubmit={save}
-        submitLabel="Create"
+        submitLabel={editingId ? "Save" : "Create"}
       >
         <div>
           <span className={adminLabelClass}>Invoice number</span>
@@ -289,36 +391,17 @@ export function ClientInvoicesPage() {
             {form.number}
           </p>
         </div>
-        <div>
-          <label className="block">
-            <span className={adminLabelClass}>Title / description</span>
-            <input
-              className={adminFieldClass}
-              value={form.title}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  title: event.target.value,
-                }))
-              }
-            />
-          </label>
-        </div>
+        <InvoiceLineItemsFields
+          lines={form.lines}
+          currency={form.currency.trim() || "USD"}
+          onChange={(lines) =>
+            setForm((current) => ({
+              ...current,
+              lines,
+            }))
+          }
+        />
         <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block">
-            <span className={adminLabelClass}>Amount</span>
-            <input
-              className={adminFieldClass}
-              value={form.amount}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  amount: event.target.value,
-                }))
-              }
-              placeholder="1000.00"
-            />
-          </label>
           <label className="block">
             <span className={adminLabelClass}>Currency</span>
             <select
@@ -335,6 +418,23 @@ export function ClientInvoicesPage() {
               <option value="PKR">PKR</option>
               <option value="EUR">EUR</option>
               <option value="GBP">GBP</option>
+            </select>
+          </label>
+          <label className="block">
+            <span className={adminLabelClass}>Category / status</span>
+            <select
+              className={adminFieldClass}
+              value={form.status}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  status: event.target.value as AdminInvoice["status"],
+                }))
+              }
+            >
+              <option value="draft">Draft</option>
+              <option value="sent">Sent</option>
+              <option value="paid">Paid</option>
             </select>
           </label>
         </div>
@@ -481,25 +581,6 @@ export function ClientInvoicesPage() {
               />
             </label>
           </div>
-        </div>
-        <div>
-          <label className="block">
-            <span className={adminLabelClass}>Category / status</span>
-            <select
-              className={adminFieldClass}
-              value={form.status}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  status: event.target.value as AdminInvoice["status"],
-                }))
-              }
-            >
-              <option value="draft">Draft</option>
-              <option value="sent">Sent</option>
-              <option value="paid">Paid</option>
-            </select>
-          </label>
         </div>
       </AdminFormModal>
 

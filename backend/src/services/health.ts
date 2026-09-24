@@ -24,6 +24,8 @@ export const EXPECTED_MIGRATIONS = [
   "0018_service_page_hierarchy",
   "0019_services_fan_gallery",
   "0020_portfolio_full_page_screenshot",
+  "0021_invoice_line_items",
+  "0022_portfolio_marquee_gallery",
 ] as const;
 
 export async function assertDatabaseReachable(): Promise<void> {

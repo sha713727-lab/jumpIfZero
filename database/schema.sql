@@ -1093,7 +1093,7 @@ CREATE TABLE public.site_gallery_images (
     archived_at timestamp with time zone,
     CONSTRAINT site_gallery_images_alt_text_len CHECK ((char_length(alt_text) <= 500)),
     CONSTRAINT site_gallery_images_image_path_len CHECK ((char_length(image_path) <= 1024)),
-    CONSTRAINT site_gallery_images_section_key_check CHECK ((section_key = ANY (ARRAY['about_gallery'::text, 'studio_flow'::text]))),
+    CONSTRAINT site_gallery_images_section_key_check CHECK ((section_key = ANY (ARRAY['about_gallery'::text, 'studio_flow'::text, 'services_fan'::text, 'portfolio_marquee'::text]))),
     CONSTRAINT site_gallery_images_version_pos CHECK ((version >= 1))
 );
 

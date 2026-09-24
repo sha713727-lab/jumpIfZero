@@ -100,7 +100,6 @@ export async function loadAdminDomainAction(
     const data = await loadAdminCmsCatalogBootstrap(actor);
     return {
       domain,
-      services: data.services,
       portfolio: data.portfolio,
       blog: data.blog,
       faqs: data.faqs,

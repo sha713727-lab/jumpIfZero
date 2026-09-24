@@ -6,6 +6,7 @@ import { BackendRequestError } from "@/lib/backend/client";
 import {
   archiveAdminServicePage,
   archiveAdminServicePageChild,
+  ContractValidationError,
   createAdminServicePageChild,
   getAdminServicePageBySlug,
   listAdminServicePages,
@@ -29,6 +30,7 @@ export type AdminServicePageActionResult =
   | {
       readonly ok: false;
       readonly reason: "unauthorized" | "conflict" | "validation" | "server";
+      readonly message?: string;
     };
 
 function actorFromSession(session: SessionPayload) {
@@ -40,6 +42,9 @@ function actorFromSession(session: SessionPayload) {
 }
 
 function mapBackendError(error: unknown): AdminServicePageActionResult {
+  if (error instanceof ContractValidationError) {
+    return { ok: false, reason: "validation", message: error.message };
+  }
   if (error instanceof BackendRequestError) {
     if (error.status === 401 || error.status === 403) {
       return { ok: false, reason: "unauthorized" };
@@ -56,8 +61,10 @@ function mapBackendError(error: unknown): AdminServicePageActionResult {
 
 function revalidateServicePages(slug?: string) {
   revalidateTag("service-pages", "max");
+  revalidatePath("/admin/services");
   revalidatePath("/admin/service-pages");
   if (slug) {
+    revalidatePath(`/admin/services/${slug}`);
     revalidatePath(`/admin/service-pages/${slug}`);
     revalidatePath(`/services/${slug}`);
   }

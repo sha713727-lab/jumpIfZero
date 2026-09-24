@@ -1,5 +1,5 @@
-import { ServicePagesListPage } from "@/components/admin/ServicePagesListPage";
+import { redirect } from "next/navigation";
 
 export default function AdminServicePagesRoute() {
-  return <ServicePagesListPage />;
+  redirect("/admin/services");
 }

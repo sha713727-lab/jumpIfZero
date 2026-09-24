@@ -50,6 +50,32 @@ import {
 import { z } from "@jumpifzero/contracts/z";
 import { backendRequest } from "@/lib/backend/client";
 
+export class ContractValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ContractValidationError";
+  }
+}
+
+function parseContract<T>(
+  schema: z.ZodType<T>,
+  data: unknown,
+): T {
+  const parsed = schema.safeParse(data);
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    const path =
+      issue !== undefined && issue.path.length > 0
+        ? issue.path.join(".")
+        : "";
+    const message = issue?.message ?? "Invalid input";
+    throw new ContractValidationError(
+      path.length > 0 ? `${path}: ${message}` : message,
+    );
+  }
+  return parsed.data;
+}
+
 export type ServicePageCollection =
   | "offerings"
   | "build-items"
@@ -476,7 +502,7 @@ export async function updateAdminServicePage(
     readonly publishedAt: string | null;
   },
 ): Promise<AdminServicePageDetail> {
-  const body = servicePageUpdateSchema.parse({
+  const body = parseContract(servicePageUpdateSchema, {
     id: input.id,
     version: input.version,
     title: input.title,
@@ -704,7 +730,7 @@ function parseChildCreateBody(
 
   switch (collection) {
     case "offerings":
-      return servicePageOfferingCreateSchema.parse({
+      return parseContract(servicePageOfferingCreateSchema, {
         servicePageId,
         title: input.title,
         description: input.description ?? "",
@@ -715,14 +741,14 @@ function parseChildCreateBody(
         publishedAt,
       });
     case "build-items":
-      return servicePageBuildItemCreateSchema.parse({
+      return parseContract(servicePageBuildItemCreateSchema, {
         servicePageId,
         label: input.label,
         sortOrder,
         publishedAt,
       });
     case "process-steps":
-      return servicePageProcessStepCreateSchema.parse({
+      return parseContract(servicePageProcessStepCreateSchema, {
         servicePageId,
         stepNumber: input.stepNumber ?? 1,
         title: input.title,
@@ -731,7 +757,7 @@ function parseChildCreateBody(
         publishedAt,
       });
     case "technologies":
-      return servicePageTechnologyCreateSchema.parse({
+      return parseContract(servicePageTechnologyCreateSchema, {
         servicePageId,
         category: input.category,
         name: input.name,
@@ -739,7 +765,7 @@ function parseChildCreateBody(
         publishedAt,
       });
     case "benefits":
-      return servicePageBenefitCreateSchema.parse({
+      return parseContract(servicePageBenefitCreateSchema, {
         servicePageId,
         title: input.title,
         body: input.body ?? "",
@@ -747,7 +773,7 @@ function parseChildCreateBody(
         publishedAt,
       });
     case "capabilities":
-      return servicePageCapabilityCreateSchema.parse({
+      return parseContract(servicePageCapabilityCreateSchema, {
         servicePageId,
         title: input.title,
         body: input.body ?? "",
@@ -755,7 +781,7 @@ function parseChildCreateBody(
         publishedAt,
       });
     case "problems":
-      return servicePageProblemCreateSchema.parse({
+      return parseContract(servicePageProblemCreateSchema, {
         servicePageId,
         title: input.title,
         body: input.body ?? "",
@@ -763,7 +789,7 @@ function parseChildCreateBody(
         publishedAt,
       });
     case "comparison-points":
-      return servicePageComparisonPointCreateSchema.parse({
+      return parseContract(servicePageComparisonPointCreateSchema, {
         servicePageId,
         title: input.title,
         body: input.body ?? "",
@@ -771,7 +797,7 @@ function parseChildCreateBody(
         publishedAt,
       });
     case "faqs":
-      return servicePageFaqCreateSchema.parse({
+      return parseContract(servicePageFaqCreateSchema, {
         servicePageId,
         question: input.question,
         answer: input.answer,
@@ -779,7 +805,7 @@ function parseChildCreateBody(
         publishedAt,
       });
     case "related":
-      return servicePageRelatedCreateSchema.parse({
+      return parseContract(servicePageRelatedCreateSchema, {
         servicePageId,
         relatedServicePageId: input.relatedServicePageId,
         sortOrder,
@@ -807,7 +833,7 @@ function parseChildUpdateBody(
 
   switch (collection) {
     case "offerings":
-      return servicePageOfferingUpdateSchema.parse({
+      return parseContract(servicePageOfferingUpdateSchema, {
         ...base,
         title: input.title,
         description: input.description ?? "",
@@ -816,55 +842,55 @@ function parseChildUpdateBody(
         imagePath: input.imagePath ?? "",
       });
     case "build-items":
-      return servicePageBuildItemUpdateSchema.parse({
+      return parseContract(servicePageBuildItemUpdateSchema, {
         ...base,
         label: input.label,
       });
     case "process-steps":
-      return servicePageProcessStepUpdateSchema.parse({
+      return parseContract(servicePageProcessStepUpdateSchema, {
         ...base,
         stepNumber: input.stepNumber ?? 1,
         title: input.title,
         body: input.body ?? "",
       });
     case "technologies":
-      return servicePageTechnologyUpdateSchema.parse({
+      return parseContract(servicePageTechnologyUpdateSchema, {
         ...base,
         category: input.category,
         name: input.name,
       });
     case "benefits":
-      return servicePageBenefitUpdateSchema.parse({
+      return parseContract(servicePageBenefitUpdateSchema, {
         ...base,
         title: input.title,
         body: input.body ?? "",
       });
     case "capabilities":
-      return servicePageCapabilityUpdateSchema.parse({
+      return parseContract(servicePageCapabilityUpdateSchema, {
         ...base,
         title: input.title,
         body: input.body ?? "",
       });
     case "problems":
-      return servicePageProblemUpdateSchema.parse({
+      return parseContract(servicePageProblemUpdateSchema, {
         ...base,
         title: input.title,
         body: input.body ?? "",
       });
     case "comparison-points":
-      return servicePageComparisonPointUpdateSchema.parse({
+      return parseContract(servicePageComparisonPointUpdateSchema, {
         ...base,
         title: input.title,
         body: input.body ?? "",
       });
     case "faqs":
-      return servicePageFaqUpdateSchema.parse({
+      return parseContract(servicePageFaqUpdateSchema, {
         ...base,
         question: input.question,
         answer: input.answer,
       });
     case "related":
-      return servicePageRelatedUpdateSchema.parse({
+      return parseContract(servicePageRelatedUpdateSchema, {
         ...base,
         relatedServicePageId: input.relatedServicePageId,
       });

@@ -10,6 +10,10 @@ export type InvoiceDocumentModel = {
   readonly issuedOn: string | null;
   readonly dueDate: string | null;
   readonly createdAt: string;
+  readonly lineItems: readonly {
+    readonly description: string;
+    readonly amount: string;
+  }[];
   readonly company: {
     readonly legalName: string;
     readonly email: string;
@@ -200,19 +204,24 @@ export function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b border-[#1a140c]/12">
-                  <td className="py-4 align-top">
-                    <p className="text-[0.94rem] font-extrabold">
-                      {invoice.title}
-                    </p>
-                    <p className="mt-1 text-[0.78rem] font-bold text-[#1a140c]/70">
-                      Professional services
-                    </p>
-                  </td>
-                  <td className="w-[7.5rem] py-4 align-top text-right text-[0.94rem] font-extrabold">
-                    {total}
-                  </td>
-                </tr>
+                {(invoice.lineItems.length > 0
+                  ? invoice.lineItems
+                  : [{ description: invoice.title, amount: invoice.amount }]
+                ).map((line, index) => (
+                  <tr
+                    key={`${line.description}-${index}`}
+                    className="border-b border-[#1a140c]/12"
+                  >
+                    <td className="py-4 align-top">
+                      <p className="text-[0.94rem] font-extrabold">
+                        {line.description}
+                      </p>
+                    </td>
+                    <td className="w-[7.5rem] py-4 align-top text-right text-[0.94rem] font-extrabold">
+                      {formatMoney(line.amount, invoice.currency)}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
 

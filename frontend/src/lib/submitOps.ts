@@ -19,6 +19,7 @@ import {
   createAdminMessage,
   createAdminProject,
   putClientAssignments,
+  updateAdminInvoice,
   updateAdminSalarySlip,
   uploadAdminFile,
 } from "@/lib/data/adminOperations";
@@ -105,12 +106,14 @@ export async function createMessageAction(input: {
 export async function createInvoiceAction(input: {
   readonly clientId: string | null;
   readonly number: string;
-  readonly title: string;
-  readonly amount: string;
   readonly currency?: string;
   readonly statusCode?: "draft" | "sent" | "paid";
   readonly dueDate?: string | null;
   readonly issuedOn?: string | null;
+  readonly lineItems: readonly {
+    readonly description: string;
+    readonly amount: string;
+  }[];
   readonly billToCompany: string;
   readonly billToName: string;
   readonly billToEmail: string;
@@ -125,12 +128,15 @@ export async function createInvoiceAction(input: {
     const data = await createAdminInvoice(actorFromSession(session), {
       clientId: input.clientId,
       number: input.number,
-      title: input.title,
-      amount: input.amount.replace(/[^\d.]/g, "") || "0",
       currency: input.currency ?? "USD",
       statusCode: input.statusCode ?? "draft",
       dueDate: input.dueDate ?? null,
       issuedOn: input.issuedOn ?? null,
+      lineItems: input.lineItems.map((line, index) => ({
+        description: line.description,
+        amount: normalizeMoneyInput(line.amount),
+        sortOrder: index,
+      })),
       billToCompany: input.billToCompany,
       billToName: input.billToName,
       billToEmail: input.billToEmail,
@@ -140,6 +146,55 @@ export async function createInvoiceAction(input: {
       fromEmail: input.fromEmail,
       fromPhone: input.fromPhone,
       idempotencyKey: crypto.randomUUID(),
+    });
+    return { ok: true, data };
+  } catch (error) {
+    return mapBackendError(error);
+  }
+}
+
+export async function updateInvoiceAction(input: {
+  readonly id: string;
+  readonly version: number;
+  readonly currency: string;
+  readonly statusCode: "draft" | "sent" | "paid";
+  readonly dueDate: string | null;
+  readonly issuedOn: string | null;
+  readonly lineItems: readonly {
+    readonly description: string;
+    readonly amount: string;
+  }[];
+  readonly billToCompany: string;
+  readonly billToName: string;
+  readonly billToEmail: string;
+  readonly billToPhone: string;
+  readonly billToLocation: string;
+  readonly fromCompany: string;
+  readonly fromEmail: string;
+  readonly fromPhone: string;
+}): Promise<OpsActionResult<AdminInvoice>> {
+  try {
+    const session = await requireSession("admin");
+    const data = await updateAdminInvoice(actorFromSession(session), {
+      id: input.id,
+      version: input.version,
+      currency: input.currency,
+      statusCode: input.statusCode,
+      dueDate: input.dueDate,
+      issuedOn: input.issuedOn,
+      lineItems: input.lineItems.map((line, index) => ({
+        description: line.description,
+        amount: normalizeMoneyInput(line.amount),
+        sortOrder: index,
+      })),
+      billToCompany: input.billToCompany,
+      billToName: input.billToName,
+      billToEmail: input.billToEmail,
+      billToPhone: input.billToPhone,
+      billToLocation: input.billToLocation,
+      fromCompany: input.fromCompany,
+      fromEmail: input.fromEmail,
+      fromPhone: input.fromPhone,
     });
     return { ok: true, data };
   } catch (error) {

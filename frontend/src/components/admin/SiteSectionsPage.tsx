@@ -37,7 +37,11 @@ const cardClass =
   "overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";
 
 type TabId = "gallery" | "stories" | "principles";
-type GallerySectionKey = "about_gallery" | "studio_flow" | "services_fan";
+type GallerySectionKey =
+  | "about_gallery"
+  | "studio_flow"
+  | "services_fan"
+  | "portfolio_marquee";
 
 type GalleryForm = {
   sectionKey: GallerySectionKey;
@@ -541,8 +545,10 @@ export function SiteSectionsPage() {
       ? gallerySection === "studio_flow"
         ? "Add Inside the Work image"
         : gallerySection === "services_fan"
-          ? "Add Services fan image"
-          : "Add About Us image"
+          ? "Add Services fan card"
+          : gallerySection === "portfolio_marquee"
+            ? "Add Portfolio hero image"
+            : "Add About Us image"
       : tab === "stories"
         ? "Add story"
         : "Add How we work card";
@@ -551,7 +557,7 @@ export function SiteSectionsPage() {
     <div className="space-y-6">
       <AdminPageHeader
         title="Site sections"
-        lede="Edit site pictures here: Services hero fan cards, Inside the Work, How we work, Client Stories, and the Home About Us spiral. Changes show on the public site right away."
+        lede="Edit site pictures here: Services hero fan cards, Portfolio hero marquee, Inside the Work, How we work, Client Stories, and the Home About Us spiral. Changes show on the public site right away."
         actionLabel={addLabel}
         onAction={openAdd}
       />
@@ -584,6 +590,7 @@ export function SiteSectionsPage() {
           {(
             [
               ["services_fan", "Services hero fan"],
+              ["portfolio_marquee", "Portfolio hero marquee"],
               ["studio_flow", "Inside the Work (About)"],
               ["about_gallery", "About Us spiral (Home)"],
             ] as const
@@ -611,7 +618,9 @@ export function SiteSectionsPage() {
               <thead className="border-b border-black/8 bg-[#f7f8f4] text-[0.72rem] font-bold tracking-[0.08em] text-black/45 uppercase">
                 <tr>
                   <th className="px-4 py-3">Image</th>
-                  <th className="px-4 py-3">Alt text</th>
+                  <th className="px-4 py-3">
+                    {gallerySection === "services_fan" ? "Card title" : "Alt text"}
+                  </th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Actions</th>
                 </tr>
@@ -947,12 +956,18 @@ export function SiteSectionsPage() {
               {galleryForm.sectionKey === "studio_flow"
                 ? "Inside the Work (About page)"
                 : galleryForm.sectionKey === "services_fan"
-                  ? "Services hero fan (order = card order)"
-                  : "About Us spiral (Home)"}
+                  ? "Services hero fan (order = card order on /services)"
+                  : galleryForm.sectionKey === "portfolio_marquee"
+                    ? "Portfolio hero marquee (order = image order on /portfolio)"
+                    : "About Us spiral (Home)"}
             </p>
             <div>
               <label className="block">
-                <span className={adminLabelClass}>Alt text</span>
+                <span className={adminLabelClass}>
+                  {galleryForm.sectionKey === "services_fan"
+                    ? "Card title"
+                    : "Alt text"}
+                </span>
                 <input
                   className={adminFieldClass}
                   value={galleryForm.altText}
@@ -961,6 +976,11 @@ export function SiteSectionsPage() {
                       ...current,
                       altText: event.target.value,
                     }))
+                  }
+                  placeholder={
+                    galleryForm.sectionKey === "services_fan"
+                      ? "Custom Development"
+                      : undefined
                   }
                 />
               </label>

@@ -8,7 +8,6 @@ import { MagneticLink } from "@/components/landingAlt/MagneticLink";
 import styles from "@/components/landingAlt/landingAlt.module.css";
 import {
   portfolioCopy,
-  portfolioMarqueeImages,
 } from "@/constants/portfolio";
 import type { PortfolioGsapProject } from "@/lib/data/portfolio";
 import { bindHeaderSectionSync } from "@/lib/headerSectionSync";
@@ -45,8 +44,10 @@ const GsapProjectsSection = dynamic(
 
 export function PortfolioPageClient({
   projects,
+  marqueeImages,
 }: Readonly<{
   projects: readonly PortfolioGsapProject[];
+  marqueeImages: readonly string[];
 }>) {
   const heroRef = useRef<HTMLElement | null>(null);
   const gridRef = useRef<HTMLElement | null>(null);
@@ -65,7 +66,7 @@ export function PortfolioPageClient({
         className="relative isolate min-h-[100svh] overflow-hidden bg-[#0d120b]"
       >
         <div className="absolute inset-0 z-0">
-          <ThreeDMarquee images={portfolioMarqueeImages} />
+          <ThreeDMarquee images={marqueeImages} />
         </div>
       </section>
 

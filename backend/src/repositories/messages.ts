@@ -167,6 +167,25 @@ export async function archiveMessage(
   return getMessageById(rowId, client);
 }
 
+export async function archiveActiveByClientId(
+  clientId: string,
+  client?: DbQueryable,
+): Promise<number> {
+  const result = await query(
+    `
+      UPDATE messages
+      SET
+        archived_at = now(),
+        updated_at = now()
+      WHERE client_id = $1
+        AND archived_at IS NULL
+    `,
+    [clientId],
+    client,
+  );
+  return result.rowCount ?? 0;
+}
+
 export async function restoreMessage(
   id: string,
   client?: DbQueryable,

@@ -1,5 +1,5 @@
-import { ServicesPage } from "@/components/admin/ServicesPage";
+import { ServicePagesListPage } from "@/components/admin/ServicePagesListPage";
 
 export default function AdminServicesRoute() {
-  return <ServicesPage />;
+  return <ServicePagesListPage />;
 }

@@ -650,20 +650,35 @@ export function buildInvoicePdf(
   ops.push(line(MARGIN_X, tableY, CONTENT_RIGHT, tableY));
 
   tableY -= 22;
-  const titleLines = wrapText(invoice.title, CONTENT_RIGHT - MARGIN_X - 90, 11, true);
-  ops.push(setFill(INK));
-  for (const lineText of titleLines) {
-    ops.push(text(lineText, MARGIN_X, tableY, 11, true));
-    tableY -= 14;
+  const rows =
+    invoice.lineItems.length > 0
+      ? invoice.lineItems
+      : [{ description: invoice.title, amount: invoice.amount }];
+  for (const row of rows) {
+    const descLines = wrapText(
+      row.description,
+      CONTENT_RIGHT - MARGIN_X - 90,
+      11,
+      true,
+    );
+    const rowTop = tableY;
+    ops.push(setFill(INK));
+    for (const lineText of descLines) {
+      ops.push(text(lineText, MARGIN_X, tableY, 11, true));
+      tableY -= 14;
+    }
+    ops.push(
+      textRight(
+        formatMoney(row.amount, invoice.currency),
+        CONTENT_RIGHT,
+        rowTop,
+        11,
+        true,
+      ),
+    );
+    tableY -= 8;
   }
-  ops.push(setFill(MUTED));
-  ops.push(text("Professional services", MARGIN_X, tableY, 9, true));
-  ops.push(setFill(INK));
-  ops.push(
-    textRight(total, CONTENT_RIGHT, tableY + 14 * titleLines.length, 11, true),
-  );
 
-  tableY -= 18;
   ops.push(setStroke(RULE));
   ops.push(line(MARGIN_X, tableY, CONTENT_RIGHT, tableY));
 

@@ -120,6 +120,7 @@ export const siteGallerySectionKeySchema = z.enum([
   "about_gallery",
   "studio_flow",
   "services_fan",
+  "portfolio_marquee",
 ]);
 
 export const siteGalleryImageRowSchema = z.object({

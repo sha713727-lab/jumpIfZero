@@ -18,6 +18,7 @@ type AdminFormModalProps = {
   readonly onSubmit: () => void;
   readonly submitLabel?: string;
   readonly wide?: boolean;
+  readonly error?: string | null;
   readonly children: ReactNode;
 };
 
@@ -28,6 +29,7 @@ export function AdminFormModal({
   onSubmit,
   submitLabel = "Save",
   wide = false,
+  error = null,
   children,
 }: AdminFormModalProps) {
   const titleId = useId();
@@ -89,6 +91,11 @@ export function AdminFormModal({
             onSubmit();
           }}
         >
+          {error ? (
+            <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[0.88rem] font-semibold text-red-700">
+              {error}
+            </p>
+          ) : null}
           {children}
           <div className="flex justify-end gap-2 pt-2">
             <button

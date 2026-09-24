@@ -23,7 +23,7 @@ type IntroKey = "benefitsIntro" | "capabilitiesIntro" | "problemsIntro";
 type PageFieldPanelsProps = {
   readonly tab: "general" | "hero" | "introduction" | "cta" | "sectionHeading";
   readonly form: PageForm;
-  readonly onChange: (next: PageForm) => void;
+  readonly onChange: (patch: Partial<PageForm>) => void;
   readonly sectionKey?: SectionKey;
   readonly sectionLabel?: string;
   readonly introKey?: IntroKey;
@@ -42,7 +42,7 @@ export function PageFieldPanels({
   showComparisonBody = false,
 }: PageFieldPanelsProps) {
   const set = <K extends keyof PageForm>(key: K, value: PageForm[K]) => {
-    onChange({ ...form, [key]: value });
+    onChange({ [key]: value } as Partial<PageForm>);
   };
 
   if (tab === "sectionHeading" && sectionKey && sectionLabel) {

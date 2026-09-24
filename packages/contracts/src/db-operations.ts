@@ -71,6 +71,16 @@ export const invoiceRowSchema = z.object({
   archived_at: z.coerce.date().nullable(),
 });
 
+export const invoiceLineItemRowSchema = z.object({
+  id: z.uuid(),
+  invoice_id: z.uuid(),
+  description: z.string().min(1).max(500),
+  amount: z.union([z.string(), z.number()]).transform((v) => String(v)),
+  sort_order: z.number().int(),
+  created_at: z.coerce.date(),
+  updated_at: z.coerce.date(),
+});
+
 export const salarySlipRowSchema = z.object({
   id: z.uuid(),
   employee_id: z.uuid().nullable(),
@@ -151,6 +161,7 @@ export type ClientRow = z.infer<typeof clientRowSchema>;
 export type AssignmentRow = z.infer<typeof assignmentRowSchema>;
 export type ProjectRow = z.infer<typeof projectRowSchema>;
 export type InvoiceRow = z.infer<typeof invoiceRowSchema>;
+export type InvoiceLineItemRow = z.infer<typeof invoiceLineItemRowSchema>;
 export type SalarySlipRow = z.infer<typeof salarySlipRowSchema>;
 export type MessageRow = z.infer<typeof messageRowSchema>;
 export type FileRow = z.infer<typeof fileRowSchema>;

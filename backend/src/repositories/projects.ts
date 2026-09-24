@@ -264,6 +264,26 @@ export async function archiveProject(
   return getProjectById(id, client);
 }
 
+export async function archiveActiveByClientId(
+  clientId: string,
+  client?: DbQueryable,
+): Promise<number> {
+  const result = await query(
+    `
+      UPDATE projects
+      SET
+        archived_at = now(),
+        version = version + 1,
+        updated_at = now()
+      WHERE client_id = $1
+        AND archived_at IS NULL
+    `,
+    [clientId],
+    client,
+  );
+  return result.rowCount ?? 0;
+}
+
 export async function restoreProject(
   input: { readonly id: string; readonly version: number },
   client?: DbQueryable,

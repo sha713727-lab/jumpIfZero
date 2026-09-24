@@ -23,6 +23,21 @@ export async function listAssignmentsByClientId(
   return result.rows.map((row) => parseRow(assignmentRowSchema, row));
 }
 
+export async function deleteAllForClient(
+  clientId: string,
+  client: DbQueryable,
+): Promise<number> {
+  const result = await query(
+    `
+      DELETE FROM client_employee_assignments
+      WHERE client_id = $1
+    `,
+    [clientId],
+    client,
+  );
+  return result.rowCount ?? 0;
+}
+
 export async function replaceClientAssignments(
   input: {
     readonly clientId: string;

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState, useTransition } from "react";
 import { AreaChart } from "@/components/dashboard/AreaChart";
 import { DonutChart } from "@/components/dashboard/DonutChart";
 import { adminIcons } from "@/components/admin/AdminIcons";
@@ -10,6 +11,8 @@ import {
   projectStatusLabel,
   projectStatuses,
 } from "@/constants/admin";
+import type { AdminServicePageListItem } from "@/lib/data/adminServicePages";
+import { listAdminServicePagesAction } from "@/lib/submitAdminServicePage";
 
 const cardClass =
   "rounded-2xl border border-black/8 bg-white shadow-[0_8px_24px_rgba(47,58,40,0.04)]";
@@ -19,8 +22,22 @@ const mixColors = ["#5c6849", "#2f3a28", "#f9a137", "#e8891a"] as const;
 export function OverviewPage() {
   const { identity, state } = useAdmin();
   const firstName = identity.name.trim().split(/\s+/)[0] ?? identity.name;
+  const [servicePages, setServicePages] = useState<
+    readonly AdminServicePageListItem[]
+  >([]);
+  const [, startTransition] = useTransition();
 
-  const activeServices = state.services.filter((item) => item.active).length;
+  useEffect(() => {
+    startTransition(async () => {
+      const result = await listAdminServicePagesAction();
+      if (result.ok && "items" in result) {
+        setServicePages(result.items);
+      }
+    });
+  }, []);
+
+  const pillars = servicePages.filter((item) => item.parentId === null);
+  const activeServices = pillars.filter((item) => item.active).length;
   const openCallbacks = state.callbacks.filter((item) => item.status === "new").length;
   const activeFaqs = state.faqs.filter((item) => item.active).length;
 
@@ -29,7 +46,7 @@ export function OverviewPage() {
       id: "services",
       label: "Active services",
       value: activeServices,
-      detail: `${state.services.length} total in catalog`,
+      detail: `${pillars.length} pillars · ${servicePages.length} pages`,
       Icon: adminIcons.services,
       tone: "bg-[rgba(92, 104, 73,0.16)] text-brand",
     },
@@ -79,7 +96,7 @@ export function OverviewPage() {
   const chartMax = Math.max(8, ...statusPoints.map((point) => point.value));
 
   const catalogCounts = [
-    { label: "Services", value: state.services.filter((s) => s.active).length },
+    { label: "Services", value: activeServices },
     { label: "Portfolio", value: state.portfolio.filter((p) => p.active).length },
     { label: "Insights", value: state.blog.filter((b) => b.active).length },
     { label: "FAQs", value: activeFaqs },
@@ -228,7 +245,7 @@ export function OverviewPage() {
             {adminOverviewCopy.servicesLive}
           </p>
           <ul className="mt-4 divide-y divide-black/8">
-            {state.services.slice(0, 5).map((service) => (
+            {pillars.slice(0, 5).map((service) => (
               <li
                 key={service.id}
                 className="flex items-center justify-between gap-3 py-3"

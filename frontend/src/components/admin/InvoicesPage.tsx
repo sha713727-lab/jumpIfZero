@@ -10,12 +10,18 @@ import {
 } from "@/components/admin/AdminFormModal";
 import { ConfirmDeleteModal } from "@/components/admin/ConfirmDeleteModal";
 import { adminIcons } from "@/components/admin/AdminIcons";
+import {
+  emptyInvoiceLine,
+  InvoiceLineItemsFields,
+  type InvoiceLineFormItem,
+} from "@/components/admin/InvoiceLineItemsFields";
 import { site } from "@/constants/site";
 import type { AdminClient, AdminInvoice } from "@/lib/data/admin";
 import { EmptyState } from "@/components/ui/EmptyState";
 import {
   archiveInvoiceAction,
   createInvoiceAction,
+  updateInvoiceAction,
 } from "@/lib/submitOps";
 import { getAdminSiteContactAction } from "@/lib/submitAdminSiteContact";
 import { nextInvoiceNumber } from "@/lib/invoiceNumber";
@@ -28,8 +34,6 @@ type InvoiceForm = {
   clientId: string;
   clientQuery: string;
   number: string;
-  title: string;
-  amount: string;
   currency: string;
   status: AdminInvoice["status"];
   issuedOn: string;
@@ -42,6 +46,7 @@ type InvoiceForm = {
   fromCompany: string;
   fromEmail: string;
   fromPhone: string;
+  lines: InvoiceLineFormItem[];
 };
 
 function todayIso(): string {
@@ -75,8 +80,6 @@ const emptyForm: InvoiceForm = {
   clientId: "",
   clientQuery: "",
   number: "",
-  title: "",
-  amount: "",
   currency: "USD",
   status: "draft",
   issuedOn: "",
@@ -89,7 +92,36 @@ const emptyForm: InvoiceForm = {
   fromCompany: site.legalName,
   fromEmail: "",
   fromPhone: "",
+  lines: [emptyInvoiceLine()],
 };
+
+function formFromInvoice(invoice: AdminInvoice): InvoiceForm {
+  return {
+    recipientKind: invoice.clientId === null ? "outsider" : "client",
+    clientId: invoice.clientId ?? "",
+    clientQuery: "",
+    number: invoice.number,
+    currency: invoice.currency,
+    status: invoice.status,
+    issuedOn: invoice.issuedOn ?? "",
+    dueDate: invoice.dueDate ?? "",
+    billToCompany: invoice.billToCompany,
+    billToName: invoice.billToName,
+    billToEmail: invoice.billToEmail,
+    billToPhone: invoice.billToPhone,
+    billToLocation: invoice.billToLocation,
+    fromCompany: invoice.fromCompany,
+    fromEmail: invoice.fromEmail,
+    fromPhone: invoice.fromPhone,
+    lines:
+      invoice.lineItems.length > 0
+        ? invoice.lineItems.map((line) => ({
+            description: line.description,
+            amount: line.amount,
+          }))
+        : [emptyInvoiceLine()],
+  };
+}
 
 const invoiceStatusClass: Record<AdminInvoice["status"], string> = {
   draft: "bg-black/8 text-black/50",
@@ -106,15 +138,18 @@ const invoiceStatusLabel: Record<AdminInvoice["status"], string> = {
 export function InvoicesPage() {
   const { state, setInvoices } = useAdmin();
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<InvoiceForm>(emptyForm);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const TrashIcon = adminIcons.trash;
+  const EditIcon = adminIcons.edit;
 
   const openCreate = () => {
     setError(null);
+    setEditingId(null);
     startTransition(async () => {
       const contact = await getAdminSiteContactAction();
       setForm({
@@ -127,20 +162,45 @@ export function InvoicesPage() {
         fromCompany: site.legalName,
         fromEmail: contact.ok ? contact.data.email : "",
         fromPhone: contact.ok ? contact.data.phone : "",
+        lines: [emptyInvoiceLine()],
       });
       setModalOpen(true);
     });
   };
 
+  const openEdit = (invoice: AdminInvoice) => {
+    setError(null);
+    setEditingId(invoice.id);
+    const client =
+      invoice.clientId === null
+        ? undefined
+        : state.clients.find((item) => item.id === invoice.clientId);
+    setForm({
+      ...formFromInvoice(invoice),
+      clientQuery: client?.company ?? "",
+    });
+    setModalOpen(true);
+  };
+
   const save = () => {
-    const title = form.title.trim();
     const number = form.number.trim();
+    const lines = form.lines
+      .map((line) => ({
+        description: line.description.trim(),
+        amount: line.amount.trim(),
+      }))
+      .filter((line) => line.description.length > 0 || line.amount.length > 0);
     const isOutsider = form.recipientKind === "outsider";
     const clientId = isOutsider ? null : form.clientId.trim() || null;
-    if (!title || !number) {
+    if (!number || lines.length === 0) {
+      setError("Add at least one line item with a description.");
       return;
     }
-    if (!isOutsider && clientId === null) {
+    if (lines.some((line) => line.description.length === 0)) {
+      setError("Each line item needs a description.");
+      return;
+    }
+    if (!isOutsider && clientId === null && editingId === null) {
       setError("Select a registered client, or switch to Outsider.");
       return;
     }
@@ -155,38 +215,80 @@ export function InvoicesPage() {
 
     startTransition(async () => {
       setError(null);
-      const result = await createInvoiceAction({
-        clientId,
-        number,
-        title,
-        amount: form.amount.trim() || "0",
-        currency: form.currency.trim() || "USD",
-        statusCode: form.status,
-        issuedOn: form.issuedOn.trim() || null,
-        dueDate: form.dueDate.trim() || null,
-        billToCompany: form.billToCompany,
-        billToName: form.billToName,
-        billToEmail: form.billToEmail,
-        billToPhone: form.billToPhone,
-        billToLocation: form.billToLocation,
-        fromCompany: form.fromCompany,
-        fromEmail: form.fromEmail,
-        fromPhone: form.fromPhone,
-      });
+      if (editingId !== null) {
+        const existing = state.invoices.find((item) => item.id === editingId);
+        if (!existing) {
+          return;
+        }
+        const result = await updateInvoiceAction({
+          id: existing.id,
+          version: existing.version,
+          currency: form.currency.trim() || "USD",
+          statusCode: form.status,
+          issuedOn: form.issuedOn.trim() || null,
+          dueDate: form.dueDate.trim() || null,
+          lineItems: lines,
+          billToCompany: form.billToCompany,
+          billToName: form.billToName,
+          billToEmail: form.billToEmail,
+          billToPhone: form.billToPhone,
+          billToLocation: form.billToLocation,
+          fromCompany: form.fromCompany,
+          fromEmail: form.fromEmail,
+          fromPhone: form.fromPhone,
+        });
 
-      if (!result.ok || !("data" in result)) {
-        setError(
-          result.ok
-            ? "Create failed."
-            : result.reason === "conflict"
-              ? "Invoice number already exists. Use a different number."
-              : "Could not create invoice.",
+        if (!result.ok || !("data" in result)) {
+          setError(
+            result.ok
+              ? "Update failed."
+              : result.reason === "conflict"
+                ? "This invoice was updated elsewhere. Refresh and try again."
+                : "Could not update invoice.",
+          );
+          return;
+        }
+
+        setInvoices(
+          state.invoices.map((item) =>
+            item.id === editingId ? result.data : item,
+          ),
         );
-        return;
+      } else {
+        const result = await createInvoiceAction({
+          clientId,
+          number,
+          currency: form.currency.trim() || "USD",
+          statusCode: form.status,
+          issuedOn: form.issuedOn.trim() || null,
+          dueDate: form.dueDate.trim() || null,
+          lineItems: lines,
+          billToCompany: form.billToCompany,
+          billToName: form.billToName,
+          billToEmail: form.billToEmail,
+          billToPhone: form.billToPhone,
+          billToLocation: form.billToLocation,
+          fromCompany: form.fromCompany,
+          fromEmail: form.fromEmail,
+          fromPhone: form.fromPhone,
+        });
+
+        if (!result.ok || !("data" in result)) {
+          setError(
+            result.ok
+              ? "Create failed."
+              : result.reason === "conflict"
+                ? "Invoice number already exists. Use a different number."
+                : "Could not create invoice.",
+          );
+          return;
+        }
+
+        setInvoices([...state.invoices, result.data]);
       }
 
-      setInvoices([...state.invoices, result.data]);
       setModalOpen(false);
+      setEditingId(null);
       setForm(emptyForm);
     });
   };
@@ -288,6 +390,15 @@ export function InvoicesPage() {
                     </a>
                     <button
                       type="button"
+                      aria-label="Edit"
+                      disabled={pending}
+                      onClick={() => openEdit(invoice)}
+                      className="inline-flex size-8 items-center justify-center rounded-lg border border-black/10 bg-white disabled:opacity-40"
+                    >
+                      <EditIcon className="size-4" />
+                    </button>
+                    <button
+                      type="button"
                       aria-label="Delete"
                       disabled={pending}
                       onClick={() => {
@@ -308,129 +419,132 @@ export function InvoicesPage() {
 
       <AdminFormModal
         open={modalOpen}
-        title="Create invoice"
-        submitLabel="Create"
+        title={editingId ? "Edit invoice" : "Create invoice"}
+        submitLabel={editingId ? "Save" : "Create"}
         wide
         onClose={() => {
           if (!pending) {
             setModalOpen(false);
+            setEditingId(null);
           }
         }}
         onSubmit={save}
       >
-        <div className="space-y-3">
-          <span className={adminLabelClass}>Recipient</span>
-          <div className="grid gap-2 sm:grid-cols-2">
-            <button
-              type="button"
-              className={`rounded-xl border px-3 py-2.5 text-left text-[0.88rem] font-semibold ${
-                form.recipientKind === "client"
-                  ? "border-brand bg-[rgba(92,104,73,0.12)] text-brand"
-                  : "border-black/10 bg-white text-black/60"
-              }`}
-              onClick={() =>
-                setForm((current) => ({
-                  ...current,
-                  recipientKind: "client",
-                }))
-              }
-            >
-              Registered client
-            </button>
-            <button
-              type="button"
-              className={`rounded-xl border px-3 py-2.5 text-left text-[0.88rem] font-semibold ${
-                form.recipientKind === "outsider"
-                  ? "border-brand bg-[rgba(92,104,73,0.12)] text-brand"
-                  : "border-black/10 bg-white text-black/60"
-              }`}
-              onClick={() =>
-                setForm((current) => ({
-                  ...current,
-                  recipientKind: "outsider",
-                  clientId: "",
-                  clientQuery: "",
-                  billToCompany: "",
-                  billToName: "",
-                  billToEmail: "",
-                  billToPhone: "",
-                  billToLocation: "",
-                }))
-              }
-            >
-              Outsider (not a client)
-            </button>
-          </div>
-          {form.recipientKind === "client" ? (
-            <div>
-              <label className="block">
-                <span className={adminLabelClass}>Search clients</span>
-                <input
-                  className={adminFieldClass}
-                  value={form.clientQuery}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      clientQuery: event.target.value,
-                    }))
-                  }
-                  placeholder="Company, name, or email"
-                />
-              </label>
-              <ul className="mt-2 max-h-40 overflow-y-auto rounded-xl border border-black/10 bg-white">
-                {state.clients.filter((client) =>
-                  matchesClientQuery(client, form.clientQuery),
-                ).length === 0 ? (
-                  <li className="px-3 py-2 text-[0.84rem] font-medium text-black/45">
-                    No matching clients
-                  </li>
-                ) : (
-                  state.clients
-                    .filter((client) =>
-                      matchesClientQuery(client, form.clientQuery),
-                    )
-                    .map((client) => {
-                      const selected = form.clientId === client.id;
-                      return (
-                        <li key={client.id}>
-                          <button
-                            type="button"
-                            className={`flex w-full flex-col gap-0.5 px-3 py-2 text-left ${
-                              selected
-                                ? "bg-[rgba(92,104,73,0.14)]"
-                                : "hover:bg-black/[0.03]"
-                            }`}
-                            onClick={() =>
-                              setForm((current) => ({
-                                ...current,
-                                clientId: client.id,
-                                clientQuery: client.company,
-                                ...billToFromClient(client),
-                              }))
-                            }
-                          >
-                            <span className="text-[0.88rem] font-semibold text-[#0d120b]">
-                              {client.company || client.name}
-                            </span>
-                            <span className="text-[0.78rem] font-medium text-black/45">
-                              {[client.name, client.email]
-                                .filter(Boolean)
-                                .join(" · ")}
-                            </span>
-                          </button>
-                        </li>
-                      );
-                    })
-                )}
-              </ul>
+        {editingId === null ? (
+          <div className="space-y-3">
+            <span className={adminLabelClass}>Recipient</span>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                className={`rounded-xl border px-3 py-2.5 text-left text-[0.88rem] font-semibold ${
+                  form.recipientKind === "client"
+                    ? "border-brand bg-[rgba(92,104,73,0.12)] text-brand"
+                    : "border-black/10 bg-white text-black/60"
+                }`}
+                onClick={() =>
+                  setForm((current) => ({
+                    ...current,
+                    recipientKind: "client",
+                  }))
+                }
+              >
+                Registered client
+              </button>
+              <button
+                type="button"
+                className={`rounded-xl border px-3 py-2.5 text-left text-[0.88rem] font-semibold ${
+                  form.recipientKind === "outsider"
+                    ? "border-brand bg-[rgba(92,104,73,0.12)] text-brand"
+                    : "border-black/10 bg-white text-black/60"
+                }`}
+                onClick={() =>
+                  setForm((current) => ({
+                    ...current,
+                    recipientKind: "outsider",
+                    clientId: "",
+                    clientQuery: "",
+                    billToCompany: "",
+                    billToName: "",
+                    billToEmail: "",
+                    billToPhone: "",
+                    billToLocation: "",
+                  }))
+                }
+              >
+                Outsider (not a client)
+              </button>
             </div>
-          ) : (
-            <p className="text-[0.82rem] font-medium text-black/45">
-              Fill Bill to below. This invoice will not appear in any client
-              portal.
-            </p>
-          )}
-        </div>
+            {form.recipientKind === "client" ? (
+              <div>
+                <label className="block">
+                  <span className={adminLabelClass}>Search clients</span>
+                  <input
+                    className={adminFieldClass}
+                    value={form.clientQuery}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        clientQuery: event.target.value,
+                      }))
+                    }
+                    placeholder="Company, name, or email"
+                  />
+                </label>
+                <ul className="mt-2 max-h-40 overflow-y-auto rounded-xl border border-black/10 bg-white">
+                  {state.clients.filter((client) =>
+                    matchesClientQuery(client, form.clientQuery),
+                  ).length === 0 ? (
+                    <li className="px-3 py-2 text-[0.84rem] font-medium text-black/45">
+                      No matching clients
+                    </li>
+                  ) : (
+                    state.clients
+                      .filter((client) =>
+                        matchesClientQuery(client, form.clientQuery),
+                      )
+                      .map((client) => {
+                        const selected = form.clientId === client.id;
+                        return (
+                          <li key={client.id}>
+                            <button
+                              type="button"
+                              className={`flex w-full flex-col gap-0.5 px-3 py-2 text-left ${
+                                selected
+                                  ? "bg-[rgba(92,104,73,0.14)]"
+                                  : "hover:bg-black/[0.03]"
+                              }`}
+                              onClick={() =>
+                                setForm((current) => ({
+                                  ...current,
+                                  clientId: client.id,
+                                  clientQuery: client.company,
+                                  ...billToFromClient(client),
+                                }))
+                              }
+                            >
+                              <span className="text-[0.88rem] font-semibold text-[#0d120b]">
+                                {client.company || client.name}
+                              </span>
+                              <span className="text-[0.78rem] font-medium text-black/45">
+                                {[client.name, client.email]
+                                  .filter(Boolean)
+                                  .join(" · ")}
+                              </span>
+                            </button>
+                          </li>
+                        );
+                      })
+                  )}
+                </ul>
+              </div>
+            ) : (
+              <p className="text-[0.82rem] font-medium text-black/45">
+                Fill Bill to below. This invoice will not appear in any client
+                portal.
+              </p>
+            )}
+          </div>
+        ) : null}
         <div>
           <span className={adminLabelClass}>Invoice number</span>
           <p
@@ -440,37 +554,17 @@ export function InvoicesPage() {
             {form.number}
           </p>
         </div>
-        <div>
-          <label className="block">
-            <span className={adminLabelClass}>Title / description</span>
-            <input
-              className={adminFieldClass}
-              value={form.title}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  title: event.target.value,
-                }))
-              }
-              placeholder="Website development — Phase 1"
-            />
-          </label>
-        </div>
+        <InvoiceLineItemsFields
+          lines={form.lines}
+          currency={form.currency.trim() || "USD"}
+          onChange={(lines) =>
+            setForm((current) => ({
+              ...current,
+              lines,
+            }))
+          }
+        />
         <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block">
-            <span className={adminLabelClass}>Amount</span>
-            <input
-              className={adminFieldClass}
-              value={form.amount}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  amount: event.target.value,
-                }))
-              }
-              placeholder="1000.00"
-            />
-          </label>
           <label className="block">
             <span className={adminLabelClass}>Currency</span>
             <select
@@ -487,6 +581,23 @@ export function InvoicesPage() {
               <option value="PKR">PKR</option>
               <option value="EUR">EUR</option>
               <option value="GBP">GBP</option>
+            </select>
+          </label>
+          <label className="block">
+            <span className={adminLabelClass}>Category / status</span>
+            <select
+              className={adminFieldClass}
+              value={form.status}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  status: event.target.value as AdminInvoice["status"],
+                }))
+              }
+            >
+              <option value="draft">Draft</option>
+              <option value="sent">Sent</option>
+              <option value="paid">Paid</option>
             </select>
           </label>
         </div>
@@ -633,25 +744,6 @@ export function InvoicesPage() {
               />
             </label>
           </div>
-        </div>
-        <div>
-          <label className="block">
-            <span className={adminLabelClass}>Category / status</span>
-            <select
-              className={adminFieldClass}
-              value={form.status}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  status: event.target.value as AdminInvoice["status"],
-                }))
-              }
-            >
-              <option value="draft">Draft</option>
-              <option value="sent">Sent</option>
-              <option value="paid">Paid</option>
-            </select>
-          </label>
         </div>
       </AdminFormModal>
 

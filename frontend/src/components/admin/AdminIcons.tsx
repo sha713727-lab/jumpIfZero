@@ -348,7 +348,6 @@ export const adminIcons = {
   salaries: SalariesIcon,
   files: FilesIcon,
   services: ServicesIcon,
-  servicePages: ServicesIcon,
   portfolio: PortfolioIcon,
   blog: BlogIcon,
   team: TeamIcon,

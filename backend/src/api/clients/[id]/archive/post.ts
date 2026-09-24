@@ -18,9 +18,10 @@ export default async function handle(input: {
   readonly params: Record<string, string>;
   readonly body: unknown;
 }): Promise<unknown> {
-  const body = input.body as Record<string, unknown>;
-  return clientsService.archiveClient(requireActor(input.ctx), {
-    ...body,
-    id: input.params.id,
-  });
+  const actor = requireActor(input.ctx);
+  const body =
+    typeof input.body === "object" && input.body !== null
+      ? { ...input.body, id: input.params.id }
+      : { id: input.params.id };
+  return clientsService.archiveClient(actor, body, input.ctx.correlationId);
 }

@@ -25,8 +25,13 @@ const hrefSchema = z
     (value) =>
       value.length === 0 ||
       value.startsWith("/") ||
-      /^https?:\/\//i.test(value),
-    { message: "Must be empty, a site path, or an http(s) URL" },
+      value.startsWith("#") ||
+      /^https?:\/\//i.test(value) ||
+      /^mailto:/i.test(value),
+    {
+      message:
+        "Must be empty, a site path, a hash link, mailto, or an http(s) URL",
+    },
   );
 
 export const servicePageUpdateSchema = z.object({

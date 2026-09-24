@@ -1,11 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { cardClass } from "@/components/admin/servicePages/types";
 import type { AdminServicePageListItem } from "@/lib/data/adminServicePages";
 import { listAdminServicePagesAction } from "@/lib/submitAdminServicePage";
+
+function publicPath(
+  item: AdminServicePageListItem,
+  parentById: ReadonlyMap<string, AdminServicePageListItem>,
+): string {
+  if (item.parentId === null) {
+    return `/services/${item.slug}`;
+  }
+  const parent = parentById.get(item.parentId);
+  if (parent === undefined) {
+    return `/services/${item.slug}`;
+  }
+  return `/services/${parent.slug}/${item.slug}`;
+}
 
 export function ServicePagesListPage() {
   const [items, setItems] = useState<readonly AdminServicePageListItem[]>([]);
@@ -16,18 +30,57 @@ export function ServicePagesListPage() {
     startTransition(async () => {
       const result = await listAdminServicePagesAction();
       if (!result.ok || !("items" in result)) {
-        setError("Could not load service pages.");
+        setError("Could not load services.");
         return;
       }
       setItems(result.items);
     });
   }, []);
 
+  const { pillars, childrenByParent, parentById } = useMemo(() => {
+    const byId = new Map(items.map((item) => [item.id, item] as const));
+    const pillarsList = items
+      .filter((item) => item.parentId === null)
+      .slice()
+      .sort((a, b) => a.sortOrder - b.sortOrder || a.title.localeCompare(b.title));
+    const grouped = new Map<string, AdminServicePageListItem[]>();
+    for (const item of items) {
+      if (item.parentId === null) {
+        continue;
+      }
+      const existing = grouped.get(item.parentId);
+      if (existing === undefined) {
+        grouped.set(item.parentId, [item]);
+      } else {
+        existing.push(item);
+      }
+    }
+    for (const children of grouped.values()) {
+      children.sort(
+        (a, b) => a.sortOrder - b.sortOrder || a.title.localeCompare(b.title),
+      );
+    }
+    return {
+      pillars: pillarsList,
+      childrenByParent: grouped,
+      parentById: byId,
+    };
+  }, [items]);
+
+  const orphanChildren = useMemo(
+    () =>
+      items.filter(
+        (item) =>
+          item.parentId !== null && !parentById.has(item.parentId),
+      ),
+    [items, parentById],
+  );
+
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        title="Service pages"
-        lede="Edit pillar landing pages, SEO, and nested section content."
+        title="Services"
+        lede="Public service pillars and nested pages used on the site."
       />
 
       {error ? (
@@ -44,30 +97,98 @@ export function ServicePagesListPage() {
         <div
           className={`${cardClass} px-5 py-10 text-center text-[0.95rem] font-medium text-black/45`}
         >
-          No service pages yet.
+          No services yet.
         </div>
       ) : null}
 
-      {items.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {items.map((item) => (
-            <Link
-              key={item.id}
-              href={`/admin/service-pages/${item.slug}`}
-              className={`${cardClass} block p-5 transition-colors hover:border-brand/30 hover:bg-[#f7f8f4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h2 className="truncate text-[1.05rem] font-extrabold tracking-[-0.02em] text-[#0d120b]">
-                    {item.title}
-                  </h2>
-                  <p className="mt-1 truncate text-[0.84rem] font-medium text-black/45">
-                    /services/{item.slug}
-                  </p>
-                </div>
-                <div className="flex shrink-0 flex-col items-end gap-1.5">
+      {pillars.length > 0 ? (
+        <div className="space-y-4">
+          {pillars.map((pillar) => {
+            const children = childrenByParent.get(pillar.id) ?? [];
+            return (
+              <section key={pillar.id} className={cardClass}>
+                <Link
+                  href={`/admin/services/${pillar.slug}`}
+                  className="flex items-start justify-between gap-3 border-b border-black/8 px-5 py-4 transition-colors hover:bg-[#f7f8f4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+                >
+                  <div className="min-w-0">
+                    <h2 className="truncate text-[1.05rem] font-extrabold tracking-[-0.02em] text-[#0d120b]">
+                      {pillar.title}
+                    </h2>
+                    <p className="mt-1 truncate text-[0.84rem] font-medium text-black/45">
+                      {publicPath(pillar, parentById)}
+                    </p>
+                  </div>
                   <span
-                    className={`rounded-full px-2.5 py-1 text-[0.72rem] font-bold ${
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-[0.72rem] font-bold ${
+                      pillar.active
+                        ? "bg-[rgba(92,104,73,0.16)] text-brand"
+                        : "bg-black/8 text-black/45"
+                    }`}
+                  >
+                    {pillar.active ? "Published" : "Draft"}
+                  </span>
+                </Link>
+                {children.length > 0 ? (
+                  <ul className="divide-y divide-black/8">
+                    {children.map((child) => (
+                      <li key={child.id}>
+                        <Link
+                          href={`/admin/services/${child.slug}`}
+                          className="flex items-start justify-between gap-3 px-5 py-3.5 pl-8 transition-colors hover:bg-[#f7f8f4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate text-[0.92rem] font-semibold text-[#0d120b]">
+                              {child.title}
+                            </p>
+                            <p className="mt-0.5 truncate text-[0.78rem] font-medium text-black/40">
+                              {publicPath(child, parentById)}
+                            </p>
+                          </div>
+                          <span
+                            className={`shrink-0 rounded-full px-2.5 py-1 text-[0.72rem] font-bold ${
+                              child.active
+                                ? "bg-[rgba(92,104,73,0.16)] text-brand"
+                                : "bg-black/8 text-black/45"
+                            }`}
+                          >
+                            {child.active ? "Published" : "Draft"}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </section>
+            );
+          })}
+        </div>
+      ) : null}
+
+      {orphanChildren.length > 0 ? (
+        <section className={cardClass}>
+          <div className="border-b border-black/8 px-5 py-3">
+            <h2 className="text-[0.95rem] font-extrabold text-[#0d120b]">
+              Other pages
+            </h2>
+          </div>
+          <ul className="divide-y divide-black/8">
+            {orphanChildren.map((item) => (
+              <li key={item.id}>
+                <Link
+                  href={`/admin/services/${item.slug}`}
+                  className="flex items-start justify-between gap-3 px-5 py-3.5 transition-colors hover:bg-[#f7f8f4]"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-[0.92rem] font-semibold text-[#0d120b]">
+                      {item.title}
+                    </p>
+                    <p className="mt-0.5 truncate text-[0.78rem] font-medium text-black/40">
+                      {publicPath(item, parentById)}
+                    </p>
+                  </div>
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-[0.72rem] font-bold ${
                       item.active
                         ? "bg-[rgba(92,104,73,0.16)] text-brand"
                         : "bg-black/8 text-black/45"
@@ -75,19 +196,11 @@ export function ServicePagesListPage() {
                   >
                     {item.active ? "Published" : "Draft"}
                   </span>
-                  {item.parentId ? (
-                    <span className="rounded-full bg-black/8 px-2.5 py-1 text-[0.72rem] font-bold text-black/45">
-                      Child
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-              <p className="mt-4 text-[0.82rem] font-medium text-black/40">
-                Nav: {item.navLabel || "—"}
-              </p>
-            </Link>
-          ))}
-        </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       ) : null}
     </div>
   );

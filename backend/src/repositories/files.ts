@@ -175,6 +175,25 @@ export async function archiveFile(
   return getFileById(rowId, client);
 }
 
+export async function archiveActiveByClientId(
+  clientId: string,
+  client?: DbQueryable,
+): Promise<number> {
+  const result = await query(
+    `
+      UPDATE files
+      SET
+        archived_at = now(),
+        updated_at = now()
+      WHERE client_id = $1
+        AND archived_at IS NULL
+    `,
+    [clientId],
+    client,
+  );
+  return result.rowCount ?? 0;
+}
+
 export async function restoreFile(
   id: string,
   client?: DbQueryable,

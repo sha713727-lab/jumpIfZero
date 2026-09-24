@@ -7,6 +7,7 @@ import {
   invoicesListResponseSchema,
   invoiceUpdateSchema,
   type Actor,
+  type InvoiceLineItemRow,
   type InvoicePublic,
   type InvoiceRow,
 } from "@jumpifzero/contracts";
@@ -35,13 +36,85 @@ function dateOnly(value: Date | null): string | null {
   return `${y}-${m}-${d}`;
 }
 
-function toPublic(row: InvoiceRow): InvoicePublic {
+function normalizeMoney(value: string): string {
+  const match = /^(-?)(\d+)(?:\.(\d+))?$/.exec(value.trim());
+  if (match === null) {
+    return value;
+  }
+  const sign = match[1] ?? "";
+  const whole = match[2] ?? "0";
+  const fraction = (match[3] ?? "").padEnd(2, "0").slice(0, 2);
+  return `${sign}${whole}.${fraction}`;
+}
+
+function moneyToCents(value: string): number {
+  const normalized = normalizeMoney(value);
+  const match = /^(-?)(\d+)\.(\d{2})$/.exec(normalized);
+  if (match === null) {
+    throw new BadRequestError("Invalid line amount");
+  }
+  const sign = match[1] === "-" ? -1 : 1;
+  const whole = Number(match[2]);
+  const frac = Number(match[3]);
+  return sign * (whole * 100 + frac);
+}
+
+function centsToMoney(cents: number): string {
+  const sign = cents < 0 ? "-" : "";
+  const abs = Math.abs(cents);
+  const whole = Math.floor(abs / 100);
+  const frac = String(abs % 100).padStart(2, "0");
+  return `${sign}${whole}.${frac}`;
+}
+
+function titleFromLines(
+  lines: readonly { readonly description: string }[],
+): string {
+  const first = lines[0];
+  if (first === undefined) {
+    throw new BadRequestError("At least one line item is required");
+  }
+  return first.description.slice(0, 200);
+}
+
+function amountFromLines(
+  lines: readonly { readonly amount: string }[],
+): string {
+  let totalCents = 0;
+  for (const line of lines) {
+    totalCents += moneyToCents(line.amount);
+  }
+  return centsToMoney(totalCents);
+}
+
+function normalizeLineInputs(
+  lines: readonly {
+    readonly description: string;
+    readonly amount: string;
+    readonly sortOrder: number;
+  }[],
+): readonly {
+  readonly description: string;
+  readonly amount: string;
+  readonly sortOrder: number;
+}[] {
+  return lines.map((line, index) => ({
+    description: line.description,
+    amount: normalizeMoney(line.amount),
+    sortOrder: index,
+  }));
+}
+
+function toPublic(
+  row: InvoiceRow,
+  lineItems: readonly InvoiceLineItemRow[],
+): InvoicePublic {
   return invoicePublicSchema.parse({
     id: row.id,
     clientId: row.client_id,
     number: row.number,
     title: row.title,
-    amount: row.amount,
+    amount: normalizeMoney(row.amount),
     currency: row.currency.trim(),
     statusCode: row.status_code,
     dueDate: dateOnly(row.due_date),
@@ -54,12 +127,26 @@ function toPublic(row: InvoiceRow): InvoicePublic {
     fromCompany: row.from_company,
     fromEmail: row.from_email,
     fromPhone: row.from_phone,
+    lineItems: lineItems.map((line) => ({
+      id: line.id,
+      description: line.description,
+      amount: normalizeMoney(line.amount),
+      sortOrder: line.sort_order,
+    })),
     version: row.version,
     createdAt: row.created_at.toISOString(),
     updatedAt: row.updated_at.toISOString(),
     archivedAt:
       row.archived_at === null ? null : row.archived_at.toISOString(),
   });
+}
+
+async function toPublicWithLines(
+  row: InvoiceRow,
+  client?: Parameters<typeof invoicesRepo.listLineItemsByInvoiceId>[1],
+): Promise<InvoicePublic> {
+  const lines = await invoicesRepo.listLineItemsByInvoiceId(row.id, client);
+  return toPublic(row, lines);
 }
 
 async function assertCanAccessInvoice(
@@ -134,8 +221,13 @@ export async function listInvoices(
       actor.role === "admin" ||
       (actor.role === "employee" && actor.employeeKind === "delivery"),
   });
+  const linesByInvoice = await invoicesRepo.listLineItemsByInvoiceIds(
+    result.items.map((item) => item.id),
+  );
   return invoicesListResponseSchema.parse({
-    items: result.items.map(toPublic),
+    items: result.items.map((row) =>
+      toPublic(row, linesByInvoice.get(row.id) ?? []),
+    ),
     total: result.total,
     limit: query.limit,
     offset: query.offset,
@@ -151,7 +243,7 @@ export async function getInvoice(
     throw new NotFoundError("Invoice not found");
   }
   await assertCanAccessInvoice(actor, row.client_id);
-  return toPublic(row);
+  return toPublicWithLines(row);
 }
 
 export async function createInvoice(
@@ -188,6 +280,10 @@ export async function createInvoice(
       body: invoicePublicSchema.parse(existing.response_body),
     };
   }
+
+  const lines = normalizeLineInputs(body.lineItems);
+  const title = titleFromLines(lines);
+  const amount = amountFromLines(lines);
 
   return withTransaction(async (tx) => {
     const raced = await idempotencyRepo.findActiveIdempotencyKey(
@@ -230,8 +326,8 @@ export async function createInvoice(
       {
         clientId: body.clientId,
         number: body.number,
-        title: body.title,
-        amount: body.amount,
+        title,
+        amount,
         currency: body.currency,
         statusCode: body.statusCode,
         dueDate: body.dueDate,
@@ -247,7 +343,11 @@ export async function createInvoice(
       },
       tx,
     );
-    const publicBody = toPublic(row);
+    const lineRows = await invoicesRepo.replaceLineItems(
+      { invoiceId: row.id, lines },
+      tx,
+    );
+    const publicBody = toPublic(row, lineRows);
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const stored = await idempotencyRepo.insertIdempotencyKey(
       {
@@ -315,36 +415,51 @@ export async function updateInvoice(
     throw new NotFoundError("Invoice not found");
   }
   await assertCanAccessInvoice(actor, existing.client_id);
-  const updated = await invoicesRepo.updateInvoice({
-    id: body.id,
-    version: body.version,
-    title: body.title,
-    amount: body.amount,
-    currency: body.currency,
-    statusCode: body.statusCode,
-    dueDate: body.dueDate,
-    issuedOn: body.issuedOn,
-    billToCompany: body.billToCompany,
-    billToName: body.billToName,
-    billToEmail: body.billToEmail,
-    billToPhone: body.billToPhone,
-    billToLocation: body.billToLocation,
-    fromCompany: body.fromCompany,
-    fromEmail: body.fromEmail,
-    fromPhone: body.fromPhone,
+
+  const lines = normalizeLineInputs(body.lineItems);
+  const title = titleFromLines(lines);
+  const amount = amountFromLines(lines);
+
+  const publicBody = await withTransaction(async (tx) => {
+    const updated = await invoicesRepo.updateInvoice(
+      {
+        id: body.id,
+        version: body.version,
+        title,
+        amount,
+        currency: body.currency,
+        statusCode: body.statusCode,
+        dueDate: body.dueDate,
+        issuedOn: body.issuedOn,
+        billToCompany: body.billToCompany,
+        billToName: body.billToName,
+        billToEmail: body.billToEmail,
+        billToPhone: body.billToPhone,
+        billToLocation: body.billToLocation,
+        fromCompany: body.fromCompany,
+        fromEmail: body.fromEmail,
+        fromPhone: body.fromPhone,
+      },
+      tx,
+    );
+    const row = await resolveVersionWrite({
+      result: updated,
+      lookup: () => invoicesRepo.getInvoiceById(body.id, tx),
+      notFoundMessage: "Invoice not found",
+      conflictMessage: "Invoice version conflict",
+    });
+    const lineRows = await invoicesRepo.replaceLineItems(
+      { invoiceId: row.id, lines },
+      tx,
+    );
+    return toPublic(row, lineRows);
   });
-  const row = await resolveVersionWrite({
-    result: updated,
-    lookup: () => invoicesRepo.getInvoiceById(body.id),
-    notFoundMessage: "Invoice not found",
-    conflictMessage: "Invoice version conflict",
-  });
-  const publicBody = toPublic(row);
+
   if (existing.status_code !== "sent" && publicBody.statusCode === "sent") {
     const client =
-      row.client_id === null
+      publicBody.clientId === null
         ? null
-        : await clientsRepo.getActiveClientById(row.client_id);
+        : await clientsRepo.getActiveClientById(publicBody.clientId);
     const billTo = publicBody.billToEmail.trim();
     await queueInvoiceEmail({
       invoice: publicBody,
@@ -381,7 +496,7 @@ export async function archiveInvoice(
     notFoundMessage: "Invoice not found",
     conflictMessage: "Invoice version conflict",
   });
-  return toPublic(row);
+  return toPublicWithLines(row);
 }
 
 export async function restoreInvoice(
@@ -405,5 +520,5 @@ export async function restoreInvoice(
     notFoundMessage: "Invoice not found",
     conflictMessage: "Invoice version conflict",
   });
-  return toPublic(row);
+  return toPublicWithLines(row);
 }

@@ -98,8 +98,24 @@ export function toAdminInvoice(row: InvoicePublic): AdminInvoice {
     number: row.number,
     title: row.title,
     amount: row.amount,
+    currency: row.currency,
     billToCompany: row.billToCompany,
+    billToName: row.billToName,
+    billToEmail: row.billToEmail,
+    billToPhone: row.billToPhone,
+    billToLocation: row.billToLocation,
+    fromCompany: row.fromCompany,
+    fromEmail: row.fromEmail,
+    fromPhone: row.fromPhone,
     status: row.statusCode,
+    issuedOn: row.issuedOn,
+    dueDate: row.dueDate,
+    lineItems: row.lineItems.map((line) => ({
+      id: line.id,
+      description: line.description,
+      amount: line.amount,
+      sortOrder: line.sortOrder,
+    })),
     version: row.version,
     updatedAt: formatUpdatedAt(row.updatedAt),
   };
@@ -362,12 +378,15 @@ export async function createAdminInvoice(
   input: {
     readonly clientId: string | null;
     readonly number: string;
-    readonly title: string;
-    readonly amount: string;
     readonly currency?: string;
     readonly statusCode?: "draft" | "sent" | "paid";
     readonly dueDate?: string | null;
     readonly issuedOn?: string | null;
+    readonly lineItems: readonly {
+      readonly description: string;
+      readonly amount: string;
+      readonly sortOrder?: number;
+    }[];
     readonly billToCompany: string;
     readonly billToName: string;
     readonly billToEmail: string;
@@ -385,12 +404,15 @@ export async function createAdminInvoice(
     body: {
       clientId: input.clientId,
       number: input.number,
-      title: input.title,
-      amount: input.amount,
       currency: input.currency ?? "USD",
       statusCode: input.statusCode ?? "draft",
       dueDate: input.dueDate ?? null,
       issuedOn: input.issuedOn ?? null,
+      lineItems: input.lineItems.map((line, index) => ({
+        description: line.description,
+        amount: line.amount,
+        sortOrder: line.sortOrder ?? index,
+      })),
       billToCompany: input.billToCompany,
       billToName: input.billToName,
       billToEmail: input.billToEmail,
@@ -401,6 +423,59 @@ export async function createAdminInvoice(
       fromPhone: input.fromPhone,
     },
     headers: { "Idempotency-Key": input.idempotencyKey },
+    actor,
+    outputSchema: invoicePublicSchema,
+  });
+  return toAdminInvoice(row);
+}
+
+export async function updateAdminInvoice(
+  actor: Actor,
+  input: {
+    readonly id: string;
+    readonly version: number;
+    readonly currency: string;
+    readonly statusCode: "draft" | "sent" | "paid";
+    readonly dueDate: string | null;
+    readonly issuedOn: string | null;
+    readonly lineItems: readonly {
+      readonly description: string;
+      readonly amount: string;
+      readonly sortOrder?: number;
+    }[];
+    readonly billToCompany: string;
+    readonly billToName: string;
+    readonly billToEmail: string;
+    readonly billToPhone: string;
+    readonly billToLocation: string;
+    readonly fromCompany: string;
+    readonly fromEmail: string;
+    readonly fromPhone: string;
+  },
+): Promise<AdminInvoice> {
+  const row = await backendRequest({
+    method: "PATCH",
+    path: `/invoices/${input.id}`,
+    body: {
+      version: input.version,
+      currency: input.currency,
+      statusCode: input.statusCode,
+      dueDate: input.dueDate,
+      issuedOn: input.issuedOn,
+      lineItems: input.lineItems.map((line, index) => ({
+        description: line.description,
+        amount: line.amount,
+        sortOrder: line.sortOrder ?? index,
+      })),
+      billToCompany: input.billToCompany,
+      billToName: input.billToName,
+      billToEmail: input.billToEmail,
+      billToPhone: input.billToPhone,
+      billToLocation: input.billToLocation,
+      fromCompany: input.fromCompany,
+      fromEmail: input.fromEmail,
+      fromPhone: input.fromPhone,
+    },
     actor,
     outputSchema: invoicePublicSchema,
   });
@@ -867,6 +942,19 @@ export async function updateAdminClient(
     outputSchema: clientPublicSchema,
   });
   return toAdminClient(row);
+}
+
+export async function archiveAdminClient(
+  actor: Actor,
+  input: { readonly id: string; readonly version: number },
+): Promise<void> {
+  await backendRequest({
+    method: "POST",
+    path: `/clients/${input.id}/archive`,
+    body: { version: input.version },
+    actor,
+    outputSchema: clientPublicSchema,
+  });
 }
 
 export async function getAdminUser(

@@ -151,7 +151,7 @@ export function ClientProjectsPage() {
         </div>
         <div>
           <label className="block">
-            <span className={adminLabelClass}>Service</span>
+            <span className={adminLabelClass}>Service type</span>
             <select
             className={adminFieldClass}
             value={form.serviceId}
@@ -162,7 +162,7 @@ export function ClientProjectsPage() {
               }))
             }
           >
-            <option value="">Select service</option>
+            <option value="">Select service type</option>
             {state.services.map((service) => (
               <option key={service.id} value={service.id}>
                 {service.title}

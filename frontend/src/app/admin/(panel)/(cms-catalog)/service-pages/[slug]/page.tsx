@@ -1,12 +1,12 @@
-import { ServicePageEditorPage } from "@/components/admin/ServicePageEditorPage";
+import { redirect } from "next/navigation";
 
-type AdminServicePageEditorRouteProps = {
+type AdminServicePagesEditorRedirectProps = {
   readonly params: Promise<{ readonly slug: string }>;
 };
 
-export default async function AdminServicePageEditorRoute({
+export default async function AdminServicePagesEditorRedirect({
   params,
-}: AdminServicePageEditorRouteProps) {
+}: AdminServicePagesEditorRedirectProps) {
   const { slug } = await params;
-  return <ServicePageEditorPage slug={slug} />;
+  redirect(`/admin/services/${slug}`);
 }

@@ -23,7 +23,12 @@ FROM (VALUES
   ('studio_flow', '/images/hero-team.png', 'Studio work', 60),
   ('studio_flow', '/images/services/seo.jpg', 'Studio work', 70),
   ('studio_flow', '/images/services/design.jpg', 'Studio work', 80),
-  ('studio_flow', '/images/welcome-hero.png', 'Studio work', 90)
+  ('studio_flow', '/images/welcome-hero.png', 'Studio work', 90),
+  ('services_fan', '/images/services/website.jpg', 'Custom Development', 10),
+  ('services_fan', '/images/services/seo.jpg', 'SEO', 20),
+  ('services_fan', '/images/services/smm.jpg', 'Digital Marketing', 30),
+  ('services_fan', '/images/services/design.jpg', 'Design', 40),
+  ('services_fan', '/images/services/security.jpg', 'Cyber Security', 50)
 ) AS v(section_key, image_path, alt_text, sort_order)
 WHERE NOT EXISTS (
   SELECT 1 FROM site_gallery_images_active g

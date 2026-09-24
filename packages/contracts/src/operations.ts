@@ -237,6 +237,19 @@ export const invoicePartyFieldsSchema = z.object({
   fromPhone: z.string().trim().max(64),
 });
 
+export const invoiceLineItemInputSchema = z.object({
+  description: z.string().trim().min(1).max(500),
+  amount: moneyAmountSchema,
+  sortOrder: z.number().int().default(0),
+});
+
+export const invoiceLineItemPublicSchema = z.object({
+  id: z.uuid(),
+  description: z.string().min(1).max(500),
+  amount: moneyAmountSchema,
+  sortOrder: z.number().int(),
+});
+
 export const invoicePublicSchema = z.object({
   id: z.uuid(),
   clientId: z.uuid().nullable(),
@@ -255,6 +268,7 @@ export const invoicePublicSchema = z.object({
   fromCompany: z.string().max(200),
   fromEmail: z.string().max(320),
   fromPhone: z.string().max(64),
+  lineItems: z.array(invoiceLineItemPublicSchema),
   version: z.number().int().min(1),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
@@ -265,12 +279,11 @@ export const invoiceCreateSchema = z
   .object({
     clientId: z.uuid().nullable().default(null),
     number: z.string().trim().min(1).max(64),
-    title: z.string().trim().min(1).max(200),
-    amount: moneyAmountSchema,
     currency: currencySchema.default("USD"),
     statusCode: invoiceStatusSchema.default("draft"),
     dueDate: z.iso.date().nullable().default(null),
     issuedOn: z.iso.date().nullable().default(null),
+    lineItems: z.array(invoiceLineItemInputSchema).min(1).max(100),
   })
   .merge(invoicePartyFieldsSchema)
   .superRefine((value, ctx) => {
@@ -291,12 +304,11 @@ export const invoiceUpdateSchema = z
   .object({
     id: z.uuid(),
     version: z.number().int().min(1),
-    title: z.string().trim().min(1).max(200),
-    amount: moneyAmountSchema,
     currency: currencySchema,
     statusCode: invoiceStatusSchema,
     dueDate: z.iso.date().nullable(),
     issuedOn: z.iso.date().nullable(),
+    lineItems: z.array(invoiceLineItemInputSchema).min(1).max(100),
   })
   .merge(invoicePartyFieldsSchema);
 

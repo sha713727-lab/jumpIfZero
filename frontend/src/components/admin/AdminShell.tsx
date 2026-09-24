@@ -26,6 +26,10 @@ function navIdFromPath(pathname: string): AdminNavId {
     return "overview";
   }
 
+  if (pathname.startsWith("/admin/service-pages")) {
+    return "services";
+  }
+
   for (const group of adminNavGroups) {
     for (const item of group.items) {
       if (item.href === "/admin") {

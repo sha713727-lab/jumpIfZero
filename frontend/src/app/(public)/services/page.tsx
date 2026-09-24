@@ -18,11 +18,24 @@ export default async function ServicesPage() {
     getSiteGalleryImages("services_fan"),
   ]);
 
-  const fanCards = serviceFanCards.map((card, index) => ({
-    title: card.title,
-    region: card.region,
-    image: fanGallery[index]?.src ?? card.image,
-  }));
+  const fanCards =
+    fanGallery.length > 0
+      ? fanGallery.map((item, index) => {
+          const fallback = serviceFanCards[index];
+          return {
+            title:
+              item.alt.trim().length > 0
+                ? item.alt
+                : (fallback?.title ?? "Service"),
+            region: fallback?.region ?? "",
+            image: item.src,
+          };
+        })
+      : serviceFanCards.map((card) => ({
+          title: card.title,
+          region: card.region,
+          image: card.image,
+        }));
 
   return (
     <ServicesPageClient

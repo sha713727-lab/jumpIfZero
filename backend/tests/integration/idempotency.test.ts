@@ -26,10 +26,15 @@ test("invoice create is idempotent for the same Idempotency-Key", async () => {
   const body = {
     clientId,
     number: `INV-T-${Date.now()}`,
-    title: "Phase7 idempotency",
-    amount: "10.00",
     currency: "USD",
     statusCode: "draft",
+    lineItems: [
+      {
+        description: "Phase7 idempotency",
+        amount: "10.00",
+        sortOrder: 0,
+      },
+    ],
     billToCompany: "Test Co",
     billToName: "Test Contact",
     billToEmail: "test@example.com",

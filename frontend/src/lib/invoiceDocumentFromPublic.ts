@@ -21,6 +21,10 @@ export function invoiceDocumentFromPublic(
     issuedOn: invoice.issuedOn,
     dueDate: invoice.dueDate,
     createdAt: invoice.createdAt,
+    lineItems: invoice.lineItems.map((line) => ({
+      description: line.description,
+      amount: line.amount,
+    })),
     company: {
       legalName: invoice.fromCompany,
       email: invoice.fromEmail,

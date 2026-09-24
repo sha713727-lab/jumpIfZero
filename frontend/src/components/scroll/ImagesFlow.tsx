@@ -188,16 +188,16 @@ export function ImagesFlow({
     const st = ScrollTrigger.create({
       trigger: flow,
       start: "top top",
-      end: `+=${screenHeight * 10}px`,
+      end: `+=${screenHeight * 4}px`,
       pin: true,
       pinSpacing: true,
-      scrub: 1,
+      scrub: 0.6,
       onUpdate: (self) => {
         const progress = self.progress;
 
         imgElements.forEach((eachImage, index) => {
-          const imgDelay = index * 0.03;
-          const imgProgress = Math.max(0, (progress - imgDelay) * 4);
+          const imgDelay = index * 0.02;
+          const imgProgress = Math.max(0, (progress - imgDelay) * 2.2);
           const start = initPos[index];
           const end = finalPos[index];
 

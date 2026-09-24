@@ -745,7 +745,8 @@ export function ServicePageEditorPage({ slug }: ServicePageEditorPageProps) {
             : result.reason === "conflict"
               ? "This page was updated elsewhere. Refresh and try again."
               : result.reason === "validation"
-                ? "Check required fields and URL formats."
+                ? (result.message ??
+                  "Check required fields and URL formats.")
                 : "Could not save page.",
         );
         return;
@@ -882,7 +883,10 @@ export function ServicePageEditorPage({ slug }: ServicePageEditorPageProps) {
               ? "Save failed."
               : result.reason === "conflict"
                 ? "This item was updated elsewhere. Refresh and try again."
-                : "Could not save item.",
+                : result.reason === "validation"
+                  ? (result.message ??
+                    "Check required fields and URL formats.")
+                  : "Could not save item.",
           );
           return;
         }
@@ -902,7 +906,13 @@ export function ServicePageEditorPage({ slug }: ServicePageEditorPageProps) {
           payload,
         });
         if (!result.ok || !("child" in result)) {
-          setError("Could not create item.");
+          setError(
+            result.ok
+              ? "Could not create item."
+              : result.reason === "validation"
+                ? (result.message ?? "Check required fields and URL formats.")
+                : "Could not create item.",
+          );
           return;
         }
         setPage(replaceChildInPage(page, collection, result.child));
@@ -1008,7 +1018,7 @@ export function ServicePageEditorPage({ slug }: ServicePageEditorPageProps) {
           {error ?? "Service page not found."}
         </p>
         <Link
-          href="/admin/service-pages"
+          href="/admin/services"
           className="text-sm font-semibold text-brand underline"
         >
           Back to service pages
@@ -1033,7 +1043,7 @@ export function ServicePageEditorPage({ slug }: ServicePageEditorPageProps) {
       )}
       <div className="flex flex-wrap items-center gap-3 text-sm">
         <Link
-          href="/admin/service-pages"
+          href="/admin/services"
           className="font-semibold text-black/55 hover:text-black"
         >
           ← Service pages
@@ -1094,7 +1104,25 @@ export function ServicePageEditorPage({ slug }: ServicePageEditorPageProps) {
       <div className={`${cardClass} space-y-5 p-5`}>
         {isScalarTab(tab) ? (
           <>
-            <PageFieldPanels tab={tab} form={form} onChange={setForm} />
+            <PageFieldPanels
+              tab={tab}
+              form={form}
+              onChange={(patch) =>
+                setForm((current) =>
+                  current === null ? current : { ...current, ...patch },
+                )
+              }
+            />
+            {error ? (
+              <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[0.88rem] font-semibold text-red-700">
+                {error}
+              </p>
+            ) : null}
+            {notice ? (
+              <p className="rounded-xl border border-brand/20 bg-brand/5 px-4 py-3 text-[0.88rem] font-semibold text-brand">
+                {notice}
+              </p>
+            ) : null}
             <div className="flex justify-end">
               <button
                 type="button"
@@ -1113,7 +1141,11 @@ export function ServicePageEditorPage({ slug }: ServicePageEditorPageProps) {
                 <PageFieldPanels
                   tab="sectionHeading"
                   form={form}
-                  onChange={setForm}
+                  onChange={(patch) =>
+                    setForm((current) =>
+                      current === null ? current : { ...current, ...patch },
+                    )
+                  }
                   sectionKey={headingMeta.key}
                   sectionLabel={headingMeta.label}
                   {...(headingMeta.introKey && headingMeta.introLabel
@@ -1126,6 +1158,16 @@ export function ServicePageEditorPage({ slug }: ServicePageEditorPageProps) {
                     ? { showComparisonBody: true as const }
                     : {})}
                 />
+                {error ? (
+                  <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[0.88rem] font-semibold text-red-700">
+                    {error}
+                  </p>
+                ) : null}
+                {notice ? (
+                  <p className="rounded-xl border border-brand/20 bg-brand/5 px-4 py-3 text-[0.88rem] font-semibold text-brand">
+                    {notice}
+                  </p>
+                ) : null}
                 <div className="flex justify-end">
                   <button
                     type="button"
@@ -1235,6 +1277,7 @@ export function ServicePageEditorPage({ slug }: ServicePageEditorPageProps) {
           onClose={() => setModalOpen(false)}
           onSubmit={saveChild}
           wide
+          error={error}
         >
           <div className="space-y-4">
             <ChildFormFields
