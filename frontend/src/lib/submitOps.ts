@@ -8,6 +8,7 @@ import type {
   AdminProject,
   AdminFile,
 } from "@jumpifzero/contracts/admin";
+import type { SalarySlipPublic } from "@jumpifzero/contracts";
 import { BackendRequestError } from "@/lib/backend/client";
 import {
   archiveAdminFile,
@@ -18,6 +19,7 @@ import {
   createAdminSalarySlip,
   createAdminMessage,
   createAdminProject,
+  getAdminSalarySlip,
   putClientAssignments,
   updateAdminInvoice,
   updateAdminSalarySlip,
@@ -221,6 +223,18 @@ function normalizeMoneyInput(value: string): string {
     return "0";
   }
   return cleaned;
+}
+
+export async function getSalarySlipAction(
+  id: string,
+): Promise<OpsActionResult<SalarySlipPublic>> {
+  try {
+    const session = await requireSession("admin");
+    const data = await getAdminSalarySlip(actorFromSession(session), id);
+    return { ok: true, data };
+  } catch (error) {
+    return mapBackendError(error);
+  }
 }
 
 export async function createSalarySlipAction(input: {

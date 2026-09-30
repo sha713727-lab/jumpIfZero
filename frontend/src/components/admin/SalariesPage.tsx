@@ -16,6 +16,8 @@ import { getAdminSiteContactAction } from "@/lib/submitAdminSiteContact";
 import {
   archiveSalarySlipAction,
   createSalarySlipAction,
+  getSalarySlipAction,
+  updateSalarySlipAction,
 } from "@/lib/submitOps";
 
 const cardClass =
@@ -98,7 +100,9 @@ function moneySum(values: readonly string[]): number {
 export function SalariesPage() {
   const { state, ensureDomain, setSalarySlips } = useAdmin();
   const [pending, startTransition] = useTransition();
-  const [createOpen, setCreateOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editVersion, setEditVersion] = useState<number | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -109,7 +113,7 @@ export function SalariesPage() {
   }, [ensureDomain]);
 
   useEffect(() => {
-    if (!createOpen) {
+    if (!formOpen || editingId !== null) {
       return;
     }
     void getAdminSiteContactAction().then((result) => {
@@ -124,16 +128,64 @@ export function SalariesPage() {
           current.fromPhone.length > 0 ? current.fromPhone : result.data.phone,
       }));
     });
-  }, [createOpen]);
+  }, [formOpen, editingId]);
+
+  const closeForm = () => {
+    setFormOpen(false);
+    setEditingId(null);
+    setEditVersion(null);
+  };
 
   const openCreate = () => {
     setError(null);
+    setEditingId(null);
+    setEditVersion(null);
     setForm({
       ...emptyForm,
       slipDate: todayIso(),
       salaryMonth: currentSalaryMonth(),
     });
-    setCreateOpen(true);
+    setFormOpen(true);
+  };
+
+  const openEdit = (slip: AdminSalarySlip) => {
+    if (pending) {
+      return;
+    }
+    setError(null);
+    startTransition(async () => {
+      const result = await getSalarySlipAction(slip.id);
+      if (!result.ok || !("data" in result)) {
+        setError("Could not load salary slip for editing.");
+        return;
+      }
+      const detail = result.data;
+      setEditingId(detail.id);
+      setEditVersion(detail.version);
+      setForm({
+        employeeId: detail.employeeId ?? "",
+        employeeName: detail.employeeName,
+        designation: detail.designation,
+        slipDate: detail.slipDate,
+        salaryMonth: detail.salaryMonth,
+        basicSalary: detail.basicSalary,
+        punctuality: detail.punctuality,
+        medicalAllowance: detail.medicalAllowance,
+        incentives: detail.incentives,
+        bonus: detail.bonus,
+        advance: detail.advance,
+        incomeTax: detail.incomeTax,
+        whTax: detail.whTax,
+        fuelAdvances: detail.fuelAdvances,
+        unpaidDays: detail.unpaidDays,
+        currency: detail.currency,
+        status: detail.statusCode,
+        fromCompany: detail.fromCompany,
+        fromEmail: detail.fromEmail,
+        fromPhone: detail.fromPhone,
+      });
+      setFormOpen(true);
+    });
   };
 
   const totalEarnings = moneySum([
@@ -152,7 +204,7 @@ export function SalariesPage() {
   ]);
   const netSalary = totalEarnings - totalDeduction;
 
-  const saveCreate = () => {
+  const saveForm = () => {
     if (pending) {
       return;
     }
@@ -170,6 +222,59 @@ export function SalariesPage() {
 
     startTransition(async () => {
       setError(null);
+
+      if (editingId !== null) {
+        if (editVersion === null) {
+          setError("Could not save salary slip.");
+          return;
+        }
+        const existing = state.salarySlips.find((item) => item.id === editingId);
+        const result = await updateSalarySlipAction({
+          id: editingId,
+          version: editVersion,
+          employeeName: form.employeeName.trim(),
+          designation: form.designation,
+          slipDate: form.slipDate,
+          salaryMonth: form.salaryMonth.trim(),
+          basicSalary: form.basicSalary,
+          punctuality: form.punctuality,
+          medicalAllowance: form.medicalAllowance,
+          incentives: form.incentives,
+          bonus: form.bonus,
+          advance: form.advance,
+          incomeTax: form.incomeTax,
+          whTax: form.whTax,
+          fuelAdvances: form.fuelAdvances,
+          unpaidDays: form.unpaidDays,
+          currency: form.currency.trim().toUpperCase() || "PKR",
+          statusCode: form.status,
+          fromCompany: form.fromCompany,
+          fromEmail: form.fromEmail,
+          fromPhone: form.fromPhone,
+        });
+        if (!result.ok || !("data" in result)) {
+          setError(
+            result.ok
+              ? "Could not save salary slip."
+              : result.reason === "conflict"
+                ? "This slip was updated elsewhere. Close, reopen Edit, and try again."
+                : result.reason === "validation"
+                  ? "Check the name and amounts, then try again."
+                  : "Could not save salary slip.",
+          );
+          return;
+        }
+        setSalarySlips(
+          existing === undefined
+            ? [result.data, ...state.salarySlips]
+            : state.salarySlips.map((item) =>
+                item.id === editingId ? result.data : item,
+              ),
+        );
+        closeForm();
+        return;
+      }
+
       const result = await createSalarySlipAction({
         employeeId: form.employeeId.length > 0 ? form.employeeId : null,
         employeeName: form.employeeName.trim(),
@@ -205,7 +310,7 @@ export function SalariesPage() {
         return;
       }
       setSalarySlips([result.data, ...state.salarySlips]);
-      setCreateOpen(false);
+      closeForm();
     });
   };
 
@@ -244,12 +349,12 @@ export function SalariesPage() {
     <div className="space-y-6">
       <AdminPageHeader
         title="Salaries"
-        lede="Create and print salary slips for anyone — registered employees or custom names."
+        lede="Create, edit, and print salary slips for anyone — registered employees or custom names."
         actionLabel="Create salary slip"
         onAction={openCreate}
       />
 
-      {error ? (
+      {error && !formOpen ? (
         <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[0.88rem] font-semibold text-red-700">
           {error}
         </p>
@@ -281,6 +386,14 @@ export function SalariesPage() {
                   >
                     {statusLabel[slip.status]}
                   </span>
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() => openEdit(slip)}
+                    className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[0.8rem] font-semibold text-[#0d120b] disabled:opacity-40"
+                  >
+                    Edit
+                  </button>
                   <a
                     href={`/admin/salaries/${slip.id}/print`}
                     className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[0.8rem] font-semibold text-brand"
@@ -306,11 +419,12 @@ export function SalariesPage() {
       </div>
 
       <AdminFormModal
-        open={createOpen}
-        title="Create salary slip"
-        onClose={() => setCreateOpen(false)}
-        onSubmit={saveCreate}
-        submitLabel="Create slip"
+        open={formOpen}
+        title={editingId ? "Edit salary slip" : "Create salary slip"}
+        onClose={closeForm}
+        onSubmit={saveForm}
+        submitLabel={editingId ? "Save changes" : "Create slip"}
+        error={error}
       >
         <div className="space-y-4">
           <label className="block">
@@ -319,7 +433,7 @@ export function SalariesPage() {
               className={adminFieldClass}
               list="salary-slip-employees"
               value={form.employeeName}
-                placeholder="Type any name"
+              placeholder="Type any name"
               autoComplete="off"
               onChange={(event) => {
                 const name = event.target.value;
