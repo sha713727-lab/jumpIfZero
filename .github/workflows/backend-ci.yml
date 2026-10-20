@@ -45,7 +45,7 @@ jobs:
       JZ_APP_PASSWORD: ci-jz-app-password-32chars!!!!
       JZ_READONLY_PASSWORD: ci-jz-readonly-password-32ch
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
