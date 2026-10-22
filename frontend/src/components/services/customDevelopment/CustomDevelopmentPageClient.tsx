@@ -579,7 +579,7 @@ export function CustomDevelopmentPageClient({
                       <div className="relative aspect-[16/10] overflow-hidden rounded-[1.5rem]">
                         <Image
                           src={item.image}
-                          alt=""
+                          alt={item.title}
                           fill
                           className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                           sizes="(max-width: 768px) 100vw, 33vw"

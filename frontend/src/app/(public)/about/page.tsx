@@ -9,9 +9,9 @@ import { getTeamMembers } from "@/lib/data/team";
 import { pageMetadata } from "@/lib/pageMetadata";
 
 export const metadata: Metadata = pageMetadata({
-  title: "About",
+  title: "About | Software Team in Lahore",
   description:
-    "JZ Enterprises designs end-to-end digital systems around your goals — strategy, design, development, and growth as one system.",
+    "Meet the Lahore-based team at JZ Enterprises — custom software, web, and mobile development with clear ownership from strategy through launch.",
   path: "/about",
 });
 
@@ -26,7 +26,7 @@ export default async function AboutPage() {
   return (
     <AboutPageClient
       teamMembers={teamMembers}
-      studioImages={studioGallery.map((item) => item.src)}
+      studioImages={studioGallery}
       principles={principles}
       siteContact={siteContact}
     />

@@ -6,9 +6,9 @@ import { pageMetadata } from "@/lib/pageMetadata";
 import { PortfolioPageClient } from "@/components/portfolio/PortfolioPageClient";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Portfolio",
+  title: "Portfolio | Web, Software & App Projects",
   description:
-    "Selected work from JZ Enterprises — websites, software, apps, brand, and growth systems built to convert and scale.",
+    "Selected websites, software, and mobile apps built by JZ Enterprises for businesses in Pakistan and beyond — outcomes you can review before you engage.",
   path: "/portfolio",
 });
 
@@ -20,8 +20,11 @@ export default async function PortfolioPage() {
 
   const marqueeImages =
     marqueeGallery.length > 0
-      ? marqueeGallery.map((item) => item.src)
-      : [...portfolioMarqueeImages];
+      ? marqueeGallery
+      : portfolioMarqueeImages.map((src) => ({
+          src,
+          alt: "JZ Enterprises portfolio project",
+        }));
 
   return (
     <PortfolioPageClient projects={projects} marqueeImages={marqueeImages} />

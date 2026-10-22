@@ -34,7 +34,7 @@ export function AboutPageClient({
   siteContact,
 }: Readonly<{
   teamMembers: readonly import("@/lib/data/team").TeamMember[];
-  studioImages: readonly string[];
+  studioImages: readonly import("@/lib/data/siteSections").SiteGalleryImage[];
   principles: readonly import("@/lib/data/siteSections").SitePrinciple[];
   siteContact: import("@/lib/data/siteContact").SiteContactDetails;
 }>) {
@@ -296,11 +296,17 @@ export function AboutPageClient({
             </div>
 
             <address className="not-italic text-[0.9rem] leading-[1.65] font-medium text-brand/80">
-              {siteContact.addressLines.map((line) => (
-                <span key={line} className="block">
-                  {line}
-                </span>
-              ))}
+              {siteContact.addressLines.map((line) => {
+                const normalized = line.replace(/\s+/g, " ").trim();
+                if (normalized.length === 0) {
+                  return null;
+                }
+                return (
+                  <span key={normalized} className="block">
+                    {normalized}
+                  </span>
+                );
+              })}
             </address>
 
             <MagneticLink

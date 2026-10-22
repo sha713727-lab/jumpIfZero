@@ -6,9 +6,9 @@ import { getSiteGalleryImages } from "@/lib/data/siteSections";
 import { pageMetadata } from "@/lib/pageMetadata";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Software Development Services",
+  title: "Software Development Services in Lahore",
   description:
-    "Custom software development, web development, mobile apps, SEO, digital marketing, design, and cyber security from JZ Enterprises.",
+    "Custom software, web development, and mobile apps in Lahore and Pakistan — plus SEO, digital marketing, design, and cybersecurity from JZ Enterprises.",
   path: "/services",
 });
 

@@ -64,15 +64,24 @@ export function buildGalleryItems(
   viewportWidth: number,
   viewportHeight: number,
   imagePaths?: readonly string[],
+  images?: readonly { readonly src: string; readonly alt: string }[],
 ): GalleryItemData[] {
   const random = createSeededRandom(GALLERY_SEED);
   const items: GalleryItemData[] = [];
   const total = config.itemCount;
-  const pool =
-    imagePaths !== undefined && imagePaths.length > 0
-      ? imagePaths
-      : IMAGE_POOL;
-  if (pool.length === 0) {
+  const typedPool =
+    images !== undefined && images.length > 0
+      ? images
+      : imagePaths !== undefined && imagePaths.length > 0
+        ? imagePaths.map((src) => ({
+            src,
+            alt: "JZ Enterprises work",
+          }))
+        : IMAGE_POOL.map((src) => ({
+            src,
+            alt: "JZ Enterprises work",
+          }));
+  if (typedPool.length === 0) {
     return items;
   }
 
@@ -87,7 +96,7 @@ export function buildGalleryItems(
       config,
     );
     const size = SIZE_PRESETS[index % SIZE_PRESETS.length];
-    const source = pool[index % pool.length];
+    const source = typedPool[index % typedPool.length];
 
     if (!size || !source) {
       continue;
@@ -95,8 +104,8 @@ export function buildGalleryItems(
 
     items.push({
       id: `gallery-item-${index + 1}`,
-      src: source,
-      alt: "JZ Enterprises work",
+      src: source.src,
+      alt: source.alt,
       width: size.width,
       height: size.height,
       pathT,

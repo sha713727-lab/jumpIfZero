@@ -167,7 +167,7 @@ export function HomePageClient({
   serviceChapters: readonly ServiceChapter[];
   teamMembers: readonly TeamMember[];
   faqItems: readonly FaqItem[];
-  aboutGalleryImages: readonly string[];
+  aboutGalleryImages: readonly import("@/lib/data/siteSections").SiteGalleryImage[];
   testimonials: readonly SiteTestimonial[];
 }>) {
   return (
@@ -192,7 +192,7 @@ export function HomePageClient({
       >
         <AltWhy />
       </DeferredMount>
-      <FloatingGallery imagePaths={aboutGalleryImages} />
+      <FloatingGallery images={aboutGalleryImages} />
       <DeferredMount
         fallback={
           <section className="min-h-[14rem] bg-brand [content-visibility:auto] [contain-intrinsic-size:1px_14rem]" />

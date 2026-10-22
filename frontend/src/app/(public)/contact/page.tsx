@@ -4,9 +4,9 @@ import { getSiteContact } from "@/lib/data/siteContact";
 import { pageMetadata } from "@/lib/pageMetadata";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Contact",
+  title: "Contact | Lahore, Pakistan",
   description:
-    "Start a scoped engagement with JZ Enterprises — tell us what you are building and we reply with a clear next step.",
+    "Start a scoped software, web, or mobile project with JZ Enterprises in Lahore. Tell us what you are building and we reply with a clear next step.",
   path: "/contact",
 });
 

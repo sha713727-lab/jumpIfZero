@@ -3,12 +3,20 @@
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 
+export type ThreeDMarqueeImage = {
+  readonly src: string;
+  readonly alt: string;
+};
+
 export type ThreeDMarqueeProps = {
-  readonly images: readonly string[];
+  readonly images: readonly ThreeDMarqueeImage[];
   readonly className?: string;
 };
 
-function buildColumns(images: readonly string[], columns: number): string[][] {
+function buildColumns(
+  images: readonly ThreeDMarqueeImage[],
+  columns: number,
+): ThreeDMarqueeImage[][] {
   const looped = [...images, ...images];
   const perColumn = 5;
 
@@ -27,7 +35,7 @@ export function ThreeDMarquee({ images, className }: ThreeDMarqueeProps) {
     : "relative mx-auto block h-full min-h-[100svh] w-full overflow-hidden";
 
   return (
-    <div className={rootClass} aria-hidden="true">
+    <div className={rootClass}>
       <div className="absolute inset-0 bg-[#0d120b]" />
 
       <div className="relative z-0 flex size-full items-center justify-center [perspective:1100px]">
@@ -36,15 +44,14 @@ export function ThreeDMarquee({ images, className }: ThreeDMarqueeProps) {
             {chunks.map((subarray, colIndex) => {
               const columnClass =
                 "flex flex-col items-stretch gap-2.5 max-sm:gap-2 sm:gap-3.5 md:gap-5";
-              const tiles = subarray.map((src, imageIndex) => (
+              const tiles = subarray.map((image, imageIndex) => (
                 <div
-                  key={`${src}-${colIndex}-${imageIndex}`}
+                  key={`${image.src}-${colIndex}-${imageIndex}`}
                   className="relative aspect-[4/3] w-full overflow-hidden rounded-[0.85rem] border border-white/[0.08] bg-[#161c13] shadow-[0_14px_32px_rgba(5,7,5,0.5)] sm:rounded-[1rem] md:rounded-[1.15rem]"
                 >
                   <Image
-                    src={src}
-                    alt=""
-                    aria-hidden="true"
+                    src={image.src}
+                    alt={image.alt}
                     fill
                     draggable={false}
                     className="object-cover select-none"

@@ -37,6 +37,31 @@ const nextConfig: NextConfig = {
   },
   redirects: async () => [
     {
+      source: "/about/",
+      destination: "/about",
+      permanent: true,
+    },
+    {
+      source: "/contact/",
+      destination: "/contact",
+      permanent: true,
+    },
+    {
+      source: "/services/",
+      destination: "/services",
+      permanent: true,
+    },
+    {
+      source: "/portfolio/",
+      destination: "/portfolio",
+      permanent: true,
+    },
+    {
+      source: "/blog/",
+      destination: "/blog",
+      permanent: true,
+    },
+    {
       source: "/about-us",
       destination: "/about",
       permanent: true,

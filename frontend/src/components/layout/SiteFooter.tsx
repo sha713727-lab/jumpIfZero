@@ -176,11 +176,17 @@ export async function SiteFooter() {
                 ) : null}
                 {contact.addressLines.length > 0 ? (
                   <address className="not-italic leading-[1.5]">
-                    {contact.addressLines.map((line) => (
-                      <span key={line} className="block">
-                        {line}
-                      </span>
-                    ))}
+                    {contact.addressLines.map((line) => {
+                      const normalized = line.replace(/\s+/g, " ").trim();
+                      if (normalized.length === 0) {
+                        return null;
+                      }
+                      return (
+                        <span key={normalized} className="block">
+                          {normalized}
+                        </span>
+                      );
+                    })}
                   </address>
                 ) : null}
               </div>

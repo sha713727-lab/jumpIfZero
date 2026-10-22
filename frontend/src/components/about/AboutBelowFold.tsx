@@ -75,12 +75,17 @@ export function AboutBelowFold({
   principles,
 }: Readonly<{
   members: readonly TeamMember[];
-  studioImages: readonly string[];
+  studioImages: readonly import("@/lib/data/siteSections").SiteGalleryImage[];
   principles: readonly import("@/lib/data/siteSections").SitePrinciple[];
 }>) {
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const flowImages =
-    studioImages.length > 0 ? studioImages : aboutFlowImages;
+    studioImages.length > 0
+      ? studioImages
+      : aboutFlowImages.map((src) => ({
+          src,
+          alt: "JZ Enterprises studio and project work",
+        }));
   const workPrinciples =
     principles.length > 0
       ? principles

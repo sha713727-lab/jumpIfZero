@@ -10,7 +10,7 @@ import { env } from "@/lib/env";
 import { site } from "@/constants/site";
 import { HomePageClient } from "./HomePageClient";
 
-const homeTitle = `${site.name} | Software Development Company`;
+const homeTitle = `${site.name} | Software Development Company in Lahore`;
 
 export const metadata: Metadata = {
   title: {
@@ -57,7 +57,7 @@ export default async function HomePage() {
       serviceChapters={serviceChapters}
       teamMembers={teamMembers}
       faqItems={faqItems}
-      aboutGalleryImages={aboutGallery.map((item) => item.src)}
+      aboutGalleryImages={aboutGallery}
       testimonials={testimonials}
     />
   );

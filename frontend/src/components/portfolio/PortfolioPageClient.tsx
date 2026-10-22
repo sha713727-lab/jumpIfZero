@@ -47,7 +47,7 @@ export function PortfolioPageClient({
   marqueeImages,
 }: Readonly<{
   projects: readonly PortfolioGsapProject[];
-  marqueeImages: readonly string[];
+  marqueeImages: readonly import("@/components/scroll/ThreeDMarquee").ThreeDMarqueeImage[];
 }>) {
   const heroRef = useRef<HTMLElement | null>(null);
   const gridRef = useRef<HTMLElement | null>(null);

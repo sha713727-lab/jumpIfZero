@@ -19,8 +19,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return buildServicePageMetadata(
     path,
     page,
-    "Service",
-    "Explore Jump If Zero services.",
+    "Software Development Services in Lahore",
+    "Custom software, web, and mobile development services from JZ Enterprises in Lahore, Pakistan.",
   );
 }
 

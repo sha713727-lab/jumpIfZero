@@ -1,12 +1,13 @@
 import { site } from "@/constants/site";
 import { getSiteContact } from "@/lib/data/siteContact";
 import { env } from "@/lib/env";
+import { formatStreetAddress, formatTelephone } from "@/lib/seo/nap";
 
 export async function LocalBusinessJsonLd() {
   const contact = await getSiteContact();
-  const address = contact.addressLines.filter(
-    (line) => line.trim().length > 0,
-  );
+  const streetAddress = formatStreetAddress(contact.addressLines);
+  const telephone = formatTelephone(contact.phoneHref, contact.phone);
+
   const payload = {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
@@ -15,18 +16,24 @@ export async function LocalBusinessJsonLd() {
     url: env.siteUrl,
     description: site.description,
     email: contact.email,
-    telephone: contact.phoneHref.replace(/^tel:/i, "") || contact.phone,
+    telephone,
     address: {
       "@type": "PostalAddress",
-      streetAddress: address.join(" "),
+      streetAddress,
       addressLocality: "Lahore",
       addressRegion: "Punjab",
       addressCountry: "PK",
     },
-    areaServed: {
-      "@type": "Country",
-      name: "Pakistan",
-    },
+    areaServed: [
+      {
+        "@type": "City",
+        name: "Lahore",
+      },
+      {
+        "@type": "Country",
+        name: "Pakistan",
+      },
+    ],
   };
 
   return (

@@ -3,7 +3,7 @@ export const site = {
   legalName: "JZ Enterprises",
   tagline: "Jump If Zero",
   description:
-    "JZ Enterprises is a software development company delivering custom software, web development, and mobile apps — plus SEO, marketing, design, and security — built around your goals.",
+    "JZ Enterprises is a custom software, web, and mobile app development company in Lahore, Pakistan — with SEO, marketing, design, and security as supporting capabilities.",
 } as const;
 
 export const navLinks = [
@@ -21,7 +21,7 @@ export const heroCopy = {
   headlineLead: "JZ",
   headlineRest: "Enterprises",
   support:
-    "Custom software development, web development, and digital growth systems — scoped to how you sell and operate.",
+    "Custom software, web, and mobile app development for growing businesses in Lahore and across Pakistan.",
   imageSrc: "/images/hero-office.png",
   loginHref: "/dashboard",
 } as const;

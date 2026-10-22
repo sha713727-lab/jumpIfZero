@@ -43,6 +43,11 @@ const DEFAULT_POSITIONS = [
   { x: 0, y: 0 },
 ] as const;
 
+export type ImagesFlowImage = {
+  readonly src: string;
+  readonly alt: string;
+};
+
 export type ImagesFlowProps = {
   readonly flowWatermark?: string;
   readonly flowTitle?: string;
@@ -50,7 +55,7 @@ export type ImagesFlowProps = {
   readonly flowCtaLabel?: string;
   readonly flowCtaHref?: string;
   readonly flowText?: string;
-  readonly images: readonly string[];
+  readonly images: readonly ImagesFlowImage[];
   readonly className?: string;
 };
 
@@ -299,12 +304,12 @@ export function ImagesFlow({
           className="absolute inset-0 z-10 h-full w-full"
           style={{ perspective: 2000, transformStyle: "preserve-3d" }}
         >
-          {images.map((src, index) => {
+          {images.map((image, index) => {
             const isLast = index === images.length - 1;
 
             return (
               <div
-                key={`${src}-${index}`}
+                key={`${image.src}-${index}`}
                 ref={(el) => {
                   imageRefs.current[index] = el;
                 }}
@@ -323,9 +328,8 @@ export function ImagesFlow({
                   }
                 >
                   <Image
-                    src={src}
-                    alt=""
-                    aria-hidden="true"
+                    src={image.src}
+                    alt={image.alt}
                     fill
                     className="object-cover grayscale contrast-[0.92] brightness-[1.18]"
                     sizes={isLast ? "(max-width: 768px) 100vw, 90vw" : "(max-width: 768px) 90vw, 500px"}

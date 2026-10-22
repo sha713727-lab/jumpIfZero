@@ -65,9 +65,15 @@ export type AboutCopy = {
   };
 };
 
+export type FloatingGalleryImage = {
+  readonly src: string;
+  readonly alt: string;
+};
+
 export type FloatingGalleryProps = {
   readonly sectionId?: string;
   readonly ariaLabel?: string;
   readonly copy?: AboutCopy;
   readonly imagePaths?: readonly string[];
+  readonly images?: readonly FloatingGalleryImage[];
 };
